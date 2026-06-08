@@ -186,7 +186,7 @@ function HomePage() {
           </p>
         </div>
 
-        <ol className="mt-10 border-t border-border">
+        <ol className="mt-10 border-y border-border">
           {siteRoutes.map((route, index) => {
             const number = String(index + 1).padStart(2, '0')
             const available = route.status === 'available'
@@ -195,20 +195,18 @@ function HomePage() {
               return (
                 <li
                   key={route.path}
-                  className="grid grid-cols-[auto_1fr_auto] items-baseline gap-x-5 gap-y-1 border-b border-border py-7 sm:gap-x-8"
+                  className="grid gap-5 border-t border-border py-6 text-muted-foreground first:border-t-0 md:grid-cols-[4rem_minmax(0,1fr)_8rem] md:items-center"
                 >
                   <span className="font-mono text-sm text-muted-foreground/70">
                     {number}
                   </span>
                   <div>
-                    <h3 className="font-serif text-2xl text-muted-foreground">
-                      {route.label}
-                    </h3>
+                    <h3 className="font-serif text-2xl">{route.label}</h3>
                     <p className="mt-1 text-muted-foreground/80">
                       {route.tagline}
                     </p>
                   </div>
-                  <span className="flex items-center gap-1.5 font-mono text-xs uppercase tracking-wide text-muted-foreground/70">
+                  <span className="flex items-center gap-1.5 font-mono text-xs uppercase tracking-wide text-muted-foreground/70 md:justify-self-end">
                     <Lock className="h-3.5 w-3.5" aria-hidden="true" />
                     Soon
                   </span>
@@ -217,10 +215,13 @@ function HomePage() {
             }
 
             return (
-              <li key={route.path}>
+              <li
+                key={route.path}
+                className="border-t border-border first:border-t-0"
+              >
                 <Link
                   to={route.path}
-                  className="group grid grid-cols-[auto_1fr_auto] items-baseline gap-x-5 gap-y-1 border-b border-border py-7 transition-colors hover:border-foreground/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:gap-x-8"
+                  className="group grid gap-5 py-6 transition-colors hover:bg-card/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:grid-cols-[4rem_minmax(0,1fr)_2rem] md:items-center"
                 >
                   <span className="font-mono text-sm text-accent">
                     {number}
@@ -234,7 +235,7 @@ function HomePage() {
                     </p>
                   </div>
                   <ArrowRight
-                    className="h-5 w-5 self-center text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary"
+                    className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary md:justify-self-end"
                     aria-hidden="true"
                   />
                 </Link>

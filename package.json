@@ -12,6 +12,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "prepare": "effect-language-service patch",
     "typecheck": "tsc -b && pnpm run effect:diagnostics",
     "preview": "vite preview"
   },

@@ -2,8 +2,6 @@
   "$schema": "./node_modules/@effect/language-service/schema.json",
   "compilerOptions": {
     "allowImportingTsExtensions": true,
-    "baseUrl": ".",
-    "downlevelIteration": true,
     "erasableSyntaxOnly": true,
     "exactOptionalPropertyTypes": true,
     "forceConsistentCasingInFileNames": true,

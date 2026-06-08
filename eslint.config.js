@@ -29,7 +29,10 @@ const importExtensionsRule = {
         return
       }
 
-      const isLocal = source.startsWith('./') || source.startsWith('../') || source.startsWith('@/')
+      const isLocal =
+        source.startsWith('./') ||
+        source.startsWith('../') ||
+        source.startsWith('@/')
       const isAsset =
         source.endsWith('.css') ||
         source.endsWith('.svg') ||
@@ -46,7 +49,10 @@ const importExtensionsRule = {
         }
 
         if (source.endsWith('.js') || source.endsWith('.jsx')) {
-          const fixed = source.replace(/\.jsx?$/, source.endsWith('.jsx') ? '.tsx' : '.ts')
+          const fixed = source.replace(
+            /\.jsx?$/,
+            source.endsWith('.jsx') ? '.tsx' : '.ts',
+          )
           context.report({
             node,
             messageId: 'localNoJs',
@@ -65,7 +71,12 @@ const importExtensionsRule = {
         return
       }
 
-      if (source.endsWith('.ts') || source.endsWith('.tsx') || source.endsWith('.js') || source.endsWith('.jsx')) {
+      if (
+        source.endsWith('.ts') ||
+        source.endsWith('.tsx') ||
+        source.endsWith('.js') ||
+        source.endsWith('.jsx')
+      ) {
         const fixed = source.replace(/\.(tsx?|jsx?)$/, '')
         context.report({
           node,
@@ -112,10 +123,16 @@ const noDisableValidationRule = {
     return {
       Property(node) {
         const keyMatches =
-          (node.key?.type === 'Identifier' && node.key.name === 'disableValidation') ||
-          (node.key?.type === 'Literal' && node.key.value === 'disableValidation')
+          (node.key?.type === 'Identifier' &&
+            node.key.name === 'disableValidation') ||
+          (node.key?.type === 'Literal' &&
+            node.key.value === 'disableValidation')
 
-        if (keyMatches && node.value?.type === 'Literal' && node.value.value === true) {
+        if (
+          keyMatches &&
+          node.value?.type === 'Literal' &&
+          node.value.value === true
+        ) {
           context.report({ node, messageId: 'noDisableValidation' })
         }
       },
@@ -127,7 +144,8 @@ const preferOptionFromNullableRule = {
   meta: {
     type: 'suggestion',
     docs: {
-      description: 'Prefer Option.fromNullable over ternary Option.some/Option.none',
+      description:
+        'Prefer Option.fromNullable over ternary Option.some/Option.none',
     },
     messages: {
       preferFromNullable:
@@ -147,9 +165,17 @@ const preferOptionFromNullableRule = {
         }
 
         let testedName = null
-        if (test.left.type === 'Identifier' && test.right.type === 'Literal' && test.right.value === null) {
+        if (
+          test.left.type === 'Identifier' &&
+          test.right.type === 'Literal' &&
+          test.right.value === null
+        ) {
           testedName = test.left.name
-        } else if (test.right.type === 'Identifier' && test.left.type === 'Literal' && test.left.value === null) {
+        } else if (
+          test.right.type === 'Identifier' &&
+          test.left.type === 'Literal' &&
+          test.left.value === null
+        ) {
           testedName = test.right.name
         } else if (
           test.left.type === 'MemberExpression' &&
@@ -168,7 +194,10 @@ const preferOptionFromNullableRule = {
           return
         }
 
-        if (consequent.type !== 'CallExpression' || alternate.type !== 'CallExpression') {
+        if (
+          consequent.type !== 'CallExpression' ||
+          alternate.type !== 'CallExpression'
+        ) {
           return
         }
 
@@ -218,9 +247,15 @@ const noLocalStorageRule = {
           return
         }
 
-        if (node.parent.type === 'MemberExpression' && node.parent.property === node) {
+        if (
+          node.parent.type === 'MemberExpression' &&
+          node.parent.property === node
+        ) {
           const obj = node.parent.object
-          if (obj.type === 'Identifier' && (obj.name === 'window' || obj.name === 'globalThis')) {
+          if (
+            obj.type === 'Identifier' &&
+            (obj.name === 'window' || obj.name === 'globalThis')
+          ) {
             context.report({ node: node.parent, messageId: 'noLocalStorage' })
           }
           return
@@ -325,12 +360,20 @@ const noSilentErrorSwallowRule = {
         }
         if (node.body.type === 'BlockStatement') {
           const body = node.body.body
-          return body.length === 1 && body[0]?.type === 'ReturnStatement' && isEffectVoidOrUnit(body[0].argument)
+          return (
+            body.length === 1 &&
+            body[0]?.type === 'ReturnStatement' &&
+            isEffectVoidOrUnit(body[0].argument)
+          )
         }
       }
       if (node.type === 'FunctionExpression') {
         const body = node.body.body
-        return body.length === 1 && body[0]?.type === 'ReturnStatement' && isEffectVoidOrUnit(body[0].argument)
+        return (
+          body.length === 1 &&
+          body[0]?.type === 'ReturnStatement' &&
+          isEffectVoidOrUnit(body[0].argument)
+        )
       }
       return false
     }
@@ -367,14 +410,18 @@ const noSilentErrorSwallowRule = {
             return
           }
           for (const prop of obj.properties) {
-            if (prop.type === 'Property' && isVoidReturningHandler(prop.value)) {
+            if (
+              prop.type === 'Property' &&
+              isVoidReturningHandler(prop.value)
+            ) {
               context.report({ node: prop.value, messageId: 'noSilentSwallow' })
             }
           }
           return
         }
 
-        const handler = catchType === 'catchTag' ? node.arguments[1] : node.arguments[0]
+        const handler =
+          catchType === 'catchTag' ? node.arguments[1] : node.arguments[0]
         if (isVoidReturningHandler(handler)) {
           context.report({ node: handler, messageId: 'noSilentSwallow' })
         }
@@ -402,7 +449,9 @@ const noVoidExpressionRule = {
           context.report({
             node,
             messageId: 'noVoidExpression',
-            data: { expression: context.getSourceCode().getText(node.argument) },
+            data: {
+              expression: context.getSourceCode().getText(node.argument),
+            },
           })
         }
       },
@@ -482,7 +531,10 @@ export default defineConfig([
       'local/pipe-max-arguments': 'error',
       'local/prefer-option-from-nullable': 'error',
 
-      '@typescript-eslint/consistent-type-assertions': ['error', { assertionStyle: 'never' }],
+      '@typescript-eslint/consistent-type-assertions': [
+        'error',
+        { assertionStyle: 'never' },
+      ],
       '@typescript-eslint/consistent-type-imports': [
         'error',
         { fixStyle: 'separate-type-imports', prefer: 'type-imports' },
@@ -501,6 +553,10 @@ export default defineConfig([
       'no-unused-vars': 'off',
       'object-shorthand': 'error',
       'prefer-const': 'error',
+      'react-refresh/only-export-components': [
+        'error',
+        { allowConstantExport: true },
+      ],
       'require-yield': 'off',
     },
   },

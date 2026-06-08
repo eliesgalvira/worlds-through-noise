@@ -56,7 +56,9 @@ function App() {
               <p className="text-sm font-medium text-muted-foreground">
                 Inference frame
               </p>
-              <h2 className="text-2xl font-semibold">Hidden world to decision</h2>
+              <h2 className="text-2xl font-semibold">
+                Hidden world to decision
+              </h2>
             </div>
             <RadioTower className="h-6 w-6 text-primary" aria-hidden="true" />
           </div>

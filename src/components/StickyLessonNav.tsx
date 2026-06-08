@@ -179,6 +179,7 @@ function TocList({
       const trackTop = activeRect.top - listRect.top + paddingTop
       const trackBottom = activeRect.bottom - listRect.top - paddingBottom
 
+      track.style.setProperty('--toc-track-height', `${listRect.height}px`)
       track.style.setProperty('--toc-track-top', `${trackTop}px`)
       track.style.setProperty('--toc-track-bottom', `${trackBottom}px`)
 
@@ -233,8 +234,10 @@ function TocList({
     >
       <div
         ref={trackRef}
-        className="pointer-events-none absolute left-0 top-3 z-10 h-[calc(100%-1.5rem)] w-px bg-accent transition-[clip-path] duration-200 ease-out"
+        data-toc-track="true"
+        className="pointer-events-none absolute left-0 top-3 z-10 w-px bg-accent transition-[clip-path] duration-200 ease-out"
         style={{
+          height: 'var(--toc-track-height, calc(100% - 1.5rem))',
           clipPath:
             'polygon(0 var(--toc-track-top, 0px), 100% var(--toc-track-top, 0px), 100% var(--toc-track-bottom, 0px), 0 var(--toc-track-bottom, 0px))',
         }}

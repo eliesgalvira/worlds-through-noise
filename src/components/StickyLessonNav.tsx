@@ -182,17 +182,20 @@ function TocList({
       track.style.setProperty('--toc-track-top', `${trackTop}px`)
       track.style.setProperty('--toc-track-bottom', `${trackBottom}px`)
 
-      const activeTop = active.offsetTop
-      const activeBottom = activeTop + active.offsetHeight
+      const containerRect = container.getBoundingClientRect()
+      const activeTop = activeRect.top - containerRect.top + container.scrollTop
+      const activeBottom = activeTop + activeRect.height
       const visibleTop = container.scrollTop
       const visibleBottom = visibleTop + container.clientHeight
-      const outsideView =
-        activeTop < visibleTop + 8 || activeBottom > visibleBottom - 8
+      const scrollMargin = 28
+      const reduceMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)',
+      ).matches
 
-      if (outsideView) {
-        const reduceMotion = window.matchMedia(
-          '(prefers-reduced-motion: reduce)',
-        ).matches
+      if (
+        activeTop < visibleTop + scrollMargin ||
+        activeBottom > visibleBottom - scrollMargin
+      ) {
         container.scrollTo({
           top: Math.max(
             0,
@@ -225,6 +228,7 @@ function TocList({
   return (
     <div
       ref={containerRef}
+      data-toc-container="true"
       className="relative max-h-[50vh] overflow-y-auto py-3 [scrollbar-width:none] xl:max-h-[calc(100svh-9rem)]"
     >
       <div

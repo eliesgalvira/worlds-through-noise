@@ -40,7 +40,7 @@ function SliderControl({
       : `${value}${unit !== undefined ? ` ${unit}` : ''}`
 
   return (
-    <div className={cn('space-y-2', className)}>
+    <div className={cn('space-y-2.5', className)}>
       <div className="flex items-baseline justify-between gap-3">
         <Label htmlFor={id} className="flex items-center gap-2">
           {label}
@@ -50,9 +50,12 @@ function SliderControl({
             </span>
           ) : null}
         </Label>
-        <span className="font-mono text-sm tabular-nums text-foreground">
+        <output
+          htmlFor={id}
+          className="rounded-full bg-muted/70 px-2 py-0.5 font-mono text-xs tabular-nums text-foreground"
+        >
           {display}
-        </span>
+        </output>
       </div>
       <Slider
         id={id}

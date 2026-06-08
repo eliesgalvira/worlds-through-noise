@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useReducer, useState } from 'react'
 import type { ReactNode } from 'react'
-import { motion, useReducedMotion } from 'motion/react'
+import { LazyMotion, domAnimation, m, useReducedMotion } from 'motion/react'
 import type { Transition } from 'motion/react'
 import type { BusinessDay, Time } from 'lightweight-charts'
+import { Button } from '@/components/ui/button.tsx'
 import { LessonChart } from '@/components/LessonChart.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
 import {
@@ -17,6 +18,7 @@ import {
   normalPdf,
 } from '@/domain/math/distributions.ts'
 import { formatFixed, formatPercent } from '@/lib/format.ts'
+import { cn } from '@/lib/utils.ts'
 import { scaleLinear } from '@/components/interactive/plot-utils.ts'
 import type { ChartSeries } from '@/components/LessonChart.tsx'
 
@@ -24,8 +26,103 @@ type LearningSandboxProps = {
   readonly moduleId: string
 }
 
+type LegendItem = {
+  readonly label: string
+  readonly color: string
+  readonly kind?: 'line' | 'dot' | 'dash'
+}
+
+type DetectionControls = {
+  readonly observation: number
+  readonly noise: number
+  readonly samples: number
+  readonly separation: number
+  readonly threshold: number
+  readonly priorH1: number
+}
+
+type DetectionControlAction =
+  | { readonly type: 'observation'; readonly value: number }
+  | { readonly type: 'noise'; readonly value: number }
+  | { readonly type: 'samples'; readonly value: number }
+  | { readonly type: 'separation'; readonly value: number }
+  | { readonly type: 'threshold'; readonly value: number }
+  | { readonly type: 'priorH1'; readonly value: number }
+
+const initialDetectionControls: DetectionControls = {
+  observation: 58,
+  noise: 13,
+  samples: 5,
+  separation: 28,
+  threshold: 54,
+  priorH1: 0.35,
+}
+
+type EstimationControls = {
+  readonly samples: number
+  readonly noise: number
+  readonly priorStrength: number
+  readonly drawRun: number
+}
+
+type EstimationControlAction =
+  | { readonly type: 'samples'; readonly value: number }
+  | { readonly type: 'noise'; readonly value: number }
+  | { readonly type: 'priorStrength'; readonly value: number }
+  | { readonly type: 'drawSamples' }
+
+const initialEstimationControls: EstimationControls = {
+  samples: 12,
+  noise: 10,
+  priorStrength: 0.35,
+  drawRun: 0,
+}
+
+function detectionControlsReducer(
+  state: DetectionControls,
+  action: DetectionControlAction,
+): DetectionControls {
+  switch (action.type) {
+    case 'observation':
+      return { ...state, observation: action.value }
+    case 'noise':
+      return { ...state, noise: action.value }
+    case 'samples':
+      return { ...state, samples: action.value }
+    case 'separation':
+      return { ...state, separation: action.value }
+    case 'threshold':
+      return { ...state, threshold: action.value }
+    case 'priorH1':
+      return { ...state, priorH1: action.value }
+  }
+}
+
+function estimationControlsReducer(
+  state: EstimationControls,
+  action: EstimationControlAction,
+): EstimationControls {
+  switch (action.type) {
+    case 'samples':
+      return { ...state, samples: action.value }
+    case 'noise':
+      return { ...state, noise: action.value }
+    case 'priorStrength':
+      return { ...state, priorStrength: action.value }
+    case 'drawSamples':
+      return { ...state, drawRun: state.drawRun + 1 }
+  }
+}
+
 const VIEW_WIDTH = 100
 const CHART_BASE_YEAR = 2020
+const ROC_SAMPLE_COUNT = 2400
+const ROC_MIN_FALSE_ALARM = 0.001
+const PLOT_LEFT_PERCENT = 2.5
+const PLOT_WIDTH_PERCENT = 89
+
+const plotXPercent = (value: number): number =>
+  PLOT_LEFT_PERCENT + (value / VIEW_WIDTH) * PLOT_WIDTH_PERCENT
 
 const isLeapYear = (year: number): boolean =>
   year % 400 === 0 || (year % 4 === 0 && year % 100 !== 0)
@@ -140,6 +237,7 @@ function densityChartSeries(
       fill: 'rgba(30, 58, 138, 0.14)',
       data: h0Data,
       lineWidth: 3,
+      smooth: true,
     },
     {
       type: 'area',
@@ -148,8 +246,36 @@ function densityChartSeries(
       fill: 'rgba(217, 119, 6, 0.17)',
       data: h1Data,
       lineWidth: 3,
+      smooth: true,
     },
   ]
+}
+
+function ChartLegend({ items }: { readonly items: ReadonlyArray<LegendItem> }) {
+  return (
+    <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+      {items.map((item) => (
+        <span key={item.label} className="inline-flex items-center gap-2">
+          <span
+            className={cn(
+              'inline-block h-2.5 w-5 rounded-full',
+              item.kind === 'dot' ? 'h-2.5 w-2.5' : '',
+              item.kind === 'dash'
+                ? 'h-px border-t border-dashed bg-transparent'
+                : '',
+            )}
+            style={{
+              backgroundColor:
+                item.kind === 'dash' ? 'transparent' : item.color,
+              borderColor: item.color,
+            }}
+            aria-hidden="true"
+          />
+          {item.label}
+        </span>
+      ))}
+    </div>
+  )
 }
 
 function SandboxShell({
@@ -170,7 +296,7 @@ function SandboxShell({
   return (
     <section
       id={`${moduleId}-sandbox`}
-      className="scroll-mt-24 rounded-lg border bg-card/80 p-5 sm:p-6"
+      className="scroll-mt-40 rounded-lg border bg-card/80 p-5 sm:scroll-mt-28 sm:p-6"
       aria-label={title}
     >
       <p className="font-mono text-xs uppercase tracking-[0.16em] text-accent">
@@ -223,55 +349,81 @@ function EvidenceDensities({
 
   return (
     <div className="relative">
-      <LessonChart
-        series={series}
-        ariaLabel="Two Gaussian density curves for H0 and H1."
-        height={300}
-        timeFormatter={formatChartAxisTime}
+      <ChartLegend
+        items={[
+          { label: 'world H0 density', color: '#1e3a8a' },
+          { label: 'world H1 density', color: '#d97706' },
+          ...(threshold !== undefined
+            ? [
+                {
+                  label: 'decision threshold',
+                  color: '#d97706',
+                  kind: 'dash' as const,
+                },
+              ]
+            : []),
+          ...(observation !== undefined
+            ? [
+                {
+                  label: 'observed statistic',
+                  color: '#151515',
+                  kind: 'dash' as const,
+                },
+              ]
+            : []),
+        ]}
       />
-      <div className="pointer-events-none absolute inset-x-3 bottom-9 flex justify-between text-xs text-muted-foreground">
-        <span className="text-h0">H0 density</span>
-        <span className="text-h1">H1 density</span>
+      <div className="relative">
+        <LessonChart
+          series={series}
+          ariaLabel="Two Gaussian density curves for H0 and H1."
+          height={300}
+          yPrecision={3}
+          timeFormatter={formatChartAxisTime}
+        />
+        {threshold !== undefined ? (
+          <m.div
+            className="pointer-events-none absolute bottom-8 top-4 z-20 border-l-2 border-dashed border-threshold"
+            style={{
+              left: `${plotXPercent(threshold)}%`,
+              borderColor: '#d97706',
+            }}
+            transition={markerTransition}
+          />
+        ) : null}
+        {observation !== undefined ? (
+          <>
+            <m.div
+              className="pointer-events-none absolute bottom-8 top-4 z-20 border-l-2 border-dashed"
+              style={{
+                left: `${plotXPercent(observation)}%`,
+                borderColor: '#151515',
+              }}
+              transition={markerTransition}
+            />
+            <m.div
+              className="pointer-events-none absolute top-3 z-30 -translate-x-1/2 rounded-sm border border-border bg-card/95 px-2 py-1 font-mono text-xs font-medium text-foreground shadow-sm"
+              style={{
+                left: `${plotXPercent(observation)}%`,
+              }}
+              transition={markerTransition}
+            >
+              x={Math.round(observation)}
+            </m.div>
+          </>
+        ) : null}
       </div>
-      {threshold !== undefined ? (
-        <>
-          <motion.div
-            className="pointer-events-none absolute bottom-11 top-5 border-l-2 border-dashed border-threshold"
-            style={{ left: `${threshold}%` }}
-            transition={markerTransition}
-          />
-          <motion.div
-            className="pointer-events-none absolute top-4 h-3 w-3 -translate-x-1/2 rounded-full bg-threshold"
-            style={{ left: `${threshold}%` }}
-            transition={markerTransition}
-          />
-        </>
-      ) : null}
-      {observation !== undefined ? (
-        <>
-          <motion.div
-            className="pointer-events-none absolute bottom-11 top-5 border-l-2 border-dashed border-foreground"
-            style={{ left: `${observation}%` }}
-            transition={markerTransition}
-          />
-          <motion.div
-            className="pointer-events-none absolute top-4 h-3 w-3 -translate-x-1/2 bg-foreground"
-            style={{ left: `${observation}%` }}
-            transition={markerTransition}
-          />
-        </>
-      ) : null}
     </div>
   )
 }
 
 function DetectionSandbox({ moduleId }: { readonly moduleId: string }) {
-  const [observation, setObservation] = useState(58)
-  const [noise, setNoise] = useState(13)
-  const [samples, setSamples] = useState(5)
-  const [separation, setSeparation] = useState(28)
-  const [threshold, setThreshold] = useState(54)
-  const [priorH1, setPriorH1] = useState(0.35)
+  const [controls, dispatchControls] = useReducer(
+    detectionControlsReducer,
+    initialDetectionControls,
+  )
+  const { observation, noise, samples, separation, threshold, priorH1 } =
+    controls
   const effectiveSd = noise / Math.sqrt(samples)
   const h0Mean = 50 - separation / 2
   const h1Mean = 50 + separation / 2
@@ -305,7 +457,9 @@ function DetectionSandbox({ moduleId }: { readonly moduleId: string }) {
             max={80}
             step={1}
             meaning="The only thing the detector gets to see."
-            onValueChange={setObservation}
+            onValueChange={(value) => {
+              dispatchControls({ type: 'observation', value })
+            }}
             format={(value) => `x = ${value.toFixed(0)}`}
           />
         }
@@ -339,7 +493,9 @@ function DetectionSandbox({ moduleId }: { readonly moduleId: string }) {
               max={46}
               step={1}
               meaning="More separation means each hidden world leaves a more distinct trace."
-              onValueChange={setSeparation}
+              onValueChange={(value) => {
+                dispatchControls({ type: 'separation', value })
+              }}
               format={(value) => `d = ${value.toFixed(0)}`}
             />
             <SliderControl
@@ -350,7 +506,9 @@ function DetectionSandbox({ moduleId }: { readonly moduleId: string }) {
               max={25}
               step={1}
               meaning="More noise spreads each world across more observations."
-              onValueChange={setNoise}
+              onValueChange={(value) => {
+                dispatchControls({ type: 'noise', value })
+              }}
               format={(value) => `sigma = ${value.toFixed(0)}`}
             />
             <SliderControl
@@ -361,7 +519,9 @@ function DetectionSandbox({ moduleId }: { readonly moduleId: string }) {
               max={30}
               step={1}
               meaning="More samples sharpen the average evidence."
-              onValueChange={setSamples}
+              onValueChange={(value) => {
+                dispatchControls({ type: 'samples', value })
+              }}
               format={(value) => `N = ${value.toFixed(0)}`}
             />
           </>
@@ -395,8 +555,10 @@ function DetectionSandbox({ moduleId }: { readonly moduleId: string }) {
             min={18}
             max={82}
             step={1}
-            meaning="The black marker is the observed statistic."
-            onValueChange={setObservation}
+            meaning="The dark annotated rule is the observed statistic."
+            onValueChange={(value) => {
+              dispatchControls({ type: 'observation', value })
+            }}
             format={(value) => `x = ${value.toFixed(0)}`}
           />
         }
@@ -473,7 +635,9 @@ function DetectionSandbox({ moduleId }: { readonly moduleId: string }) {
             max={75}
             step={1}
             meaning="Decide H1 when the statistic lands to the right."
-            onValueChange={setThreshold}
+            onValueChange={(value) => {
+              dispatchControls({ type: 'threshold', value })
+            }}
             format={(value) => `gamma = ${value.toFixed(0)}`}
           />
           {moduleId === 'D5' ? (
@@ -485,7 +649,9 @@ function DetectionSandbox({ moduleId }: { readonly moduleId: string }) {
               max={0.95}
               step={0.01}
               meaning="A rarer H1 needs stronger evidence unless the cost of missing it is high."
-              onValueChange={setPriorH1}
+              onValueChange={(value) => {
+                dispatchControls({ type: 'priorH1', value })
+              }}
               format={(value) => formatPercent(value, 0)}
             />
           ) : null}
@@ -611,21 +777,24 @@ function RocSandbox({ moduleId }: { readonly moduleId: string }) {
   const reduceMotion = useReducedMotion()
   const pFalseAlarm = rightTailFalseAlarm(threshold, 38, 12)
   const pDetection = rightTailDetectionProbability(threshold, 64, 12)
+  const signalSeparation = (64 - 38) / 12
+  const rocMarkerLeft = plotXPercent(pFalseAlarm * 100)
+  const rocMarkerTop = 7 + ((100 - pDetection * 100) / 120) * 80
   const rocSeries = useMemo<ReadonlyArray<ChartSeries>>(
     () => [
       {
-        type: 'area',
+        type: 'line',
         title: 'ROC curve',
         color: '#1e3a8a',
-        fill: 'rgba(30, 58, 138, 0.12)',
         lineWidth: 3,
-        data: linspace(0.001, 0.999, 180).map((falseAlarm) => {
-          const gamma = 38 + 12 * normalInvCdf(1 - falseAlarm)
-          return {
+        data: linspace(ROC_MIN_FALSE_ALARM, 0.999, ROC_SAMPLE_COUNT).map(
+          (falseAlarm) => ({
             time: chartTime(falseAlarm * 100),
-            value: rightTailDetectionProbability(gamma, 64, 12) * 100,
-          }
-        }),
+            value:
+              normalCdf(normalInvCdf(falseAlarm) + signalSeparation, 0, 1) *
+              100,
+          }),
+        ),
       },
       {
         type: 'line',
@@ -638,7 +807,7 @@ function RocSandbox({ moduleId }: { readonly moduleId: string }) {
         })),
       },
     ],
-    [],
+    [signalSeparation],
   )
 
   return (
@@ -668,27 +837,59 @@ function RocSandbox({ moduleId }: { readonly moduleId: string }) {
       }
     >
       <div className="relative">
-        <LessonChart
-          series={rocSeries}
-          height={300}
-          timeFormatter={formatChartAxisTime}
-          ariaLabel="ROC curve plotting detection probability against false alarm probability."
+        <ChartLegend
+          items={[
+            { label: 'ROC curve', color: '#1e3a8a' },
+            {
+              label: 'no-information baseline',
+              color: 'rgba(107, 98, 87, 0.65)',
+              kind: 'line',
+            },
+            { label: 'current threshold', color: '#d97706', kind: 'dot' },
+          ]}
         />
-        <motion.div
-          className="pointer-events-none absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-threshold ring-2 ring-card"
-          style={{
-            left: `${12 + pFalseAlarm * 76}%`,
-            top: `${82 - pDetection * 66}%`,
-          }}
-          transition={
-            reduceMotion === true
-              ? { duration: 0 }
-              : { type: 'spring', stiffness: 180, damping: 26 }
-          }
-        />
-        <div className="pointer-events-none absolute inset-x-3 bottom-9 flex justify-between text-xs text-muted-foreground">
-          <span>false alarm probability</span>
-          <span>detection probability rises upward</span>
+        <div className="relative">
+          <LessonChart
+            series={rocSeries}
+            height={300}
+            yPrecision={1}
+            timeFormatter={formatChartAxisTime}
+            ariaLabel="ROC curve plotting detection probability against false alarm probability."
+          />
+          <m.div
+            className="pointer-events-none absolute bottom-8 top-3 z-20 border-l border-dashed"
+            style={{ left: `${rocMarkerLeft}%`, borderColor: '#d97706' }}
+            transition={
+              reduceMotion === true
+                ? { duration: 0 }
+                : { type: 'spring', stiffness: 180, damping: 26 }
+            }
+          />
+          <m.div
+            className="pointer-events-none absolute left-3 right-20 z-20 border-t border-dashed"
+            style={{ top: `${rocMarkerTop}%`, borderColor: '#d97706' }}
+            transition={
+              reduceMotion === true
+                ? { duration: 0 }
+                : { type: 'spring', stiffness: 180, damping: 26 }
+            }
+          />
+          <m.div
+            className="pointer-events-none absolute z-30 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-card bg-threshold shadow-[0_0_0_2px_rgba(217,119,6,0.18)]"
+            style={{
+              left: `${rocMarkerLeft}%`,
+              top: `${rocMarkerTop}%`,
+            }}
+            transition={
+              reduceMotion === true
+                ? { duration: 0 }
+                : { type: 'spring', stiffness: 180, damping: 26 }
+            }
+          />
+          <div className="pointer-events-none absolute inset-x-3 bottom-9 flex justify-between text-xs text-muted-foreground">
+            <span>false alarm probability</span>
+            <span>detection probability rises upward</span>
+          </div>
         </div>
       </div>
     </SandboxShell>
@@ -789,13 +990,375 @@ function GeometrySandbox({ moduleId }: { readonly moduleId: string }) {
   )
 }
 
+type PlotPoint = {
+  readonly x: number
+  readonly y: number
+}
+
+const clampPlotX = (value: number): number =>
+  Math.min(
+    88,
+    Math.max(
+      12,
+      scaleLinear({
+        value,
+        domainMin: 12,
+        domainMax: 88,
+        rangeMin: 12,
+        rangeMax: 88,
+      }),
+    ),
+  )
+
+const linePath = (points: ReadonlyArray<PlotPoint>): string =>
+  points
+    .map(
+      (point, index) =>
+        `${index === 0 ? 'M' : 'L'} ${formatFixed(point.x, 3)} ${formatFixed(point.y, 3)}`,
+    )
+    .join(' ')
+
+const areaPath = (
+  points: ReadonlyArray<PlotPoint>,
+  baseline: number,
+): string => {
+  const first = points[0]
+  const last = points[points.length - 1]
+  if (first === undefined || last === undefined) return ''
+
+  return `${linePath(points)} L ${formatFixed(last.x, 3)} ${baseline} L ${formatFixed(first.x, 3)} ${baseline} Z`
+}
+
+function makeEstimationSamples({
+  samples,
+  noise,
+  truth,
+  drawRun,
+}: {
+  readonly samples: number
+  readonly noise: number
+  readonly truth: number
+  readonly drawRun: number
+}): ReadonlyArray<number> {
+  return Array.from(
+    { length: Math.max(1, Math.round(samples)) },
+    (_, index) => {
+      const phase = drawRun * 0.811 + index * 1.729
+      const wave =
+        Math.sin(phase) * 0.62 +
+        Math.cos(phase * 1.71 + 0.4) * 0.27 +
+        Math.sin(phase * 0.43 + 1.8) * 0.11
+
+      return Math.min(88, Math.max(12, truth + wave * noise * 0.78))
+    },
+  )
+}
+
+const mean = (values: ReadonlyArray<number>): number =>
+  values.reduce((total, value) => total + value, 0) / Math.max(1, values.length)
+
+function EstimationInstrument({
+  moduleId,
+  noise,
+  truth,
+  ml,
+  map,
+  spread,
+  priorStrength,
+  sampleValues,
+  drawRun,
+}: {
+  readonly moduleId: string
+  readonly noise: number
+  readonly truth: number
+  readonly ml: number
+  readonly map: number
+  readonly spread: number
+  readonly priorStrength: number
+  readonly sampleValues: ReadonlyArray<number>
+  readonly drawRun: number
+}) {
+  const reduceMotion = useReducedMotion()
+  const transition: Transition =
+    reduceMotion === true
+      ? { duration: 0 }
+      : { duration: 0.45, ease: [0.22, 1, 0.36, 1] }
+  const modelBaseline = 36
+  const modelSd = Math.max(4.2, noise * 0.62)
+  const modelHeight = 20
+  const curvePoints = linspace(12, 88, 240).map((x) => {
+    const z = (x - truth) / modelSd
+    return {
+      x,
+      y: modelBaseline - Math.exp(-0.5 * z * z) * modelHeight,
+    }
+  })
+  const prior = 42
+  const standardErrorWidth = Math.min(24, Math.max(4, spread * 3.4))
+  const spreadLeft = clampPlotX(ml - standardErrorWidth)
+  const spreadRight = clampPlotX(ml + standardErrorWidth)
+  const spreadBandWidth = Math.max(0, spreadRight - spreadLeft)
+  const observedSampleTop = (49 / 74) * 100
+  const displayedSamples = sampleValues
+    .slice(0, Math.min(60, sampleValues.length))
+    .map((value, index) => {
+      const z = (value - truth) / modelSd
+      const curveY = modelBaseline - Math.exp(-0.5 * z * z) * modelHeight
+      return {
+        id: index,
+        x: clampPlotX(value),
+        curveTop: (curveY / 74) * 100,
+        finalTop: observedSampleTop,
+      }
+    })
+  const gradientId = `estimate-gradient-${moduleId}`
+  const sampleDelay = (index: number): number =>
+    reduceMotion === true ? 0 : Math.min(1.6, index * 0.045)
+
+  return (
+    <div className="relative mx-auto max-w-4xl py-4">
+      <span className="absolute left-[13%] top-[7%] z-20 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs font-medium text-estimate">
+        sampling model f(x | true theta)
+      </span>
+      <span className="absolute left-[13%] top-[61%] z-20 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs text-muted-foreground">
+        samples land by measured value
+      </span>
+      <span className="absolute left-[13%] top-[78%] z-20 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs text-muted-foreground">
+        standard error band
+      </span>
+      <span
+        className="absolute top-[11%] z-20 -translate-x-1/2 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs font-medium text-truth"
+        style={{ left: `${truth}%` }}
+      >
+        true theta
+      </span>
+      <span
+        className="absolute top-[86%] z-20 -translate-x-1/2 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs font-medium text-estimate"
+        style={{ left: `${ml}%` }}
+      >
+        ML mean
+      </span>
+      {priorStrength > 0 ? (
+        <>
+          <span
+            className="absolute top-[25%] z-20 -translate-x-1/2 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs text-prior"
+            style={{ left: `${prior}%` }}
+          >
+            prior mean
+          </span>
+          <span
+            className="absolute top-[94%] z-20 -translate-x-1/2 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs font-medium text-prior"
+            style={{ left: `${map}%` }}
+          >
+            MAP
+          </span>
+        </>
+      ) : null}
+      {displayedSamples.map((sample, index) => (
+        <m.span
+          key={`${drawRun}-${sample.id}`}
+          className="absolute z-30 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-card bg-estimate shadow-[0_0_0_1px_rgba(30,58,138,0.28)]"
+          style={{ left: `${sample.x}%` }}
+          initial={
+            reduceMotion === true
+              ? false
+              : { opacity: 0, top: `${sample.curveTop}%`, scale: 0.8 }
+          }
+          animate={{
+            opacity: 0.86,
+            top: `${sample.finalTop}%`,
+            scale: 1,
+          }}
+          transition={{
+            duration: reduceMotion === true ? 0 : 0.42,
+            delay: sampleDelay(index),
+            ease: [0.22, 1, 0.36, 1],
+          }}
+        />
+      ))}
+      <svg
+        viewBox="0 0 100 74"
+        className="h-80 w-full overflow-visible"
+        preserveAspectRatio="none"
+        role="img"
+        aria-label="A labeled estimation animation showing sampled observations, the sampling model, true value, ML estimate, MAP estimate, prior mean, and estimator spread."
+      >
+        <defs>
+          <linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="#1e3a8a" stopOpacity="0.12" />
+            <stop offset="100%" stopColor="#1e3a8a" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+
+        <g className="stroke-border" opacity="0.65">
+          {[24, 36, 48, 60, 72].map((x) => (
+            <line
+              key={`vertical-${x}`}
+              x1={x}
+              y1="11"
+              x2={x}
+              y2="66"
+              strokeWidth="1"
+              vectorEffect="non-scaling-stroke"
+            />
+          ))}
+          {[20, 36, 49, 62].map((y) => (
+            <line
+              key={`horizontal-${y}`}
+              x1="12"
+              y1={y}
+              x2="88"
+              y2={y}
+              strokeWidth="1"
+              vectorEffect="non-scaling-stroke"
+            />
+          ))}
+        </g>
+
+        <line
+          x1="12"
+          y1={modelBaseline}
+          x2="88"
+          y2={modelBaseline}
+          className="stroke-border"
+          strokeWidth="1"
+          vectorEffect="non-scaling-stroke"
+        />
+        <m.path
+          d={areaPath(curvePoints, modelBaseline)}
+          fill={`url(#${gradientId})`}
+          transition={transition}
+        />
+        <m.path
+          d={linePath(curvePoints)}
+          fill="none"
+          className="stroke-estimate"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
+          transition={transition}
+        />
+
+        <line
+          x1="12"
+          y1="49"
+          x2="88"
+          y2="49"
+          className="stroke-border"
+          strokeWidth="1"
+          vectorEffect="non-scaling-stroke"
+        />
+        <line
+          x1="12"
+          y1="62"
+          x2="88"
+          y2="62"
+          className="stroke-border"
+          strokeWidth="1"
+          vectorEffect="non-scaling-stroke"
+        />
+        <m.rect
+          x={spreadLeft}
+          y="58.5"
+          width={spreadBandWidth}
+          height="7"
+          rx="1.2"
+          className="fill-estimate"
+          opacity="0.12"
+          transition={transition}
+        />
+        <m.line
+          x1={spreadLeft}
+          x2={spreadLeft}
+          y1="57.5"
+          y2="66.5"
+          className="stroke-estimate"
+          strokeWidth="1.1"
+          opacity="0.75"
+          vectorEffect="non-scaling-stroke"
+          transition={transition}
+        />
+        <m.line
+          x1={spreadRight}
+          x2={spreadRight}
+          y1="57.5"
+          y2="66.5"
+          className="stroke-estimate"
+          strokeWidth="1.1"
+          opacity="0.75"
+          vectorEffect="non-scaling-stroke"
+          transition={transition}
+        />
+
+        {priorStrength > 0 ? (
+          <m.line
+            x1={prior}
+            x2={prior}
+            y1="14"
+            y2="67"
+            className="stroke-prior"
+            strokeDasharray="4 4"
+            strokeWidth="1.3"
+            opacity={0.35 + priorStrength * 0.45}
+            vectorEffect="non-scaling-stroke"
+            transition={transition}
+          />
+        ) : null}
+        <m.line
+          x1={truth}
+          x2={truth}
+          y1="14"
+          y2="67"
+          className="stroke-truth"
+          strokeWidth="1.8"
+          vectorEffect="non-scaling-stroke"
+          transition={transition}
+        />
+        <m.line
+          x1={ml}
+          x2={ml}
+          y1="14"
+          y2="67"
+          className="stroke-estimate"
+          strokeWidth="1.8"
+          vectorEffect="non-scaling-stroke"
+          transition={transition}
+        />
+        {priorStrength > 0 ? (
+          <m.line
+            x1={map}
+            x2={map}
+            y1="14"
+            y2="67"
+            className="stroke-prior"
+            strokeDasharray="3 3"
+            strokeWidth="1.5"
+            opacity={0.55 + priorStrength * 0.4}
+            vectorEffect="non-scaling-stroke"
+            transition={transition}
+          />
+        ) : null}
+      </svg>
+    </div>
+  )
+}
+
 function EstimationSandbox({ moduleId }: { readonly moduleId: string }) {
-  const [samples, setSamples] = useState(12)
-  const [noise, setNoise] = useState(10)
-  const [priorStrength, setPriorStrength] = useState(0.35)
+  const [controls, dispatchControls] = useReducer(
+    estimationControlsReducer,
+    initialEstimationControls,
+  )
+  const { drawRun, noise, priorStrength, samples } = controls
   const truth = 52
-  const ml = truth + 18 / Math.sqrt(samples) - noise * 0.12
-  const map = ml * (1 - priorStrength) + 42 * priorStrength
+  const prior = 42
+  const usesPrior = moduleId === 'E7' || moduleId === 'E6'
+  const effectivePriorStrength = usesPrior ? priorStrength : 0
+  const sampleValues = useMemo(
+    () => makeEstimationSamples({ drawRun, noise, samples, truth }),
+    [drawRun, noise, samples, truth],
+  )
+  const ml = mean(sampleValues)
+  const map = ml * (1 - effectivePriorStrength) + prior * effectivePriorStrength
   const spread = noise / Math.sqrt(samples)
 
   return (
@@ -819,7 +1382,9 @@ function EstimationSandbox({ moduleId }: { readonly moduleId: string }) {
             max={80}
             step={1}
             meaning="More observations usually tighten the estimate cloud."
-            onValueChange={setSamples}
+            onValueChange={(value) => {
+              dispatchControls({ type: 'samples', value })
+            }}
             format={(value) => `N = ${value.toFixed(0)}`}
           />
           <SliderControl
@@ -830,10 +1395,12 @@ function EstimationSandbox({ moduleId }: { readonly moduleId: string }) {
             max={24}
             step={1}
             meaning="More noise makes each observation less informative."
-            onValueChange={setNoise}
+            onValueChange={(value) => {
+              dispatchControls({ type: 'noise', value })
+            }}
             format={(value) => `sigma = ${value.toFixed(0)}`}
           />
-          {moduleId === 'E7' || moduleId === 'E6' ? (
+          {usesPrior ? (
             <SliderControl
               label="Prior pull"
               variable="w"
@@ -842,14 +1409,35 @@ function EstimationSandbox({ moduleId }: { readonly moduleId: string }) {
               max={0.8}
               step={0.01}
               meaning="A stronger prior pulls MAP away from pure ML."
-              onValueChange={setPriorStrength}
+              onValueChange={(value) => {
+                dispatchControls({ type: 'priorStrength', value })
+              }}
               format={(value) => formatPercent(value, 0)}
             />
           ) : null}
+          <div className="space-y-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                dispatchControls({ type: 'drawSamples' })
+              }}
+            >
+              Draw observations
+            </Button>
+            <p className="text-xs leading-5 text-muted-foreground">
+              Dots fall from the sampling model to their measured positions.
+            </p>
+          </div>
         </>
       }
       readout={
-        <div className="grid gap-4 text-sm leading-6 sm:grid-cols-3">
+        <div
+          className={cn(
+            'grid gap-4 text-sm leading-6',
+            usesPrior ? 'sm:grid-cols-3' : 'sm:grid-cols-2',
+          )}
+        >
           <p>
             <span className="block font-medium text-truth">truth</span>
             <span className="font-mono">{formatFixed(truth, 1)}</span>
@@ -858,82 +1446,40 @@ function EstimationSandbox({ moduleId }: { readonly moduleId: string }) {
             <span className="block font-medium text-estimate">ML</span>
             <span className="font-mono">{formatFixed(ml, 1)}</span>
           </p>
-          <p>
-            <span className="block font-medium text-prior">MAP</span>
-            <span className="font-mono">{formatFixed(map, 1)}</span>
-          </p>
+          {usesPrior ? (
+            <p>
+              <span className="block font-medium text-prior">MAP</span>
+              <span className="font-mono">{formatFixed(map, 1)}</span>
+            </p>
+          ) : null}
         </div>
       }
     >
-      <svg
-        viewBox="0 0 100 58"
-        className="h-72 w-full"
-        role="img"
-        aria-label="Estimator cloud tightening around a hidden truth."
-      >
-        <line x1="8" y1="34" x2="92" y2="34" className="stroke-border" />
-        <line
-          x1={truth}
-          y1="12"
-          x2={truth}
-          y2="46"
-          className="stroke-truth"
-          strokeWidth="1.5"
-        />
-        <line
-          x1={ml}
-          y1="18"
-          x2={ml}
-          y2="40"
-          className="stroke-estimate"
-          strokeWidth="1.5"
-        />
-        <line
-          x1={map}
-          y1="22"
-          x2={map}
-          y2="44"
-          className="stroke-prior"
-          strokeWidth="1.5"
-          strokeDasharray="3 2"
-        />
-        {linspace(-2.5, 2.5, 17).map((offset, index) => (
-          <circle
-            key={offset}
-            cx={ml + offset * spread}
-            cy={23 + (index % 5) * 5}
-            r="1.6"
-            className="fill-estimate"
-            opacity="0.45"
-          />
-        ))}
-        <text
-          x={truth}
-          y="10"
-          textAnchor="middle"
-          className="fill-truth text-[5px]"
-        >
-          true value
-        </text>
-        <text
-          x={ml}
-          y="53"
-          textAnchor="middle"
-          className="fill-estimate text-[5px]"
-        >
-          estimate cloud
-        </text>
-      </svg>
+      <EstimationInstrument
+        moduleId={moduleId}
+        noise={noise}
+        truth={truth}
+        ml={ml}
+        map={map}
+        spread={spread}
+        priorStrength={effectivePriorStrength}
+        sampleValues={sampleValues}
+        drawRun={drawRun}
+      />
     </SandboxShell>
   )
 }
 
 function LearningSandbox({ moduleId }: LearningSandboxProps) {
-  if (moduleId.startsWith('D')) {
-    return <DetectionSandbox moduleId={moduleId} />
-  }
-
-  return <EstimationSandbox moduleId={moduleId} />
+  return (
+    <LazyMotion features={domAnimation}>
+      {moduleId.startsWith('D') ? (
+        <DetectionSandbox moduleId={moduleId} />
+      ) : (
+        <EstimationSandbox moduleId={moduleId} />
+      )}
+    </LazyMotion>
+  )
 }
 
 export { LearningSandbox }

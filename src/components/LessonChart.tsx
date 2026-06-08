@@ -4,6 +4,7 @@ import {
   ColorType,
   createChart,
   LineSeries,
+  LineType,
 } from 'lightweight-charts'
 import type {
   AreaData,
@@ -23,6 +24,7 @@ type ChartSeries =
       readonly color: string
       readonly data: ReadonlyArray<LineData<Time>>
       readonly lineWidth?: 1 | 2 | 3 | 4
+      readonly smooth?: boolean
     }
   | {
       readonly type: 'area'
@@ -31,6 +33,7 @@ type ChartSeries =
       readonly fill: string
       readonly data: ReadonlyArray<AreaData<Time>>
       readonly lineWidth?: 1 | 2 | 3 | 4
+      readonly smooth?: boolean
     }
 
 type LessonChartProps = {
@@ -38,6 +41,7 @@ type LessonChartProps = {
   readonly height?: number
   readonly yVisible?: boolean
   readonly xVisible?: boolean
+  readonly yPrecision?: number
   readonly timeFormatter?: (time: Time) => string
   readonly ariaLabel: string
 }
@@ -48,6 +52,7 @@ type ChartSeriesConfig =
       readonly title: string
       readonly color: string
       readonly lineWidth: 1 | 2 | 3 | 4
+      readonly smooth: boolean
     }
   | {
       readonly type: 'area'
@@ -55,6 +60,7 @@ type ChartSeriesConfig =
       readonly color: string
       readonly fill: string
       readonly lineWidth: 1 | 2 | 3 | 4
+      readonly smooth: boolean
     }
 
 type SeriesUpdater = (series: ChartSeries) => void
@@ -94,6 +100,8 @@ const parseLineWidth = (value: string): 1 | 2 | 3 | 4 => {
   return 2
 }
 
+const parseBoolean = (value: string): boolean => value === 'true'
+
 const timeOrderKey = (time: Time): number => {
   if (typeof time === 'number') return time
 
@@ -113,7 +121,7 @@ const timeOrderKey = (time: Time): number => {
 const orderedUniqueData = <T extends { readonly time: Time }>(
   data: ReadonlyArray<T>,
 ): Array<T> => {
-  const sorted = [...data].sort(
+  const sorted = data.toSorted(
     (left, right) => timeOrderKey(left.time) - timeOrderKey(right.time),
   )
   const output: Array<T> = []
@@ -144,6 +152,7 @@ const seriesConfigKeyFromSeries = (
         item.color,
         item.lineWidth ?? 2,
         item.type === 'area' ? item.fill : '',
+        item.smooth === true,
       ].join(CONFIG_FIELD_SEPARATOR),
     )
     .join(CONFIG_ITEM_SEPARATOR)
@@ -154,8 +163,14 @@ const seriesConfigsFromKey = (
   if (configKey.length === 0) return []
 
   return configKey.split(CONFIG_ITEM_SEPARATOR).map((entry) => {
-    const [type = 'line', title = '', color = '', lineWidth = '2', fill = ''] =
-      entry.split(CONFIG_FIELD_SEPARATOR)
+    const [
+      type = 'line',
+      title = '',
+      color = '',
+      lineWidth = '2',
+      fill = '',
+      smooth = 'false',
+    ] = entry.split(CONFIG_FIELD_SEPARATOR)
 
     if (type === 'area') {
       return {
@@ -164,6 +179,7 @@ const seriesConfigsFromKey = (
         color,
         fill,
         lineWidth: parseLineWidth(lineWidth),
+        smooth: parseBoolean(smooth),
       }
     }
 
@@ -172,6 +188,7 @@ const seriesConfigsFromKey = (
       title,
       color,
       lineWidth: parseLineWidth(lineWidth),
+      smooth: parseBoolean(smooth),
     }
   })
 }
@@ -181,6 +198,7 @@ function LessonChart({
   height = 290,
   yVisible = true,
   xVisible = true,
+  yPrecision = 3,
   timeFormatter,
   ariaLabel,
 }: LessonChartProps) {
@@ -189,6 +207,7 @@ function LessonChart({
   const seriesUpdatersRef = useRef<ReadonlyArray<SeriesUpdater>>([])
   const palette = useMemo(() => readChartPalette(), [])
   const formatTime = timeFormatter ?? formatTick
+  const minMove = 1 / 10 ** yPrecision
 
   const seriesConfigKey = useMemo(
     () => seriesConfigKeyFromSeries(series),
@@ -252,15 +271,20 @@ function LessonChart({
     const nextUpdaters = seriesConfigsFromKey(seriesConfigKey).map((config) => {
       if (config.type === 'area') {
         const options: DeepPartial<AreaSeriesOptions> = {
-          title: config.title,
+          title: '',
           topColor: config.fill,
           bottomColor: 'rgba(255, 253, 248, 0)',
           lineColor: config.color,
           lineWidth: config.lineWidth,
+          lineType: config.smooth ? LineType.Curved : LineType.Simple,
           priceLineVisible: false,
           lastValueVisible: false,
           crosshairMarkerVisible: true,
-          priceFormat: { type: 'price', precision: 4, minMove: 0.0001 },
+          priceFormat: {
+            type: 'price',
+            precision: yPrecision,
+            minMove,
+          },
         }
         const area = chart.addSeries(AreaSeries, options)
         return (next: ChartSeries) => {
@@ -271,13 +295,18 @@ function LessonChart({
       }
 
       const options: DeepPartial<LineSeriesOptions> = {
-        title: config.title,
+        title: '',
         color: config.color,
         lineWidth: config.lineWidth,
+        lineType: config.smooth ? LineType.Curved : LineType.Simple,
         priceLineVisible: false,
         lastValueVisible: false,
         crosshairMarkerVisible: true,
-        priceFormat: { type: 'price', precision: 4, minMove: 0.0001 },
+        priceFormat: {
+          type: 'price',
+          precision: yPrecision,
+          minMove,
+        },
       }
       const line = chart.addSeries(LineSeries, options)
       return (next: ChartSeries) => {
@@ -296,7 +325,7 @@ function LessonChart({
       chartRef.current = null
       seriesUpdatersRef.current = []
     }
-  }, [chartOptions, seriesConfigKey])
+  }, [chartOptions, minMove, seriesConfigKey, yPrecision])
 
   useEffect(() => {
     series.forEach((item, index) => {
@@ -306,13 +335,13 @@ function LessonChart({
   }, [series])
 
   return (
-    <div
-      ref={containerRef}
-      role="img"
-      aria-label={ariaLabel}
+    <figure
       className="w-full overflow-hidden rounded-md border border-border bg-card"
       style={{ height }}
-    />
+    >
+      <div ref={containerRef} className="h-full w-full" />
+      <figcaption className="sr-only">{ariaLabel}</figcaption>
+    </figure>
   )
 }
 

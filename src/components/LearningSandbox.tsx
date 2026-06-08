@@ -120,6 +120,11 @@ const ROC_SAMPLE_COUNT = 2400
 const ROC_MIN_FALSE_ALARM = 0.001
 const PLOT_LEFT_PERCENT = 2.5
 const PLOT_WIDTH_PERCENT = 89
+const priorHoleStyle = {
+  borderColor: 'var(--prior)',
+  boxShadow:
+    '0 0 0 3px var(--card), 0 0 0 4px color-mix(in srgb, var(--prior) 22%, transparent)',
+}
 
 const plotXPercent = (value: number): number =>
   PLOT_LEFT_PERCENT + (value / VIEW_WIDTH) * PLOT_WIDTH_PERCENT
@@ -1057,6 +1062,368 @@ function makeEstimationSamples({
 const mean = (values: ReadonlyArray<number>): number =>
   values.reduce((total, value) => total + value, 0) / Math.max(1, values.length)
 
+type DisplayedEstimationSample = {
+  readonly id: number
+  readonly x: number
+  readonly curveTop: number
+  readonly finalTop: number
+}
+
+function EstimationLabels({
+  mapX,
+  mlX,
+  priorStrength,
+  priorX,
+  truthX,
+}: {
+  readonly mapX: number
+  readonly mlX: number
+  readonly priorStrength: number
+  readonly priorX: number
+  readonly truthX: number
+}) {
+  return (
+    <>
+      <span className="absolute left-[13%] top-[7%] z-20 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs font-medium text-estimate">
+        sampling model f(x | true theta)
+      </span>
+      <span className="absolute left-[13%] top-[61%] z-20 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs text-muted-foreground">
+        samples land by measured value
+      </span>
+      <span className="absolute left-[13%] top-[78%] z-20 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs text-muted-foreground">
+        standard error band
+      </span>
+      <span
+        className="absolute top-[11%] z-20 -translate-x-1/2 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs font-medium text-truth"
+        style={{ left: `${truthX}%` }}
+      >
+        true theta
+      </span>
+      <span
+        className="absolute top-[88%] z-20 -translate-x-1/2 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs font-medium text-estimate"
+        style={{ left: `${mlX}%` }}
+      >
+        ML mean
+      </span>
+      {priorStrength > 0 ? (
+        <>
+          <span
+            className="absolute top-[25%] z-20 -translate-x-1/2 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs text-prior"
+            style={{ left: `${priorX}%` }}
+          >
+            prior mean
+          </span>
+          <span
+            className="absolute top-[94%] z-20 -translate-x-1/2 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs font-medium text-prior"
+            style={{ left: `${mapX}%` }}
+          >
+            MAP
+          </span>
+        </>
+      ) : null}
+    </>
+  )
+}
+
+function EstimationSampleDots({
+  displayedSamples,
+  drawRun,
+  reduceMotion,
+}: {
+  readonly displayedSamples: ReadonlyArray<DisplayedEstimationSample>
+  readonly drawRun: number
+  readonly reduceMotion: boolean | null
+}) {
+  return (
+    <>
+      {displayedSamples.map((sample, index) => (
+        <m.span
+          key={`${drawRun}-${sample.id}`}
+          className="absolute z-30 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-card bg-estimate shadow-[0_0_0_1px_rgba(30,58,138,0.28)]"
+          style={{ left: `${sample.x}%` }}
+          initial={
+            reduceMotion === true
+              ? false
+              : { opacity: 0, top: `${sample.curveTop}%`, scale: 0.8 }
+          }
+          animate={{
+            opacity: 0.86,
+            top: `${sample.finalTop}%`,
+            scale: 1,
+          }}
+          transition={{
+            duration: reduceMotion === true ? 0 : 0.42,
+            delay: reduceMotion === true ? 0 : Math.min(1.6, index * 0.045),
+            ease: [0.22, 1, 0.36, 1],
+          }}
+        />
+      ))}
+    </>
+  )
+}
+
+function PriorMapHoles({
+  mapX,
+  priorCurveY,
+  priorStrength,
+  priorX,
+}: {
+  readonly mapX: number
+  readonly priorCurveY: number
+  readonly priorStrength: number
+  readonly priorX: number
+}) {
+  if (priorStrength <= 0) return null
+
+  return (
+    <>
+      <span
+        className="absolute z-30 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-card"
+        style={{
+          ...priorHoleStyle,
+          left: `${priorX}%`,
+          top: `${(priorCurveY / 74) * 100}%`,
+        }}
+        aria-hidden="true"
+      />
+      <span
+        className="absolute z-30 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-card"
+        style={{
+          ...priorHoleStyle,
+          left: `${mapX}%`,
+          top: `${(62 / 74) * 100}%`,
+        }}
+        aria-hidden="true"
+      />
+    </>
+  )
+}
+
+function EstimationGrid() {
+  return (
+    <g className="stroke-border" opacity="0.65">
+      {[24, 36, 48, 60, 72].map((x) => (
+        <line
+          key={`vertical-${x}`}
+          x1={x}
+          y1="11"
+          x2={x}
+          y2="66"
+          strokeWidth="1"
+          vectorEffect="non-scaling-stroke"
+        />
+      ))}
+      {[20, 36, 49, 62].map((y) => (
+        <line
+          key={`horizontal-${y}`}
+          x1="12"
+          y1={y}
+          x2="88"
+          y2={y}
+          strokeWidth="1"
+          vectorEffect="non-scaling-stroke"
+        />
+      ))}
+    </g>
+  )
+}
+
+function StandardErrorBand({
+  spreadBandWidth,
+  spreadLeft,
+  spreadRight,
+  transition,
+}: {
+  readonly spreadBandWidth: number
+  readonly spreadLeft: number
+  readonly spreadRight: number
+  readonly transition: Transition
+}) {
+  return (
+    <>
+      <m.rect
+        x={spreadLeft}
+        y="58.5"
+        width={spreadBandWidth}
+        height="7"
+        rx="1.2"
+        className="fill-estimate"
+        opacity="0.12"
+        transition={transition}
+      />
+      <m.line
+        x1={spreadLeft}
+        x2={spreadLeft}
+        y1="57.5"
+        y2="66.5"
+        className="stroke-estimate"
+        strokeWidth="1.1"
+        opacity="0.75"
+        vectorEffect="non-scaling-stroke"
+        transition={transition}
+      />
+      <m.line
+        x1={spreadRight}
+        x2={spreadRight}
+        y1="57.5"
+        y2="66.5"
+        className="stroke-estimate"
+        strokeWidth="1.1"
+        opacity="0.75"
+        vectorEffect="non-scaling-stroke"
+        transition={transition}
+      />
+    </>
+  )
+}
+
+function PriorMapGuides({
+  mapGapBottom,
+  mapGapTop,
+  mapX,
+  priorGapBottom,
+  priorGapTop,
+  priorStrength,
+  priorX,
+  transition,
+}: {
+  readonly mapGapBottom: number
+  readonly mapGapTop: number
+  readonly mapX: number
+  readonly priorGapBottom: number
+  readonly priorGapTop: number
+  readonly priorStrength: number
+  readonly priorX: number
+  readonly transition: Transition
+}) {
+  if (priorStrength <= 0) return null
+
+  return (
+    <>
+      <m.line
+        x1={priorX}
+        x2={priorX}
+        y1="14"
+        y2={priorGapTop}
+        className="stroke-prior"
+        strokeDasharray="3 4"
+        strokeWidth="1.25"
+        opacity={0.55 + priorStrength * 0.35}
+        vectorEffect="non-scaling-stroke"
+        transition={transition}
+      />
+      <m.line
+        x1={priorX}
+        x2={priorX}
+        y1={priorGapBottom}
+        y2="67"
+        className="stroke-prior"
+        strokeDasharray="3 4"
+        strokeWidth="1.25"
+        opacity={0.55 + priorStrength * 0.35}
+        vectorEffect="non-scaling-stroke"
+        transition={transition}
+      />
+      <m.line
+        x1={mapX}
+        x2={mapX}
+        y1="14"
+        y2={mapGapTop}
+        className="stroke-prior"
+        strokeDasharray="3 4"
+        strokeWidth="1.25"
+        opacity={0.58 + priorStrength * 0.35}
+        vectorEffect="non-scaling-stroke"
+        transition={transition}
+      />
+      <m.line
+        x1={mapX}
+        x2={mapX}
+        y1={mapGapBottom}
+        y2="67"
+        className="stroke-prior"
+        strokeDasharray="3 4"
+        strokeWidth="1.25"
+        opacity={0.58 + priorStrength * 0.35}
+        vectorEffect="non-scaling-stroke"
+        transition={transition}
+      />
+    </>
+  )
+}
+
+function TruthMlGuides({
+  mlGuideStart,
+  mlMarkerBottom,
+  mlMarkerTop,
+  mlX,
+  transition,
+  trueGuideEnd,
+  trueMarkerBottom,
+  trueMarkerTop,
+  truthX,
+}: {
+  readonly mlGuideStart: number
+  readonly mlMarkerBottom: number
+  readonly mlMarkerTop: number
+  readonly mlX: number
+  readonly transition: Transition
+  readonly trueGuideEnd: number
+  readonly trueMarkerBottom: number
+  readonly trueMarkerTop: number
+  readonly truthX: number
+}) {
+  return (
+    <>
+      <m.line
+        x1={truthX}
+        x2={truthX}
+        y1={trueMarkerBottom}
+        y2={trueGuideEnd}
+        className="stroke-truth"
+        strokeWidth="0.75"
+        opacity="0.5"
+        strokeLinecap="round"
+        vectorEffect="non-scaling-stroke"
+        transition={transition}
+      />
+      <m.line
+        x1={truthX}
+        x2={truthX}
+        y1={trueMarkerTop}
+        y2={trueMarkerBottom}
+        className="stroke-truth"
+        strokeWidth="3"
+        strokeLinecap="round"
+        vectorEffect="non-scaling-stroke"
+        transition={transition}
+      />
+      <m.line
+        x1={mlX}
+        x2={mlX}
+        y1={mlGuideStart}
+        y2={mlMarkerTop}
+        className="stroke-estimate"
+        strokeWidth="0.75"
+        opacity="0.5"
+        vectorEffect="non-scaling-stroke"
+        transition={transition}
+      />
+      <m.line
+        x1={mlX}
+        x2={mlX}
+        y1={mlMarkerTop}
+        y2={mlMarkerBottom}
+        className="stroke-estimate"
+        strokeWidth="3"
+        strokeLinecap="round"
+        vectorEffect="non-scaling-stroke"
+        transition={transition}
+      />
+    </>
+  )
+}
+
 function EstimationInstrument({
   moduleId,
   noise,
@@ -1086,17 +1453,34 @@ function EstimationInstrument({
   const modelBaseline = 36
   const modelSd = Math.max(4.2, noise * 0.62)
   const modelHeight = 20
-  const curvePoints = linspace(12, 88, 240).map((x) => {
-    const z = (x - truth) / modelSd
-    return {
-      x,
-      y: modelBaseline - Math.exp(-0.5 * z * z) * modelHeight,
-    }
-  })
+  const modelYAt = (value: number): number => {
+    const z = (value - truth) / modelSd
+    return modelBaseline - Math.exp(-0.5 * z * z) * modelHeight
+  }
+  const curvePoints = linspace(12, 88, 240).map((x) => ({
+    x,
+    y: modelYAt(x),
+  }))
   const prior = 42
+  const truthX = clampPlotX(truth)
+  const mlX = clampPlotX(ml)
+  const priorX = clampPlotX(prior)
+  const mapX = clampPlotX(map)
+  const trueCurveY = modelYAt(truth)
+  const priorCurveY = modelYAt(prior)
+  const trueMarkerTop = trueCurveY - 4
+  const trueMarkerBottom = trueCurveY + 7
+  const trueGuideEnd = 49.5
+  const mlMarkerTop = 57
+  const mlMarkerBottom = 67
+  const mlGuideStart = 49
+  const mapGapTop = 58.8
+  const mapGapBottom = 65.2
+  const priorGapTop = priorCurveY - 4.5
+  const priorGapBottom = priorCurveY + 4.5
   const standardErrorWidth = Math.min(24, Math.max(4, spread * 3.4))
-  const spreadLeft = clampPlotX(ml - standardErrorWidth)
-  const spreadRight = clampPlotX(ml + standardErrorWidth)
+  const spreadLeft = clampPlotX(mlX - standardErrorWidth)
+  const spreadRight = clampPlotX(mlX + standardErrorWidth)
   const spreadBandWidth = Math.max(0, spreadRight - spreadLeft)
   const observedSampleTop = (49 / 74) * 100
   const displayedSamples = sampleValues
@@ -1112,70 +1496,27 @@ function EstimationInstrument({
       }
     })
   const gradientId = `estimate-gradient-${moduleId}`
-  const sampleDelay = (index: number): number =>
-    reduceMotion === true ? 0 : Math.min(1.6, index * 0.045)
 
   return (
     <div className="relative mx-auto max-w-4xl py-4">
-      <span className="absolute left-[13%] top-[7%] z-20 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs font-medium text-estimate">
-        sampling model f(x | true theta)
-      </span>
-      <span className="absolute left-[13%] top-[61%] z-20 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs text-muted-foreground">
-        samples land by measured value
-      </span>
-      <span className="absolute left-[13%] top-[78%] z-20 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs text-muted-foreground">
-        standard error band
-      </span>
-      <span
-        className="absolute top-[11%] z-20 -translate-x-1/2 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs font-medium text-truth"
-        style={{ left: `${truth}%` }}
-      >
-        true theta
-      </span>
-      <span
-        className="absolute top-[86%] z-20 -translate-x-1/2 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs font-medium text-estimate"
-        style={{ left: `${ml}%` }}
-      >
-        ML mean
-      </span>
-      {priorStrength > 0 ? (
-        <>
-          <span
-            className="absolute top-[25%] z-20 -translate-x-1/2 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs text-prior"
-            style={{ left: `${prior}%` }}
-          >
-            prior mean
-          </span>
-          <span
-            className="absolute top-[94%] z-20 -translate-x-1/2 rounded-sm bg-card/95 px-1.5 py-0.5 text-xs font-medium text-prior"
-            style={{ left: `${map}%` }}
-          >
-            MAP
-          </span>
-        </>
-      ) : null}
-      {displayedSamples.map((sample, index) => (
-        <m.span
-          key={`${drawRun}-${sample.id}`}
-          className="absolute z-30 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-card bg-estimate shadow-[0_0_0_1px_rgba(30,58,138,0.28)]"
-          style={{ left: `${sample.x}%` }}
-          initial={
-            reduceMotion === true
-              ? false
-              : { opacity: 0, top: `${sample.curveTop}%`, scale: 0.8 }
-          }
-          animate={{
-            opacity: 0.86,
-            top: `${sample.finalTop}%`,
-            scale: 1,
-          }}
-          transition={{
-            duration: reduceMotion === true ? 0 : 0.42,
-            delay: sampleDelay(index),
-            ease: [0.22, 1, 0.36, 1],
-          }}
-        />
-      ))}
+      <EstimationLabels
+        mapX={mapX}
+        mlX={mlX}
+        priorStrength={priorStrength}
+        priorX={priorX}
+        truthX={truthX}
+      />
+      <EstimationSampleDots
+        displayedSamples={displayedSamples}
+        drawRun={drawRun}
+        reduceMotion={reduceMotion}
+      />
+      <PriorMapHoles
+        mapX={mapX}
+        priorCurveY={priorCurveY}
+        priorStrength={priorStrength}
+        priorX={priorX}
+      />
       <svg
         viewBox="0 0 100 74"
         className="h-80 w-full overflow-visible"
@@ -1190,30 +1531,7 @@ function EstimationInstrument({
           </linearGradient>
         </defs>
 
-        <g className="stroke-border" opacity="0.65">
-          {[24, 36, 48, 60, 72].map((x) => (
-            <line
-              key={`vertical-${x}`}
-              x1={x}
-              y1="11"
-              x2={x}
-              y2="66"
-              strokeWidth="1"
-              vectorEffect="non-scaling-stroke"
-            />
-          ))}
-          {[20, 36, 49, 62].map((y) => (
-            <line
-              key={`horizontal-${y}`}
-              x1="12"
-              y1={y}
-              x2="88"
-              y2={y}
-              strokeWidth="1"
-              vectorEffect="non-scaling-stroke"
-            />
-          ))}
-        </g>
+        <EstimationGrid />
 
         <line
           x1="12"
@@ -1257,87 +1575,33 @@ function EstimationInstrument({
           strokeWidth="1"
           vectorEffect="non-scaling-stroke"
         />
-        <m.rect
-          x={spreadLeft}
-          y="58.5"
-          width={spreadBandWidth}
-          height="7"
-          rx="1.2"
-          className="fill-estimate"
-          opacity="0.12"
+        <StandardErrorBand
+          spreadBandWidth={spreadBandWidth}
+          spreadLeft={spreadLeft}
+          spreadRight={spreadRight}
           transition={transition}
         />
-        <m.line
-          x1={spreadLeft}
-          x2={spreadLeft}
-          y1="57.5"
-          y2="66.5"
-          className="stroke-estimate"
-          strokeWidth="1.1"
-          opacity="0.75"
-          vectorEffect="non-scaling-stroke"
+        <PriorMapGuides
+          mapGapBottom={mapGapBottom}
+          mapGapTop={mapGapTop}
+          mapX={mapX}
+          priorGapBottom={priorGapBottom}
+          priorGapTop={priorGapTop}
+          priorStrength={priorStrength}
+          priorX={priorX}
           transition={transition}
         />
-        <m.line
-          x1={spreadRight}
-          x2={spreadRight}
-          y1="57.5"
-          y2="66.5"
-          className="stroke-estimate"
-          strokeWidth="1.1"
-          opacity="0.75"
-          vectorEffect="non-scaling-stroke"
+        <TruthMlGuides
+          mlGuideStart={mlGuideStart}
+          mlMarkerBottom={mlMarkerBottom}
+          mlMarkerTop={mlMarkerTop}
+          mlX={mlX}
           transition={transition}
+          trueGuideEnd={trueGuideEnd}
+          trueMarkerBottom={trueMarkerBottom}
+          trueMarkerTop={trueMarkerTop}
+          truthX={truthX}
         />
-
-        {priorStrength > 0 ? (
-          <m.line
-            x1={prior}
-            x2={prior}
-            y1="14"
-            y2="67"
-            className="stroke-prior"
-            strokeDasharray="4 4"
-            strokeWidth="1.3"
-            opacity={0.35 + priorStrength * 0.45}
-            vectorEffect="non-scaling-stroke"
-            transition={transition}
-          />
-        ) : null}
-        <m.line
-          x1={truth}
-          x2={truth}
-          y1="14"
-          y2="67"
-          className="stroke-truth"
-          strokeWidth="1.8"
-          vectorEffect="non-scaling-stroke"
-          transition={transition}
-        />
-        <m.line
-          x1={ml}
-          x2={ml}
-          y1="14"
-          y2="67"
-          className="stroke-estimate"
-          strokeWidth="1.8"
-          vectorEffect="non-scaling-stroke"
-          transition={transition}
-        />
-        {priorStrength > 0 ? (
-          <m.line
-            x1={map}
-            x2={map}
-            y1="14"
-            y2="67"
-            className="stroke-prior"
-            strokeDasharray="3 3"
-            strokeWidth="1.5"
-            opacity={0.55 + priorStrength * 0.4}
-            vectorEffect="non-scaling-stroke"
-            transition={transition}
-          />
-        ) : null}
       </svg>
     </div>
   )

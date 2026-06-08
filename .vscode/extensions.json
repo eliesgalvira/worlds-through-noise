@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "TypeScriptTeam.native-preview",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss"
+  ]
+}

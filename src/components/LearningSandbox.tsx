@@ -120,11 +120,17 @@ const ROC_SAMPLE_COUNT = 2400
 const ROC_MIN_FALSE_ALARM = 0.001
 const PLOT_LEFT_PERCENT = 2.5
 const PLOT_WIDTH_PERCENT = 89
+const ESTIMATION_VIEW_HEIGHT = 74
+const ESTIMATION_SVG_HEIGHT_REM = 20
+const ESTIMATION_SVG_PADDING_REM = 1
 const priorHoleStyle = {
   borderColor: 'var(--prior)',
   boxShadow:
     '0 0 0 3px var(--card), 0 0 0 4px color-mix(in srgb, var(--prior) 22%, transparent)',
 }
+
+const estimationSvgTop = (y: number): string =>
+  `calc(${ESTIMATION_SVG_PADDING_REM}rem + ${(y / ESTIMATION_VIEW_HEIGHT) * ESTIMATION_SVG_HEIGHT_REM}rem)`
 
 const plotXPercent = (value: number): number =>
   PLOT_LEFT_PERCENT + (value / VIEW_WIDTH) * PLOT_WIDTH_PERCENT
@@ -1065,8 +1071,8 @@ const mean = (values: ReadonlyArray<number>): number =>
 type DisplayedEstimationSample = {
   readonly id: number
   readonly x: number
-  readonly curveTop: number
-  readonly finalTop: number
+  readonly curveY: number
+  readonly finalY: number
 }
 
 function EstimationLabels({
@@ -1144,11 +1150,15 @@ function EstimationSampleDots({
           initial={
             reduceMotion === true
               ? false
-              : { opacity: 0, top: `${sample.curveTop}%`, scale: 0.8 }
+              : {
+                  opacity: 0,
+                  top: estimationSvgTop(sample.curveY),
+                  scale: 0.8,
+                }
           }
           animate={{
             opacity: 0.86,
-            top: `${sample.finalTop}%`,
+            top: estimationSvgTop(sample.finalY),
             scale: 1,
           }}
           transition={{
@@ -1182,7 +1192,7 @@ function PriorMapHoles({
         style={{
           ...priorHoleStyle,
           left: `${priorX}%`,
-          top: `${(priorCurveY / 74) * 100}%`,
+          top: estimationSvgTop(priorCurveY),
         }}
         aria-hidden="true"
       />
@@ -1191,7 +1201,7 @@ function PriorMapHoles({
         style={{
           ...priorHoleStyle,
           left: `${mapX}%`,
-          top: `${(62 / 74) * 100}%`,
+          top: estimationSvgTop(62),
         }}
         aria-hidden="true"
       />
@@ -1383,7 +1393,6 @@ function TruthMlGuides({
         className="stroke-truth"
         strokeWidth="0.75"
         opacity="0.5"
-        strokeLinecap="round"
         vectorEffect="non-scaling-stroke"
         transition={transition}
       />
@@ -1470,7 +1479,7 @@ function EstimationInstrument({
   const priorCurveY = modelYAt(prior)
   const trueMarkerTop = trueCurveY - 4
   const trueMarkerBottom = trueCurveY + 7
-  const trueGuideEnd = 49.5
+  const trueGuideEnd = 49
   const mlMarkerTop = 57
   const mlMarkerBottom = 67
   const mlGuideStart = 49
@@ -1482,7 +1491,7 @@ function EstimationInstrument({
   const spreadLeft = clampPlotX(mlX - standardErrorWidth)
   const spreadRight = clampPlotX(mlX + standardErrorWidth)
   const spreadBandWidth = Math.max(0, spreadRight - spreadLeft)
-  const observedSampleTop = (49 / 74) * 100
+  const observedSampleY = 49
   const displayedSamples = sampleValues
     .slice(0, Math.min(60, sampleValues.length))
     .map((value, index) => {
@@ -1491,8 +1500,8 @@ function EstimationInstrument({
       return {
         id: index,
         x: clampPlotX(value),
-        curveTop: (curveY / 74) * 100,
-        finalTop: observedSampleTop,
+        curveY,
+        finalY: observedSampleY,
       }
     })
   const gradientId = `estimate-gradient-${moduleId}`

@@ -5,10 +5,10 @@ type MetricTone = 'neutral' | 'h0' | 'h1' | 'detection' | 'falseAlarm'
 
 const toneRing: Record<MetricTone, string> = {
   neutral: 'border-border',
-  h0: 'border-h0/40',
-  h1: 'border-accent/40',
-  detection: 'border-detection/40',
-  falseAlarm: 'border-false-alarm/40',
+  h0: 'border-h0/50',
+  h1: 'border-accent/50',
+  detection: 'border-detection/50',
+  falseAlarm: 'border-false-alarm/50',
 }
 
 const toneText: Record<MetricTone, string> = {
@@ -35,13 +35,7 @@ function MetricStat({
   className,
 }: MetricStatProps) {
   return (
-    <div
-      className={cn(
-        'rounded-md border bg-background px-4 py-3',
-        toneRing[tone],
-        className,
-      )}
-    >
+    <div className={cn('border-t px-1 py-3', toneRing[tone], className)}>
       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </p>

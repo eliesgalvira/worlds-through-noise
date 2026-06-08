@@ -20,10 +20,7 @@ function PredictionPrompt({
 
   return (
     <div
-      className={cn(
-        'rounded-lg border border-accent/40 bg-accent/5 p-5',
-        className,
-      )}
+      className={cn('border-y border-accent/40 bg-accent/5 py-5', className)}
     >
       <div className="flex items-start gap-3">
         <Lightbulb

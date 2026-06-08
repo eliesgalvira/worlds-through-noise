@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import katex from 'katex'
 import { Eye, EyeOff } from 'lucide-react'
 import { cn } from '@/lib/utils.ts'
 
 type EquationRevealProps = {
   /** The plain-English meaning, always shown first. */
   readonly sentence: string
-  /** The symbolic form, revealed on demand. Plain text / pseudo-LaTeX. */
+  /** The symbolic form, revealed on demand as KaTeX. */
   readonly equation: string
   readonly caption?: string
   readonly defaultRevealed?: boolean
@@ -20,18 +21,34 @@ function EquationReveal({
   className,
 }: EquationRevealProps) {
   const [revealed, setRevealed] = useState(defaultRevealed)
+  const equationRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!revealed) {
+      return
+    }
+    const element = equationRef.current
+    if (element === null) {
+      return
+    }
+    katex.render(equation, element, {
+      displayMode: true,
+      throwOnError: false,
+      strict: 'ignore',
+    })
+  }, [equation, revealed])
 
   return (
-    <figure className={cn('rounded-lg border bg-card p-5', className)}>
+    <figure className={cn('border-y border-border bg-card/40 py-5', className)}>
       <p className="text-base leading-7 text-foreground">{sentence}</p>
 
       <div className="mt-4">
         {revealed ? (
-          <div className="rounded-md border bg-background px-4 py-3">
-            <code className="block overflow-x-auto whitespace-pre font-mono text-sm leading-6 text-foreground">
-              {equation}
-            </code>
-          </div>
+          <div
+            ref={equationRef}
+            className="overflow-x-auto rounded-md border bg-background px-4 py-3 text-foreground"
+            aria-label={equation}
+          />
         ) : (
           <button
             type="button"

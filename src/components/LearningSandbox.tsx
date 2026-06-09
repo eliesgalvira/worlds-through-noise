@@ -220,6 +220,7 @@ function SandboxShell({
   children,
   controls,
   readout,
+  layout = 'stacked',
 }: {
   readonly moduleId: string
   readonly title: string
@@ -227,7 +228,41 @@ function SandboxShell({
   readonly children: ReactNode
   readonly controls: ReactNode
   readonly readout?: ReactNode
+  readonly layout?: 'stacked' | 'split'
 }) {
+  if (layout === 'split') {
+    return (
+      <section
+        id={`${moduleId}-sandbox`}
+        className="scroll-mt-40 rounded-lg border bg-card/80 p-5 sm:scroll-mt-28 sm:p-6"
+        aria-label={title}
+      >
+        <p className="font-mono text-xs uppercase tracking-[0.16em] text-accent">
+          Interactive sandbox
+        </p>
+        <h3 className="mt-2 max-w-3xl font-serif text-2xl font-semibold leading-tight text-foreground">
+          {title}
+        </h3>
+        <p className="mt-3 max-w-3xl text-base leading-7 text-muted-foreground">
+          {instruction}
+        </p>
+
+        <div className="mt-6 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,21rem)]">
+          <div className="min-w-0">{children}</div>
+          <div className="border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+            <p className="mb-5 font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">
+              Manipulate
+            </p>
+            <div className="space-y-5">{controls}</div>
+            {readout !== undefined ? (
+              <div className="mt-5 border-t border-border pt-4">{readout}</div>
+            ) : null}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section
       id={`${moduleId}-sandbox`}
@@ -1632,11 +1667,11 @@ function GeometrySandbox({ moduleId }: { readonly moduleId: string }) {
   const [angle, setAngle] = useState(24)
   const quietScore = 1 / stretch
 
-  const VIEW_W = 480
-  const VIEW_H = 300
+  const VIEW_W = 430
+  const VIEW_H = 260
   const unit = 28
-  const centerX = 240
-  const centerY = 150
+  const centerX = 215
+  const centerY = 130
   const gridHalfX = 7
   const gridHalfY = 4
   const phiRad = (angle * Math.PI) / 180
@@ -1693,6 +1728,7 @@ function GeometrySandbox({ moduleId }: { readonly moduleId: string }) {
       moduleId={moduleId}
       title="Noise changes the meaning of distance"
       instruction="Rotate and stretch the noise ellipse. The best codeword separation points through the quiet direction, not necessarily the longest-looking Euclidean gap."
+      layout="split"
       controls={
         <>
           <SliderControl
@@ -1736,10 +1772,7 @@ function GeometrySandbox({ moduleId }: { readonly moduleId: string }) {
           { label: 'noisy direction', color: '#6b6257', kind: 'dash' },
         ]}
       />
-      <figure
-        className="w-full overflow-hidden rounded-md border border-border bg-card"
-        style={{ height: 340 }}
-      >
+      <figure className="mx-auto aspect-[43/26] w-full max-w-[58rem] overflow-hidden rounded-md border border-border bg-card">
         <svg
           viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
           className="h-full w-full"

@@ -694,11 +694,41 @@ function DetectionSandbox({ moduleId }: { readonly moduleId: string }) {
   )
 }
 
+const DOPPLER_VIEW_W = 480
+const DOPPLER_VIEW_H = 210
+const DOPPLER_REGION_LEFT = 92
+const DOPPLER_REGION_RIGHT = 456
+const DOPPLER_STATIC_BASELINE = 74
+const DOPPLER_SHIFTED_BASELINE = 150
+const DOPPLER_AMPLITUDE = 26
+const DOPPLER_BASE_CYCLES = 4.5
+
 function DopplerSandbox({ moduleId }: { readonly moduleId: string }) {
   const [shift, setShift] = useState(0.22)
-  const crests = linspace(0, 1, 13)
   const h0Score = Math.max(0, 1 - shift * 2.2)
   const h1Score = Math.min(1, 0.28 + shift * 1.9)
+
+  const shiftedCycles = DOPPLER_BASE_CYCLES * (65 / (65 - shift * 35))
+  const wavePoints = (
+    cycles: number,
+    baseline: number,
+  ): ReadonlyArray<PlotPoint> =>
+    linspace(DOPPLER_REGION_LEFT, DOPPLER_REGION_RIGHT, 260).map((x) => {
+      const phase =
+        ((x - DOPPLER_REGION_LEFT) /
+          (DOPPLER_REGION_RIGHT - DOPPLER_REGION_LEFT)) *
+        Math.PI *
+        2 *
+        cycles
+      return { x, y: baseline - DOPPLER_AMPLITUDE * Math.sin(phase) }
+    })
+  const staticPath = linePath(
+    wavePoints(DOPPLER_BASE_CYCLES, DOPPLER_STATIC_BASELINE),
+  )
+  const shiftedPath = linePath(
+    wavePoints(shiftedCycles, DOPPLER_SHIFTED_BASELINE),
+  )
+  const gridLines = linspace(DOPPLER_REGION_LEFT, DOPPLER_REGION_RIGHT, 9)
 
   return (
     <SandboxShell
@@ -731,54 +761,113 @@ function DopplerSandbox({ moduleId }: { readonly moduleId: string }) {
         </div>
       }
     >
-      <svg
-        viewBox="0 0 100 58"
-        className="h-72 w-full"
-        role="img"
-        aria-label="Doppler wave crests returning from static and moving reflectors."
+      <ChartLegend
+        items={[
+          { label: 'static rhythm (template f0)', color: '#1e3a8a' },
+          { label: 'shifted return (echo)', color: '#d97706' },
+        ]}
+      />
+      <figure
+        className="w-full overflow-hidden rounded-md border border-border bg-card"
+        style={{ height: 300 }}
       >
-        <text x="5" y="10" className="fill-muted-foreground text-[5px]">
-          probe
-        </text>
-        <rect
-          x="6"
-          y="18"
-          width="8"
-          height="22"
-          rx="1.5"
-          className="fill-primary"
-        />
-        {crests.map((t) => (
+        <svg
+          viewBox={`0 0 ${DOPPLER_VIEW_W} ${DOPPLER_VIEW_H}`}
+          className="h-full w-full"
+          role="img"
+          aria-label={`Static template rhythm and a Doppler-shifted echo whose frequency rises with a shift of ${formatFixed(shift, 2)}.`}
+        >
+          <g className="stroke-border" opacity="0.5">
+            {gridLines.map((x) => (
+              <line
+                key={`dg-${x.toFixed(2)}`}
+                x1={x}
+                y1="36"
+                x2={x}
+                y2="188"
+                strokeWidth="1"
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
+          </g>
           <line
-            key={`h0-${t}`}
-            x1={22 + t * 65}
-            y1="16"
-            x2={22 + t * 65}
-            y2="28"
-            className="stroke-h0"
+            x1={DOPPLER_REGION_LEFT}
+            y1={DOPPLER_STATIC_BASELINE}
+            x2={DOPPLER_REGION_RIGHT}
+            y2={DOPPLER_STATIC_BASELINE}
+            className="stroke-border"
             strokeWidth="1"
-            opacity="0.35"
+            strokeDasharray="2 4"
+            vectorEffect="non-scaling-stroke"
           />
-        ))}
-        {crests.map((t) => (
           <line
-            key={`h1-${t}`}
-            x1={22 + t * (65 - shift * 35)}
-            y1="34"
-            x2={22 + t * (65 - shift * 35)}
-            y2="48"
-            className="stroke-h1"
-            strokeWidth="1.2"
-            opacity="0.65"
+            x1={DOPPLER_REGION_LEFT}
+            y1={DOPPLER_SHIFTED_BASELINE}
+            x2={DOPPLER_REGION_RIGHT}
+            y2={DOPPLER_SHIFTED_BASELINE}
+            className="stroke-border"
+            strokeWidth="1"
+            strokeDasharray="2 4"
+            vectorEffect="non-scaling-stroke"
           />
-        ))}
-        <text x="22" y="14" className="fill-h0 text-[5px]">
-          static rhythm
-        </text>
-        <text x="22" y="55" className="fill-h1 text-[5px]">
-          shifted return
-        </text>
-      </svg>
+
+          <rect
+            x="36"
+            y="83"
+            width="20"
+            height="58"
+            rx="4"
+            className="fill-primary"
+          />
+          <text
+            x="46"
+            y="74"
+            textAnchor="middle"
+            className="fill-muted-foreground font-mono text-[10px]"
+          >
+            probe
+          </text>
+
+          <path
+            d={staticPath}
+            fill="none"
+            className="stroke-h0"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+          <path
+            d={shiftedPath}
+            fill="none"
+            className="stroke-h1"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+
+          <text
+            x={DOPPLER_REGION_LEFT}
+            y={DOPPLER_STATIC_BASELINE - DOPPLER_AMPLITUDE - 8}
+            className="fill-h0 font-mono text-[10px]"
+          >
+            static rhythm
+          </text>
+          <text
+            x={DOPPLER_REGION_LEFT}
+            y={DOPPLER_SHIFTED_BASELINE + DOPPLER_AMPLITUDE + 16}
+            className="fill-h1 font-mono text-[10px]"
+          >
+            shifted return
+          </text>
+        </svg>
+      </figure>
+      <p className="mt-3 text-center text-xs text-muted-foreground">
+        Motion compresses the returning wave into a higher frequency.
+        Correlation scores how much the echo still resembles the static
+        template.
+      </p>
     </SandboxShell>
   )
 }

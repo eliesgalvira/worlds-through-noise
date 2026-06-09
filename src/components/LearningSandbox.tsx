@@ -7,7 +7,9 @@ import { Button } from '@/components/ui/button.tsx'
 import { LessonChart } from '@/components/LessonChart.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
 import {
+  bayesGaussianThreshold,
   gaussianLogLikelihoodRatio,
+  npThresholdRightTail,
   rightTailDetectionProbability,
   rightTailFalseAlarm,
 } from '@/domain/math/detection.ts'
@@ -19,7 +21,11 @@ import {
 } from '@/domain/math/distributions.ts'
 import { formatFixed, formatPercent } from '@/lib/format.ts'
 import { cn } from '@/lib/utils.ts'
-import { scaleLinear } from '@/components/interactive/plot-utils.ts'
+import {
+  areaPathFromPoints,
+  pathFromPoints,
+  scaleLinear,
+} from '@/components/interactive/plot-utils.ts'
 import type { ChartSeries } from '@/components/LessonChart.tsx'
 
 type LearningSandboxProps = {
@@ -30,32 +36,6 @@ type LegendItem = {
   readonly label: string
   readonly color: string
   readonly kind?: 'line' | 'dot' | 'dash'
-}
-
-type DetectionControls = {
-  readonly observation: number
-  readonly noise: number
-  readonly samples: number
-  readonly separation: number
-  readonly threshold: number
-  readonly priorH1: number
-}
-
-type DetectionControlAction =
-  | { readonly type: 'observation'; readonly value: number }
-  | { readonly type: 'noise'; readonly value: number }
-  | { readonly type: 'samples'; readonly value: number }
-  | { readonly type: 'separation'; readonly value: number }
-  | { readonly type: 'threshold'; readonly value: number }
-  | { readonly type: 'priorH1'; readonly value: number }
-
-const initialDetectionControls: DetectionControls = {
-  observation: 58,
-  noise: 13,
-  samples: 5,
-  separation: 28,
-  threshold: 54,
-  priorH1: 0.35,
 }
 
 type EstimationControls = {
@@ -76,26 +56,6 @@ const initialEstimationControls: EstimationControls = {
   noise: 10,
   priorStrength: 0.35,
   drawRun: 0,
-}
-
-function detectionControlsReducer(
-  state: DetectionControls,
-  action: DetectionControlAction,
-): DetectionControls {
-  switch (action.type) {
-    case 'observation':
-      return { ...state, observation: action.value }
-    case 'noise':
-      return { ...state, noise: action.value }
-    case 'samples':
-      return { ...state, samples: action.value }
-    case 'separation':
-      return { ...state, separation: action.value }
-    case 'threshold':
-      return { ...state, threshold: action.value }
-    case 'priorH1':
-      return { ...state, priorH1: action.value }
-  }
 }
 
 function estimationControlsReducer(
@@ -226,42 +186,6 @@ const chartValueFromTime = (time: Time): number => {
 const formatChartAxisTime = (time: Time): string =>
   formatFixed(chartValueFromTime(time), 1)
 
-function densityChartSeries(
-  h0Mean: number,
-  h1Mean: number,
-  sd: number,
-): ReadonlyArray<ChartSeries> {
-  const h0Data = linspace(0, VIEW_WIDTH, 180).map((x) => ({
-    time: chartTime(x),
-    value: normalPdf(x, h0Mean, sd),
-  }))
-  const h1Data = linspace(0, VIEW_WIDTH, 180).map((x) => ({
-    time: chartTime(x),
-    value: normalPdf(x, h1Mean, sd),
-  }))
-
-  return [
-    {
-      type: 'area',
-      title: 'H0 density',
-      color: '#1e3a8a',
-      fill: 'rgba(30, 58, 138, 0.14)',
-      data: h0Data,
-      lineWidth: 3,
-      smooth: true,
-    },
-    {
-      type: 'area',
-      title: 'H1 density',
-      color: '#d97706',
-      fill: 'rgba(217, 119, 6, 0.17)',
-      data: h1Data,
-      lineWidth: 3,
-      smooth: true,
-    },
-  ]
-}
-
 function ChartLegend({ items }: { readonly items: ReadonlyArray<LegendItem> }) {
   return (
     <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
@@ -335,280 +259,1055 @@ function SandboxShell({
   )
 }
 
-function EvidenceDensities({
-  observation,
-  separation,
-  sd,
-  threshold,
+const DETECT_VIEW_W = 480
+const DETECT_VIEW_H = 226
+const DETECT_PAD_X = 22
+const DETECT_TOP = 26
+const DETECT_BASELINE = 184
+const DETECT_GRID_VALUES = [10, 30, 50, 70, 90]
+
+type DensityFn = (value: number) => number
+
+type DensityScale = {
+  readonly mapX: (value: number) => number
+  readonly yForPdf: (pdf: number) => number
+}
+
+function makeDensityScale(curves: ReadonlyArray<DensityFn>): DensityScale {
+  let peak = 1e-9
+  for (const value of linspace(0, 100, 180)) {
+    for (const curve of curves) {
+      peak = Math.max(peak, curve(value))
+    }
+  }
+  const plotHeight = DETECT_BASELINE - DETECT_TOP
+  return {
+    mapX: (value) =>
+      scaleLinear({
+        value,
+        domainMin: 0,
+        domainMax: 100,
+        rangeMin: DETECT_PAD_X,
+        rangeMax: DETECT_VIEW_W - DETECT_PAD_X,
+      }),
+    yForPdf: (pdf) => DETECT_BASELINE - (pdf / peak) * plotHeight * 0.92,
+  }
+}
+
+function curvePoints(
+  scale: DensityScale,
+  curve: DensityFn,
+): ReadonlyArray<{ readonly x: number; readonly y: number }> {
+  return linspace(0, 100, 220).map((value) => ({
+    x: scale.mapX(value),
+    y: scale.yForPdf(curve(value)),
+  }))
+}
+
+function regionPoints(
+  scale: DensityScale,
+  curve: DensityFn,
+  from: number,
+  to: number,
+): ReadonlyArray<{ readonly x: number; readonly y: number }> {
+  return linspace(from, to, 140).map((value) => ({
+    x: scale.mapX(value),
+    y: scale.yForPdf(curve(value)),
+  }))
+}
+
+function DetectionField({
+  ariaLabel,
+  axisLabel,
+  children,
 }: {
-  readonly observation?: number
-  readonly separation: number
-  readonly sd: number
-  readonly threshold?: number
+  readonly ariaLabel: string
+  readonly axisLabel: string
+  readonly children: ReactNode
 }) {
-  const h0Mean = 50 - separation / 2
-  const h1Mean = 50 + separation / 2
-  const reduceMotion = useReducedMotion()
-  const markerTransition: Transition =
-    reduceMotion === true
-      ? { duration: 0 }
-      : { type: 'spring', stiffness: 180, damping: 26 }
-  const series = useMemo(
-    () => densityChartSeries(h0Mean, h1Mean, sd),
-    [h0Mean, h1Mean, sd],
+  return (
+    <figure
+      className="w-full overflow-hidden rounded-md border border-border bg-card"
+      style={{ height: 300 }}
+    >
+      <svg
+        viewBox={`0 0 ${DETECT_VIEW_W} ${DETECT_VIEW_H}`}
+        className="h-full w-full"
+        role="img"
+        aria-label={ariaLabel}
+      >
+        <g className="stroke-border" opacity="0.55">
+          {DETECT_GRID_VALUES.map((value) => {
+            const x =
+              DETECT_PAD_X + (value / 100) * (DETECT_VIEW_W - 2 * DETECT_PAD_X)
+            return (
+              <line
+                key={`grid-${value}`}
+                x1={x}
+                y1={DETECT_TOP}
+                x2={x}
+                y2={DETECT_BASELINE}
+                strokeWidth="1"
+                vectorEffect="non-scaling-stroke"
+              />
+            )
+          })}
+        </g>
+        <line
+          x1={DETECT_PAD_X}
+          y1={DETECT_BASELINE}
+          x2={DETECT_VIEW_W - DETECT_PAD_X}
+          y2={DETECT_BASELINE}
+          className="stroke-muted-foreground"
+          strokeWidth="1.1"
+          opacity="0.8"
+          vectorEffect="non-scaling-stroke"
+        />
+        {children}
+        <text
+          x={DETECT_VIEW_W / 2}
+          y={DETECT_VIEW_H - 8}
+          textAnchor="middle"
+          className="fill-muted-foreground text-[10px]"
+        >
+          {axisLabel}
+        </text>
+      </svg>
+    </figure>
   )
+}
+
+function BaseFills({
+  scale,
+  pdfH0,
+  pdfH1,
+}: {
+  readonly scale: DensityScale
+  readonly pdfH0: DensityFn
+  readonly pdfH1: DensityFn
+}) {
+  return (
+    <>
+      <path
+        d={areaPathFromPoints(curvePoints(scale, pdfH0), DETECT_BASELINE)}
+        className="fill-h0"
+        opacity="0.08"
+      />
+      <path
+        d={areaPathFromPoints(curvePoints(scale, pdfH1), DETECT_BASELINE)}
+        className="fill-h1"
+        opacity="0.08"
+      />
+    </>
+  )
+}
+
+function BaseStrokes({
+  scale,
+  pdfH0,
+  pdfH1,
+}: {
+  readonly scale: DensityScale
+  readonly pdfH0: DensityFn
+  readonly pdfH1: DensityFn
+}) {
+  return (
+    <>
+      <path
+        d={pathFromPoints(curvePoints(scale, pdfH0))}
+        fill="none"
+        className="stroke-h0"
+        strokeWidth="2.2"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      />
+      <path
+        d={pathFromPoints(curvePoints(scale, pdfH1))}
+        fill="none"
+        className="stroke-h1"
+        strokeWidth="2.2"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      />
+    </>
+  )
+}
+
+function PeakLabels({
+  scale,
+  h0Mean,
+  h1Mean,
+  pdfH0,
+  pdfH1,
+}: {
+  readonly scale: DensityScale
+  readonly h0Mean: number
+  readonly h1Mean: number
+  readonly pdfH0: DensityFn
+  readonly pdfH1: DensityFn
+}) {
+  return (
+    <>
+      <text
+        x={scale.mapX(h0Mean)}
+        y={scale.yForPdf(pdfH0(h0Mean)) - 7}
+        textAnchor="middle"
+        className="fill-h0 font-mono text-[12px] font-medium"
+      >
+        H0
+      </text>
+      <text
+        x={scale.mapX(h1Mean)}
+        y={scale.yForPdf(pdfH1(h1Mean)) - 7}
+        textAnchor="middle"
+        className="fill-h1 font-mono text-[12px] font-medium"
+      >
+        H1
+      </text>
+    </>
+  )
+}
+
+function ObservationSandbox({ moduleId }: { readonly moduleId: string }) {
+  const h0Mean = 38
+  const h1Mean = 62
+  const sd = 12
+  const [observation, setObservation] = useState(50)
+  const [hiddenWorld, setHiddenWorld] = useState<'H0' | 'H1' | null>(null)
+  const [revealed, setRevealed] = useState(false)
+  const [drawId, setDrawId] = useState(0)
+  const pdfH0: DensityFn = (value) => normalPdf(value, h0Mean, sd)
+  const pdfH1: DensityFn = (value) => normalPdf(value, h1Mean, sd)
+  const scale = makeDensityScale([pdfH0, pdfH1])
+  const likelihood0 = pdfH0(observation)
+  const likelihood1 = pdfH1(observation)
+  const ratio = likelihood1 / Math.max(1e-9, likelihood0)
+  const ambiguous = ratio > 0.5 && ratio < 2
+  const leaning = likelihood1 >= likelihood0 ? 'H1' : 'H0'
+  const obsX = scale.mapX(observation)
+  const y0 = scale.yForPdf(likelihood0)
+  const y1 = scale.yForPdf(likelihood1)
+
+  const drawTrace = () => {
+    const next = drawId + 1
+    const r1 = Math.abs(Math.sin(next * 12.9898 + 1.3)) % 1
+    const r2 = Math.abs(Math.sin(next * 4.1414 + 0.7)) % 1
+    const world = r1 < 0.5 ? 'H0' : 'H1'
+    const mean = world === 'H0' ? h0Mean : h1Mean
+    const gauss =
+      Math.sqrt(-2 * Math.log(Math.max(1e-6, r2))) * Math.cos(2 * Math.PI * r1)
+    setDrawId(next)
+    setHiddenWorld(world)
+    setRevealed(false)
+    setObservation(Math.round(Math.min(88, Math.max(12, mean + sd * gauss))))
+  }
 
   return (
-    <div className="relative">
+    <SandboxShell
+      moduleId={moduleId}
+      title="One trace, two hidden worlds"
+      instruction="Draw a noisy trace from a hidden world, or move it by hand. Read how ordinary that exact value is under each world. In the overlap, one trace cannot settle the question."
+      controls={
+        <>
+          <div className="flex flex-wrap gap-3">
+            <Button type="button" onClick={drawTrace}>
+              Draw a noisy trace
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={hiddenWorld === null}
+              onClick={() => {
+                setRevealed(true)
+              }}
+            >
+              Reveal hidden world
+            </Button>
+          </div>
+          <SliderControl
+            label="Trace position"
+            variable="x"
+            value={observation}
+            min={12}
+            max={88}
+            step={1}
+            meaning="The single corrupted value the detector is allowed to see."
+            onValueChange={(value) => {
+              setObservation(value)
+              setHiddenWorld(null)
+              setRevealed(false)
+            }}
+            format={(value) => `x = ${value.toFixed(0)}`}
+          />
+        </>
+      }
+      readout={
+        <div className="space-y-2 text-base leading-7 text-foreground">
+          <p>
+            Likelihood under H0:{' '}
+            <span className="font-mono text-h0">
+              {formatFixed(likelihood0, 4)}
+            </span>{' '}
+            &nbsp;|&nbsp; under H1:{' '}
+            <span className="font-mono text-h1">
+              {formatFixed(likelihood1, 4)}
+            </span>
+          </p>
+          <p>
+            {ambiguous
+              ? 'Both worlds explain this trace almost equally. The trace alone is not enough.'
+              : `This trace leans ${leaning}, but the other world has not become impossible.`}
+          </p>
+          {hiddenWorld !== null ? (
+            <p className="text-sm text-muted-foreground">
+              {revealed
+                ? `This trace was really generated by ${hiddenWorld}.`
+                : 'The world that generated this trace is hidden. Guess, then reveal it.'}
+            </p>
+          ) : null}
+        </div>
+      }
+    >
       <ChartLegend
         items={[
           { label: 'world H0 density', color: '#1e3a8a' },
           { label: 'world H1 density', color: '#d97706' },
-          ...(threshold !== undefined
-            ? [
-                {
-                  label: 'decision threshold',
-                  color: '#d97706',
-                  kind: 'dash' as const,
-                },
-              ]
-            : []),
-          ...(observation !== undefined
-            ? [
-                {
-                  label: 'observed statistic',
-                  color: '#151515',
-                  kind: 'dash' as const,
-                },
-              ]
-            : []),
+          { label: 'observed trace x', color: '#151515', kind: 'dot' },
         ]}
       />
-      <div className="relative">
-        <LessonChart
-          series={series}
-          ariaLabel="Two Gaussian density curves for H0 and H1."
-          height={300}
-          yPrecision={3}
-          timeFormatter={formatChartAxisTime}
+      <DetectionField
+        ariaLabel={`Two world densities with an observed trace at ${observation}.`}
+        axisLabel="observed value x"
+      >
+        <BaseFills scale={scale} pdfH0={pdfH0} pdfH1={pdfH1} />
+        <BaseStrokes scale={scale} pdfH0={pdfH0} pdfH1={pdfH1} />
+        <line
+          x1={obsX}
+          y1={DETECT_TOP - 6}
+          x2={obsX}
+          y2={DETECT_BASELINE}
+          className="stroke-truth"
+          strokeWidth="1.4"
+          strokeDasharray="4 3"
+          vectorEffect="non-scaling-stroke"
         />
-        {threshold !== undefined ? (
-          <m.div
-            className="pointer-events-none absolute bottom-8 top-4 z-20 border-l-2 border-dashed border-threshold"
-            style={{
-              left: `${plotXPercent(threshold)}%`,
-              borderColor: '#d97706',
-            }}
-            transition={markerTransition}
-          />
+        <circle
+          cx={obsX}
+          cy={y0}
+          r="4"
+          className="fill-h0 stroke-card"
+          strokeWidth="1.5"
+        />
+        <circle
+          cx={obsX}
+          cy={y1}
+          r="4"
+          className="fill-h1 stroke-card"
+          strokeWidth="1.5"
+        />
+        <circle
+          cx={obsX}
+          cy={DETECT_BASELINE}
+          r="4.5"
+          className="fill-truth stroke-card"
+          strokeWidth="2"
+        />
+        <text
+          x={obsX}
+          y={DETECT_BASELINE + 15}
+          textAnchor="middle"
+          className="fill-truth font-mono text-[10px]"
+        >
+          trace
+        </text>
+        <PeakLabels
+          scale={scale}
+          h0Mean={h0Mean}
+          h1Mean={h1Mean}
+          pdfH0={pdfH0}
+          pdfH1={pdfH1}
+        />
+        {revealed && hiddenWorld !== null ? (
+          <text
+            x={DETECT_VIEW_W / 2}
+            y={DETECT_TOP - 4}
+            textAnchor="middle"
+            className={
+              hiddenWorld === 'H0'
+                ? 'fill-h0 font-mono text-[11px] font-medium'
+                : 'fill-h1 font-mono text-[11px] font-medium'
+            }
+          >
+            hidden world was {hiddenWorld}
+          </text>
         ) : null}
-        {observation !== undefined ? (
-          <>
-            <m.div
-              className="pointer-events-none absolute bottom-8 top-4 z-20 border-l-2 border-dashed"
-              style={{
-                left: `${plotXPercent(observation)}%`,
-                borderColor: '#151515',
-              }}
-              transition={markerTransition}
-            />
-            <m.div
-              className="pointer-events-none absolute top-3 z-30 -translate-x-1/2 rounded-sm border border-border bg-card/95 px-2 py-1 font-mono text-xs font-medium text-foreground shadow-sm"
-              style={{
-                left: `${plotXPercent(observation)}%`,
-              }}
-              transition={markerTransition}
-            >
-              x={Math.round(observation)}
-            </m.div>
-          </>
-        ) : null}
-      </div>
-    </div>
+      </DetectionField>
+      <p className="mt-3 text-center text-xs text-muted-foreground">
+        The two dots are how tall each world&apos;s density is at the trace:
+        evidence is a comparison of those heights, not a single curve.
+      </p>
+    </SandboxShell>
   )
 }
 
-function DetectionSandbox({ moduleId }: { readonly moduleId: string }) {
-  const [controls, dispatchControls] = useReducer(
-    detectionControlsReducer,
-    initialDetectionControls,
-  )
-  const { observation, noise, samples, separation, threshold, priorH1 } =
-    controls
-  const effectiveSd = noise / Math.sqrt(samples)
+function OverlapSandbox({ moduleId }: { readonly moduleId: string }) {
+  const [separation, setSeparation] = useState(26)
+  const [noise, setNoise] = useState(12)
+  const [samples, setSamples] = useState(4)
+  const sd = Math.max(3, noise / Math.sqrt(samples))
   const h0Mean = 50 - separation / 2
   const h1Mean = 50 + separation / 2
+  const pdfH0: DensityFn = (value) => normalPdf(value, h0Mean, sd)
+  const pdfH1: DensityFn = (value) => normalPdf(value, h1Mean, sd)
+  const overlapFn: DensityFn = (value) => Math.min(pdfH0(value), pdfH1(value))
+  const scale = makeDensityScale([pdfH0, pdfH1])
+  const overlap = 2 * normalCdf((h0Mean + h1Mean) / 2, h1Mean, sd)
+  const crossoverX = scale.mapX(50)
+
+  return (
+    <SandboxShell
+      moduleId={moduleId}
+      title="Overlap is where mistakes live"
+      instruction="Pull the worlds apart, calm the noise, or average more samples. Watch the shaded overlap, the only region where a trace is genuinely confusable, grow and shrink."
+      controls={
+        <>
+          <SliderControl
+            label="World separation"
+            variable="d"
+            value={separation}
+            min={8}
+            max={46}
+            step={1}
+            meaning="More separation means each hidden world leaves a more distinct trace."
+            onValueChange={setSeparation}
+            format={(value) => `d = ${value.toFixed(0)}`}
+          />
+          <SliderControl
+            label="Noise"
+            variable="sigma"
+            value={noise}
+            min={5}
+            max={25}
+            step={1}
+            meaning="More noise spreads each world across more observations."
+            onValueChange={setNoise}
+            format={(value) => `sigma = ${value.toFixed(0)}`}
+          />
+          <SliderControl
+            label="Independent samples"
+            variable="N"
+            value={samples}
+            min={1}
+            max={30}
+            step={1}
+            meaning="Averaging more samples sharpens each world's distribution."
+            onValueChange={setSamples}
+            format={(value) => `N = ${value.toFixed(0)}`}
+          />
+        </>
+      }
+      readout={
+        <p className="text-base leading-7 text-foreground">
+          Confusable overlap:{' '}
+          <span className="font-mono text-false-alarm">
+            {formatPercent(Math.min(1, overlap))}
+          </span>
+          . Every false alarm and every miss is born inside this shaded region.
+        </p>
+      }
+    >
+      <ChartLegend
+        items={[
+          { label: 'world H0 density', color: '#1e3a8a' },
+          { label: 'world H1 density', color: '#d97706' },
+          { label: 'confusable overlap', color: '#b91c1c' },
+        ]}
+      />
+      <DetectionField
+        ariaLabel={`Two world densities with their overlap shaded; separation ${separation}, effective noise ${formatFixed(sd, 1)}.`}
+        axisLabel="observed value x"
+      >
+        <BaseFills scale={scale} pdfH0={pdfH0} pdfH1={pdfH1} />
+        <path
+          d={areaPathFromPoints(curvePoints(scale, overlapFn), DETECT_BASELINE)}
+          className="fill-false-alarm"
+          opacity="0.24"
+        />
+        <BaseStrokes scale={scale} pdfH0={pdfH0} pdfH1={pdfH1} />
+        <line
+          x1={crossoverX}
+          y1={DETECT_TOP}
+          x2={crossoverX}
+          y2={DETECT_BASELINE}
+          className="stroke-false-alarm"
+          strokeWidth="1.2"
+          strokeDasharray="3 3"
+          opacity="0.7"
+          vectorEffect="non-scaling-stroke"
+        />
+        <PeakLabels
+          scale={scale}
+          h0Mean={h0Mean}
+          h1Mean={h1Mean}
+          pdfH0={pdfH0}
+          pdfH1={pdfH1}
+        />
+      </DetectionField>
+      <p className="mt-3 text-center text-xs text-muted-foreground">
+        Separation moves the worlds apart; noise widens them; sample count
+        sharpens them. Only the overlap produces mistakes.
+      </p>
+    </SandboxShell>
+  )
+}
+
+function EvidenceSandbox({ moduleId }: { readonly moduleId: string }) {
+  const h0Mean = 40
+  const h1Mean = 64
+  const sd = 12
+  const [observation, setObservation] = useState(56)
+  const pdfH0: DensityFn = (value) => normalPdf(value, h0Mean, sd)
+  const pdfH1: DensityFn = (value) => normalPdf(value, h1Mean, sd)
+  const scale = makeDensityScale([pdfH0, pdfH1])
+  const likelihood0 = pdfH0(observation)
+  const likelihood1 = pdfH1(observation)
+  const ratio = likelihood1 / Math.max(1e-9, likelihood0)
   const logEvidence = gaussianLogLikelihoodRatio(
     observation,
     h0Mean,
     h1Mean,
-    effectiveSd,
+    sd,
   )
-  const pFalseAlarm = rightTailFalseAlarm(threshold, h0Mean, effectiveSd)
-  const pDetection = rightTailDetectionProbability(
-    threshold,
-    h1Mean,
-    effectiveSd,
-  )
-  const overlap = 2 * normalCdf((h0Mean + h1Mean) / 2, h1Mean, effectiveSd)
-  const likelyWorld = logEvidence >= 0 ? 'H1' : 'H0'
+  const obsX = scale.mapX(observation)
+  const y0 = scale.yForPdf(likelihood0)
+  const y1 = scale.yForPdf(likelihood1)
 
-  if (moduleId === 'D0') {
-    return (
-      <SandboxShell
-        moduleId={moduleId}
-        title="Choose before you calculate"
-        instruction="Move the trace. The point is not to find certainty; it is to feel that the same trace can be ordinary under both worlds."
-        controls={
-          <SliderControl
-            label="Noisy observation"
-            variable="x"
-            value={observation}
-            min={20}
-            max={80}
-            step={1}
-            meaning="The only thing the detector gets to see."
-            onValueChange={(value) => {
-              dispatchControls({ type: 'observation', value })
-            }}
-            format={(value) => `x = ${value.toFixed(0)}`}
-          />
-        }
-        readout={
-          <p className="text-base leading-7 text-foreground">
-            This trace currently leans toward{' '}
-            <span className="font-semibold text-accent">{likelyWorld}</span>,
-            but the other world has not become impossible. Noise is the reason a
-            decision rule needs error probabilities.
+  return (
+    <SandboxShell
+      moduleId={moduleId}
+      title="Evidence is the ratio of two heights"
+      instruction="Move the trace. The two bars are how tall each world's density is at that exact value. Their ratio, not either height alone, is the evidence."
+      controls={
+        <SliderControl
+          label="Observation"
+          variable="x"
+          value={observation}
+          min={16}
+          max={88}
+          step={1}
+          meaning="The single statistic the detector compares across worlds."
+          onValueChange={setObservation}
+          format={(value) => `x = ${value.toFixed(0)}`}
+        />
+      }
+      readout={
+        <div className="grid gap-4 text-sm leading-6 sm:grid-cols-3">
+          <p>
+            <span className="block font-medium text-h1">Likelihood ratio</span>
+            <span className="font-mono">{formatFixed(ratio, 2)}</span>
           </p>
-        }
-      >
-        <EvidenceDensities observation={observation} separation={28} sd={12} />
-      </SandboxShell>
-    )
-  }
-
-  if (moduleId === 'D1') {
-    return (
-      <SandboxShell
-        moduleId={moduleId}
-        title="Overlap is where mistakes live"
-        instruction="Change noise and sample count. Watch the same two worlds become hard or easy without changing their names."
-        controls={
-          <>
-            <SliderControl
-              label="World separation"
-              variable="d"
-              value={separation}
-              min={10}
-              max={46}
-              step={1}
-              meaning="More separation means each hidden world leaves a more distinct trace."
-              onValueChange={(value) => {
-                dispatchControls({ type: 'separation', value })
-              }}
-              format={(value) => `d = ${value.toFixed(0)}`}
-            />
-            <SliderControl
-              label="Noise"
-              variable="sigma"
-              value={noise}
-              min={5}
-              max={25}
-              step={1}
-              meaning="More noise spreads each world across more observations."
-              onValueChange={(value) => {
-                dispatchControls({ type: 'noise', value })
-              }}
-              format={(value) => `sigma = ${value.toFixed(0)}`}
-            />
-            <SliderControl
-              label="Independent samples"
-              variable="N"
-              value={samples}
-              min={1}
-              max={30}
-              step={1}
-              meaning="More samples sharpen the average evidence."
-              onValueChange={(value) => {
-                dispatchControls({ type: 'samples', value })
-              }}
-              format={(value) => `N = ${value.toFixed(0)}`}
-            />
-          </>
-        }
-        readout={
-          <p className="text-base leading-7 text-foreground">
-            Approximate overlap:{' '}
-            <span className="font-mono text-accent">
-              {formatPercent(Math.min(1, overlap))}
+          <p>
+            <span className="block font-medium text-accent">Log evidence</span>
+            <span className="font-mono">{formatFixed(logEvidence, 2)}</span>
+          </p>
+          <p>
+            <span className="block font-medium text-muted-foreground">
+              Leans toward
             </span>
-            . Higher overlap means more traces can be explained by either world.
+            <span className="font-mono">{ratio >= 1 ? 'H1' : 'H0'}</span>
           </p>
-        }
+        </div>
+      }
+    >
+      <ChartLegend
+        items={[
+          { label: 'world H0 density', color: '#1e3a8a' },
+          { label: 'world H1 density', color: '#d97706' },
+          { label: 'observed trace x', color: '#151515', kind: 'dot' },
+        ]}
+      />
+      <DetectionField
+        ariaLabel={`Likelihood heights at x equals ${observation}: ratio ${formatFixed(ratio, 2)}.`}
+        axisLabel="observed value x"
       >
-        <EvidenceDensities separation={separation} sd={effectiveSd} />
-      </SandboxShell>
-    )
+        <BaseFills scale={scale} pdfH0={pdfH0} pdfH1={pdfH1} />
+        <BaseStrokes scale={scale} pdfH0={pdfH0} pdfH1={pdfH1} />
+        <line
+          x1={obsX}
+          y1={DETECT_TOP - 6}
+          x2={obsX}
+          y2={DETECT_BASELINE}
+          className="stroke-truth"
+          strokeWidth="1.2"
+          strokeDasharray="4 3"
+          vectorEffect="non-scaling-stroke"
+        />
+        <rect
+          x={obsX - 6.5}
+          y={y0}
+          width="5"
+          height={DETECT_BASELINE - y0}
+          className="fill-h0"
+          opacity="0.65"
+        />
+        <rect
+          x={obsX + 1.5}
+          y={y1}
+          width="5"
+          height={DETECT_BASELINE - y1}
+          className="fill-h1"
+          opacity="0.65"
+        />
+        <circle cx={obsX} cy={y0} r="3.4" className="fill-h0" />
+        <circle cx={obsX} cy={y1} r="3.4" className="fill-h1" />
+        <circle
+          cx={obsX}
+          cy={DETECT_BASELINE}
+          r="4"
+          className="fill-truth stroke-card"
+          strokeWidth="2"
+        />
+        <PeakLabels
+          scale={scale}
+          h0Mean={h0Mean}
+          h1Mean={h1Mean}
+          pdfH0={pdfH0}
+          pdfH1={pdfH1}
+        />
+      </DetectionField>
+      <p className="mt-3 text-center text-xs text-muted-foreground">
+        Taller amber bar means H1 expected this trace more; taller blue bar
+        means H0 did. The likelihood ratio is amber height over blue height.
+      </p>
+    </SandboxShell>
+  )
+}
+
+function ThresholdTradeoffSandbox({ moduleId }: { readonly moduleId: string }) {
+  const h0Mean = 40
+  const [separation, setSeparation] = useState(24)
+  const [threshold, setThreshold] = useState(52)
+  const h1Mean = h0Mean + separation
+  const sd = 12
+  const pdfH0: DensityFn = (value) => normalPdf(value, h0Mean, sd)
+  const pdfH1: DensityFn = (value) => normalPdf(value, h1Mean, sd)
+  const scale = makeDensityScale([pdfH0, pdfH1])
+  const pFalseAlarm = rightTailFalseAlarm(threshold, h0Mean, sd)
+  const pMiss = normalCdf(threshold, h1Mean, sd)
+  const gammaX = scale.mapX(threshold)
+  const hatchId = `miss-hatch-${moduleId}`
+
+  return (
+    <SandboxShell
+      moduleId={moduleId}
+      title="The threshold trades one mistake for the other"
+      instruction="Slide the decision line. Right of it the detector says H1. Watch the red false-alarm area and the hatched miss area trade off: there is no free direction."
+      controls={
+        <>
+          <SliderControl
+            label="Decision line"
+            variable="gamma"
+            value={threshold}
+            min={26}
+            max={78}
+            step={1}
+            meaning="Decide H1 when the statistic lands to the right of this line."
+            onValueChange={setThreshold}
+            format={(value) => `gamma = ${value.toFixed(0)}`}
+          />
+          <SliderControl
+            label="Signal separation"
+            variable="d"
+            value={separation}
+            min={12}
+            max={36}
+            step={1}
+            meaning="Greater separation shrinks both mistakes at once."
+            onValueChange={setSeparation}
+            format={(value) => `d = ${value.toFixed(0)}`}
+          />
+        </>
+      }
+      readout={
+        <div className="grid gap-4 text-sm leading-6 text-muted-foreground sm:grid-cols-2">
+          <p>
+            <span className="block font-medium text-false-alarm">
+              False alarm
+            </span>
+            H0 lands right of the line:{' '}
+            <span className="font-mono">{formatPercent(pFalseAlarm)}</span>
+          </p>
+          <p>
+            <span className="block font-medium text-h1">Miss</span>
+            H1 lands left of the line:{' '}
+            <span className="font-mono">{formatPercent(pMiss)}</span>
+          </p>
+        </div>
+      }
+    >
+      <ChartLegend
+        items={[
+          { label: 'world H0 density', color: '#1e3a8a' },
+          { label: 'world H1 density', color: '#d97706' },
+          { label: 'false alarm', color: '#b91c1c' },
+          { label: 'miss', color: '#d97706', kind: 'dash' },
+          { label: 'decision line', color: '#d97706', kind: 'dash' },
+        ]}
+      />
+      <DetectionField
+        ariaLabel={`Decision line at ${threshold}: false alarm ${formatPercent(pFalseAlarm)}, miss ${formatPercent(pMiss)}.`}
+        axisLabel="decision statistic"
+      >
+        <defs>
+          <pattern
+            id={hatchId}
+            patternUnits="userSpaceOnUse"
+            width="6"
+            height="6"
+            patternTransform="rotate(45)"
+          >
+            <line
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="6"
+              className="stroke-h1"
+              strokeWidth="1.4"
+            />
+          </pattern>
+        </defs>
+        <BaseFills scale={scale} pdfH0={pdfH0} pdfH1={pdfH1} />
+        <path
+          d={areaPathFromPoints(
+            regionPoints(scale, pdfH1, 0, threshold),
+            DETECT_BASELINE,
+          )}
+          fill={`url(#${hatchId})`}
+          opacity="0.7"
+        />
+        <path
+          d={areaPathFromPoints(
+            regionPoints(scale, pdfH0, threshold, 100),
+            DETECT_BASELINE,
+          )}
+          className="fill-false-alarm"
+          opacity="0.32"
+        />
+        <BaseStrokes scale={scale} pdfH0={pdfH0} pdfH1={pdfH1} />
+        <line
+          x1={gammaX}
+          y1={DETECT_TOP - 8}
+          x2={gammaX}
+          y2={DETECT_BASELINE}
+          className="stroke-threshold"
+          strokeWidth="1.6"
+          strokeDasharray="5 4"
+          vectorEffect="non-scaling-stroke"
+        />
+        <text
+          x={gammaX}
+          y={DETECT_TOP - 11}
+          textAnchor="middle"
+          className="fill-threshold font-mono text-[11px] italic"
+        >
+          {'\u03b3'}
+        </text>
+        <PeakLabels
+          scale={scale}
+          h0Mean={h0Mean}
+          h1Mean={h1Mean}
+          pdfH0={pdfH0}
+          pdfH1={pdfH1}
+        />
+      </DetectionField>
+      <p className="mt-3 text-center text-xs text-muted-foreground">
+        Move the line right to protect H0 from false alarms, and more real H1
+        cases slip into the hatched miss region instead.
+      </p>
+    </SandboxShell>
+  )
+}
+
+function NeymanPearsonSandbox({ moduleId }: { readonly moduleId: string }) {
+  const h0Mean = 40
+  const [alpha, setAlpha] = useState(0.1)
+  const [separation, setSeparation] = useState(24)
+  const h1Mean = h0Mean + separation
+  const sd = 12
+  const pdfH0: DensityFn = (value) => normalPdf(value, h0Mean, sd)
+  const pdfH1: DensityFn = (value) => normalPdf(value, h1Mean, sd)
+  const scale = makeDensityScale([pdfH0, pdfH1])
+  const gamma = npThresholdRightTail(alpha, h0Mean, sd, normalInvCdf)
+  const gammaDraw = Math.min(98, Math.max(2, gamma))
+  const pDetection = rightTailDetectionProbability(gamma, h1Mean, sd)
+  const gammaX = scale.mapX(gammaDraw)
+
+  return (
+    <SandboxShell
+      moduleId={moduleId}
+      title="Neyman-Pearson spends a fixed false-alarm budget"
+      instruction="You do not move the line directly. You promise a false-alarm budget alpha under H0; the line is placed to spend exactly that budget, and detection is whatever is left."
+      controls={
+        <>
+          <SliderControl
+            label="False-alarm budget"
+            variable="alpha"
+            value={alpha}
+            min={0.01}
+            max={0.3}
+            step={0.01}
+            meaning="The audited promise: under H0 the detector may call H1 only this often."
+            onValueChange={setAlpha}
+            format={(value) => formatPercent(value, 0)}
+          />
+          <SliderControl
+            label="Signal separation"
+            variable="d"
+            value={separation}
+            min={12}
+            max={36}
+            step={1}
+            meaning="Stronger signals buy more detection for the same budget."
+            onValueChange={setSeparation}
+            format={(value) => `d = ${value.toFixed(0)}`}
+          />
+        </>
+      }
+      readout={
+        <div className="grid gap-4 text-sm leading-6 text-muted-foreground sm:grid-cols-2">
+          <p>
+            <span className="block font-medium text-threshold">
+              Derived line
+            </span>
+            gamma = <span className="font-mono">{formatFixed(gamma, 1)}</span>
+          </p>
+          <p>
+            <span className="block font-medium text-detection">Detection</span>
+            <span className="font-mono">{formatPercent(pDetection)}</span>
+          </p>
+        </div>
+      }
+    >
+      <ChartLegend
+        items={[
+          { label: 'world H0 density', color: '#1e3a8a' },
+          { label: 'world H1 density', color: '#d97706' },
+          { label: 'alpha budget', color: '#b91c1c' },
+          { label: 'detection', color: '#047857' },
+          { label: 'derived line', color: '#d97706', kind: 'dash' },
+        ]}
+      />
+      <DetectionField
+        ariaLabel={`Neyman-Pearson with budget ${formatPercent(alpha, 0)}: derived line ${formatFixed(gamma, 1)}, detection ${formatPercent(pDetection)}.`}
+        axisLabel="decision statistic"
+      >
+        <BaseFills scale={scale} pdfH0={pdfH0} pdfH1={pdfH1} />
+        <path
+          d={areaPathFromPoints(
+            regionPoints(scale, pdfH1, gammaDraw, 100),
+            DETECT_BASELINE,
+          )}
+          className="fill-detection"
+          opacity="0.26"
+        />
+        <path
+          d={areaPathFromPoints(
+            regionPoints(scale, pdfH0, gammaDraw, 100),
+            DETECT_BASELINE,
+          )}
+          className="fill-false-alarm"
+          opacity="0.34"
+        />
+        <BaseStrokes scale={scale} pdfH0={pdfH0} pdfH1={pdfH1} />
+        <line
+          x1={gammaX}
+          y1={DETECT_TOP - 8}
+          x2={gammaX}
+          y2={DETECT_BASELINE}
+          className="stroke-threshold"
+          strokeWidth="1.6"
+          strokeDasharray="5 4"
+          vectorEffect="non-scaling-stroke"
+        />
+        <text
+          x={gammaX}
+          y={DETECT_TOP - 11}
+          textAnchor="middle"
+          className="fill-threshold font-mono text-[11px] italic"
+        >
+          {'\u03b3'}({'\u03b1'})
+        </text>
+        <PeakLabels
+          scale={scale}
+          h0Mean={h0Mean}
+          h1Mean={h1Mean}
+          pdfH0={pdfH0}
+          pdfH1={pdfH1}
+        />
+      </DetectionField>
+      <p className="mt-3 text-center text-xs text-muted-foreground">
+        The red area is locked to alpha. Tighten alpha and the line slides
+        right, so the green detection area shrinks with it.
+      </p>
+    </SandboxShell>
+  )
+}
+
+function MapBayesSandbox({ moduleId }: { readonly moduleId: string }) {
+  const h0Mean = 40
+  const h1Mean = 64
+  const sd = 12
+  const [priorH1, setPriorH1] = useState(0.5)
+  const [costRatio, setCostRatio] = useState(1)
+  const priorH0 = 1 - priorH1
+  const weightedH0: DensityFn = (value) =>
+    priorH0 * normalPdf(value, h0Mean, sd)
+  const weightedH1: DensityFn = (value) =>
+    priorH1 * normalPdf(value, h1Mean, sd)
+  const scale = makeDensityScale([weightedH0, weightedH1])
+  const boundary = bayesGaussianThreshold({
+    h0Mean,
+    h1Mean,
+    sd,
+    priorH1,
+    missCost: costRatio,
+    falseAlarmCost: 1,
+  })
+  const boundaryDraw = Math.min(96, Math.max(6, boundary))
+  const boundaryX = scale.mapX(boundaryDraw)
+
+  return (
+    <SandboxShell
+      moduleId={moduleId}
+      title="The prior and costs move the boundary"
+      instruction="Scale each world by how likely it was and how costly its mistake is. The optimal boundary sits where the two prior-weighted curves cross, and it slides as you change either knob."
+      controls={
+        <>
+          <SliderControl
+            label="Prior chance of H1"
+            variable="P(H1)"
+            value={priorH1}
+            min={0.05}
+            max={0.95}
+            step={0.01}
+            meaning="A rarer H1 shrinks its weighted curve and pushes the boundary right."
+            onValueChange={setPriorH1}
+            format={(value) => formatPercent(value, 0)}
+          />
+          <SliderControl
+            label="Miss vs false-alarm cost"
+            variable="c"
+            value={costRatio}
+            min={0.2}
+            max={5}
+            step={0.1}
+            meaning="When missing H1 is costlier, the boundary moves left to catch it more."
+            onValueChange={setCostRatio}
+            format={(value) => `${formatFixed(value, 1)}x`}
+          />
+        </>
+      }
+      readout={
+        <p className="text-base leading-7 text-foreground">
+          MAP boundary:{' '}
+          <span className="font-mono text-prior">
+            {formatFixed(boundary, 1)}
+          </span>
+          . With equal priors and costs it sits at the midpoint; rarity or cheap
+          misses move it from there.
+        </p>
+      }
+    >
+      <ChartLegend
+        items={[
+          { label: 'P(H0) x H0 density', color: '#1e3a8a' },
+          { label: 'P(H1) x H1 density', color: '#d97706' },
+          { label: 'MAP boundary', color: '#6d28d9', kind: 'dash' },
+        ]}
+      />
+      <DetectionField
+        ariaLabel={`Prior-weighted densities with the MAP boundary at ${formatFixed(boundary, 1)}.`}
+        axisLabel="observed value x"
+      >
+        <rect
+          x={DETECT_PAD_X}
+          y={DETECT_TOP}
+          width={Math.max(0, boundaryX - DETECT_PAD_X)}
+          height={DETECT_BASELINE - DETECT_TOP}
+          className="fill-h0"
+          opacity="0.05"
+        />
+        <rect
+          x={boundaryX}
+          y={DETECT_TOP}
+          width={Math.max(0, DETECT_VIEW_W - DETECT_PAD_X - boundaryX)}
+          height={DETECT_BASELINE - DETECT_TOP}
+          className="fill-h1"
+          opacity="0.05"
+        />
+        <BaseFills scale={scale} pdfH0={weightedH0} pdfH1={weightedH1} />
+        <BaseStrokes scale={scale} pdfH0={weightedH0} pdfH1={weightedH1} />
+        <line
+          x1={boundaryX}
+          y1={DETECT_TOP - 8}
+          x2={boundaryX}
+          y2={DETECT_BASELINE}
+          className="stroke-prior"
+          strokeWidth="1.8"
+          strokeDasharray="5 4"
+          vectorEffect="non-scaling-stroke"
+        />
+        <text
+          x={boundaryX}
+          y={DETECT_TOP - 11}
+          textAnchor="middle"
+          className="fill-prior font-mono text-[10px]"
+        >
+          MAP
+        </text>
+        <text
+          x={DETECT_PAD_X + 4}
+          y={DETECT_BASELINE - 6}
+          className="fill-h0 font-mono text-[9px]"
+        >
+          decide H0
+        </text>
+        <text
+          x={DETECT_VIEW_W - DETECT_PAD_X - 4}
+          y={DETECT_BASELINE - 6}
+          textAnchor="end"
+          className="fill-h1 font-mono text-[9px]"
+        >
+          decide H1
+        </text>
+      </DetectionField>
+      <p className="mt-3 text-center text-xs text-muted-foreground">
+        Lower the prior on H1 and its curve sinks, dragging the crossover right:
+        a rare world must clear a higher bar of evidence.
+      </p>
+    </SandboxShell>
+  )
+}
+
+function DetectionSandbox({ moduleId }: { readonly moduleId: string }) {
+  if (moduleId === 'D1') {
+    return <OverlapSandbox moduleId={moduleId} />
   }
 
   if (moduleId === 'D2') {
-    return (
-      <SandboxShell
-        moduleId={moduleId}
-        title="Evidence is a comparison, not a height"
-        instruction="Move x. Do not ask whether one curve is high; ask which curve expected this exact trace more."
-        controls={
-          <SliderControl
-            label="Observation"
-            variable="x"
-            value={observation}
-            min={18}
-            max={82}
-            step={1}
-            meaning="The dark annotated rule is the observed statistic."
-            onValueChange={(value) => {
-              dispatchControls({ type: 'observation', value })
-            }}
-            format={(value) => `x = ${value.toFixed(0)}`}
-          />
-        }
-        readout={
-          <div className="space-y-3">
-            <p className="text-base leading-7 text-foreground">
-              Log evidence:{' '}
-              <span className="font-mono text-accent">
-                {formatFixed(logEvidence, 2)}
-              </span>
-              . Positive values lean H1; negative values lean H0.
-            </p>
-            <div className="relative h-6 border-y border-border">
-              <div className="absolute left-0 top-1/2 h-px w-full bg-border" />
-              <span className="absolute left-0 top-1/2 -translate-y-1/2 text-xs text-h0">
-                H0
-              </span>
-              <span className="absolute right-0 top-1/2 -translate-y-1/2 text-xs text-h1">
-                H1
-              </span>
-              <span
-                className="absolute top-1/2 h-4 w-1.5 -translate-y-1/2 bg-foreground"
-                style={{
-                  left: `${scaleLinear({
-                    value: Math.tanh(logEvidence / 4),
-                    domainMin: -1,
-                    domainMax: 1,
-                    rangeMin: 8,
-                    rangeMax: 92,
-                  })}%`,
-                }}
-              />
-            </div>
-          </div>
-        }
-      >
-        <EvidenceDensities observation={observation} separation={32} sd={11} />
-      </SandboxShell>
-    )
+    return <EvidenceSandbox moduleId={moduleId} />
+  }
+
+  if (moduleId === 'D3') {
+    return <ThresholdTradeoffSandbox moduleId={moduleId} />
+  }
+
+  if (moduleId === 'D4') {
+    return <NeymanPearsonSandbox moduleId={moduleId} />
+  }
+
+  if (moduleId === 'D5') {
+    return <MapBayesSandbox moduleId={moduleId} />
   }
 
   if (moduleId === 'D6') {
@@ -623,82 +1322,44 @@ function DetectionSandbox({ moduleId }: { readonly moduleId: string }) {
     return <GeometrySandbox moduleId={moduleId} />
   }
 
-  return (
-    <SandboxShell
-      moduleId={moduleId}
-      title={
-        moduleId === 'D5'
-          ? 'Priors and costs move the line'
-          : 'The threshold turns evidence into action'
-      }
-      instruction={
-        moduleId === 'D4'
-          ? 'Pretend alpha is a public promise. Move the threshold until H0 is only accused at the rate you can defend.'
-          : 'Move the line and watch both mistakes change. There is no free direction.'
-      }
-      controls={
-        <>
-          <SliderControl
-            label="Threshold"
-            variable="gamma"
-            value={threshold}
-            min={25}
-            max={75}
-            step={1}
-            meaning="Decide H1 when the statistic lands to the right."
-            onValueChange={(value) => {
-              dispatchControls({ type: 'threshold', value })
-            }}
-            format={(value) => `gamma = ${value.toFixed(0)}`}
-          />
-          {moduleId === 'D5' ? (
-            <SliderControl
-              label="Prior chance of H1"
-              variable="P(H1)"
-              value={priorH1}
-              min={0.05}
-              max={0.95}
-              step={0.01}
-              meaning="A rarer H1 needs stronger evidence unless the cost of missing it is high."
-              onValueChange={(value) => {
-                dispatchControls({ type: 'priorH1', value })
-              }}
-              format={(value) => formatPercent(value, 0)}
-            />
-          ) : null}
-        </>
-      }
-      readout={
-        <div className="grid gap-4 text-sm leading-6 text-muted-foreground sm:grid-cols-2">
-          <p>
-            <span className="block font-medium text-false-alarm">
-              False alarm
-            </span>
-            H0 crosses the line:{' '}
-            <span className="font-mono">{formatPercent(pFalseAlarm)}</span>
-          </p>
-          <p>
-            <span className="block font-medium text-detection">Detection</span>
-            H1 crosses the line:{' '}
-            <span className="font-mono">{formatPercent(pDetection)}</span>
-          </p>
-        </div>
-      }
-    >
-      <EvidenceDensities
-        separation={separation}
-        sd={effectiveSd}
-        threshold={threshold}
-      />
-    </SandboxShell>
-  )
+  return <ObservationSandbox moduleId={moduleId} />
 }
+
+const DOPPLER_VIEW_W = 480
+const DOPPLER_VIEW_H = 210
+const DOPPLER_REGION_LEFT = 92
+const DOPPLER_REGION_RIGHT = 456
+const DOPPLER_STATIC_BASELINE = 74
+const DOPPLER_SHIFTED_BASELINE = 150
+const DOPPLER_AMPLITUDE = 26
+const DOPPLER_BASE_CYCLES = 4.5
 
 function DopplerSandbox({ moduleId }: { readonly moduleId: string }) {
   const [shift, setShift] = useState(0.22)
-  const crests = linspace(0, 1, 13)
   const h0Score = Math.max(0, 1 - shift * 2.2)
   const h1Score = Math.min(1, 0.28 + shift * 1.9)
+
+  const shiftedCycles = DOPPLER_BASE_CYCLES * (65 / (65 - shift * 35))
+  const wavePoints = (
+    cycles: number,
+    baseline: number,
+  ): ReadonlyArray<PlotPoint> =>
+    linspace(DOPPLER_REGION_LEFT, DOPPLER_REGION_RIGHT, 260).map((x) => {
+      const phase =
+        ((x - DOPPLER_REGION_LEFT) /
+          (DOPPLER_REGION_RIGHT - DOPPLER_REGION_LEFT)) *
+        Math.PI *
+        2 *
+        cycles
+      return { x, y: baseline - DOPPLER_AMPLITUDE * Math.sin(phase) }
+    })
+  const staticPath = linePath(
+    wavePoints(DOPPLER_BASE_CYCLES, DOPPLER_STATIC_BASELINE),
+  )
+  const shiftedPath = linePath(
+    wavePoints(shiftedCycles, DOPPLER_SHIFTED_BASELINE),
+  )
+  const gridLines = linspace(DOPPLER_REGION_LEFT, DOPPLER_REGION_RIGHT, 9)
 
   return (
     <SandboxShell
@@ -731,54 +1392,113 @@ function DopplerSandbox({ moduleId }: { readonly moduleId: string }) {
         </div>
       }
     >
-      <svg
-        viewBox="0 0 100 58"
-        className="h-72 w-full"
-        role="img"
-        aria-label="Doppler wave crests returning from static and moving reflectors."
+      <ChartLegend
+        items={[
+          { label: 'static rhythm (template f0)', color: '#1e3a8a' },
+          { label: 'shifted return (echo)', color: '#d97706' },
+        ]}
+      />
+      <figure
+        className="w-full overflow-hidden rounded-md border border-border bg-card"
+        style={{ height: 300 }}
       >
-        <text x="5" y="10" className="fill-muted-foreground text-[5px]">
-          probe
-        </text>
-        <rect
-          x="6"
-          y="18"
-          width="8"
-          height="22"
-          rx="1.5"
-          className="fill-primary"
-        />
-        {crests.map((t) => (
+        <svg
+          viewBox={`0 0 ${DOPPLER_VIEW_W} ${DOPPLER_VIEW_H}`}
+          className="h-full w-full"
+          role="img"
+          aria-label={`Static template rhythm and a Doppler-shifted echo whose frequency rises with a shift of ${formatFixed(shift, 2)}.`}
+        >
+          <g className="stroke-border" opacity="0.5">
+            {gridLines.map((x) => (
+              <line
+                key={`dg-${x.toFixed(2)}`}
+                x1={x}
+                y1="36"
+                x2={x}
+                y2="188"
+                strokeWidth="1"
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
+          </g>
           <line
-            key={`h0-${t}`}
-            x1={22 + t * 65}
-            y1="16"
-            x2={22 + t * 65}
-            y2="28"
-            className="stroke-h0"
+            x1={DOPPLER_REGION_LEFT}
+            y1={DOPPLER_STATIC_BASELINE}
+            x2={DOPPLER_REGION_RIGHT}
+            y2={DOPPLER_STATIC_BASELINE}
+            className="stroke-border"
             strokeWidth="1"
-            opacity="0.35"
+            strokeDasharray="2 4"
+            vectorEffect="non-scaling-stroke"
           />
-        ))}
-        {crests.map((t) => (
           <line
-            key={`h1-${t}`}
-            x1={22 + t * (65 - shift * 35)}
-            y1="34"
-            x2={22 + t * (65 - shift * 35)}
-            y2="48"
-            className="stroke-h1"
-            strokeWidth="1.2"
-            opacity="0.65"
+            x1={DOPPLER_REGION_LEFT}
+            y1={DOPPLER_SHIFTED_BASELINE}
+            x2={DOPPLER_REGION_RIGHT}
+            y2={DOPPLER_SHIFTED_BASELINE}
+            className="stroke-border"
+            strokeWidth="1"
+            strokeDasharray="2 4"
+            vectorEffect="non-scaling-stroke"
           />
-        ))}
-        <text x="22" y="14" className="fill-h0 text-[5px]">
-          static rhythm
-        </text>
-        <text x="22" y="55" className="fill-h1 text-[5px]">
-          shifted return
-        </text>
-      </svg>
+
+          <rect
+            x="36"
+            y="83"
+            width="20"
+            height="58"
+            rx="4"
+            className="fill-primary"
+          />
+          <text
+            x="46"
+            y="74"
+            textAnchor="middle"
+            className="fill-muted-foreground font-mono text-[10px]"
+          >
+            probe
+          </text>
+
+          <path
+            d={staticPath}
+            fill="none"
+            className="stroke-h0"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+          <path
+            d={shiftedPath}
+            fill="none"
+            className="stroke-h1"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+
+          <text
+            x={DOPPLER_REGION_LEFT}
+            y={DOPPLER_STATIC_BASELINE - DOPPLER_AMPLITUDE - 8}
+            className="fill-h0 font-mono text-[10px]"
+          >
+            static rhythm
+          </text>
+          <text
+            x={DOPPLER_REGION_LEFT}
+            y={DOPPLER_SHIFTED_BASELINE + DOPPLER_AMPLITUDE + 16}
+            className="fill-h1 font-mono text-[10px]"
+          >
+            shifted return
+          </text>
+        </svg>
+      </figure>
+      <p className="mt-3 text-center text-xs text-muted-foreground">
+        Motion compresses the returning wave into a higher frequency.
+        Correlation scores how much the echo still resembles the static
+        template.
+      </p>
     </SandboxShell>
   )
 }
@@ -912,6 +1632,62 @@ function GeometrySandbox({ moduleId }: { readonly moduleId: string }) {
   const [angle, setAngle] = useState(24)
   const quietScore = 1 / stretch
 
+  const VIEW_W = 480
+  const VIEW_H = 300
+  const unit = 28
+  const centerX = 240
+  const centerY = 150
+  const gridHalfX = 7
+  const gridHalfY = 4
+  const phiRad = (angle * Math.PI) / 180
+  const cosPhi = Math.cos(phiRad)
+  const sinPhi = Math.sin(phiRad)
+  const minorRadius = unit
+  const majorRadius = stretch * unit
+  const project = (localX: number, localY: number) => ({
+    x: centerX + localX * cosPhi - localY * sinPhi,
+    y: centerY + localX * sinPhi + localY * cosPhi,
+  })
+  const contourLevels = [0.42, 0.72, 1] as const
+  const gridLeft = centerX - gridHalfX * unit
+  const gridRight = centerX + gridHalfX * unit
+  const gridTop = centerY - gridHalfY * unit
+  const gridBottom = centerY + gridHalfY * unit
+  const verticalIndices = Array.from(
+    { length: gridHalfX * 2 + 1 },
+    (_value, index) => index - gridHalfX,
+  )
+  const horizontalIndices = Array.from(
+    { length: gridHalfY * 2 + 1 },
+    (_value, index) => index - gridHalfY,
+  )
+  const xTickValues = [-6, -4, -2, 2, 4, 6]
+  const yTickValues = [-4, -2, 2, 4]
+
+  const noisyHalf = majorRadius * 1.12
+  const noisyStart = project(-noisyHalf, 0)
+  const noisyEnd = project(noisyHalf, 0)
+  const noisyLabel = project(noisyHalf + 13, 0)
+  const quietHalf = Math.max(minorRadius * 1.55, 46)
+  const quietTop = project(0, -quietHalf)
+  const quietBottom = project(0, quietHalf)
+  const quietLabel = project(0, -quietHalf - 14)
+
+  const arcRadius = 0.72 * unit
+  const arcStart = { x: centerX + arcRadius, y: centerY }
+  const arcEnd = {
+    x: centerX + arcRadius * cosPhi,
+    y: centerY + arcRadius * sinPhi,
+  }
+  const arcSweep = angle >= 0 ? 1 : 0
+  const arcMid = phiRad / 2
+  const arcLabel = {
+    x: centerX + (arcRadius + 12) * Math.cos(arcMid),
+    y: centerY + (arcRadius + 12) * Math.sin(arcMid),
+  }
+  const gradientId = `noise-fill-${moduleId}`
+  const arrowId = `noisy-arrow-${moduleId}`
+
   return (
     <SandboxShell
       moduleId={moduleId}
@@ -953,50 +1729,222 @@ function GeometrySandbox({ moduleId }: { readonly moduleId: string }) {
         </p>
       }
     >
-      <svg
-        viewBox="0 0 100 70"
-        className="h-72 w-full"
-        role="img"
-        aria-label="Colored Gaussian noise ellipse and quiet codeword direction."
+      <ChartLegend
+        items={[
+          { label: 'noise covariance', color: '#1e3a8a' },
+          { label: 'quiet separation direction', color: '#d97706' },
+          { label: 'noisy direction', color: '#6b6257', kind: 'dash' },
+        ]}
+      />
+      <figure
+        className="w-full overflow-hidden rounded-md border border-border bg-card"
+        style={{ height: 340 }}
       >
-        <g transform={`translate(50 35) rotate(${angle})`}>
-          <ellipse
-            cx="0"
-            cy="0"
-            rx={14 * stretch}
-            ry="14"
-            className="fill-primary"
-            opacity="0.1"
-          />
-          <ellipse
-            cx="0"
-            cy="0"
-            rx={14 * stretch}
-            ry="14"
-            className="stroke-primary"
-            strokeWidth="1.2"
-            fill="none"
-          />
-          <line
-            x1="0"
-            y1="-24"
-            x2="0"
-            y2="24"
-            className="stroke-accent"
-            strokeWidth="1.8"
-          />
-          <circle cx="0" cy="-24" r="2.6" className="fill-accent" />
-          <circle cx="0" cy="24" r="2.6" className="fill-accent" />
-        </g>
-        <text
-          x="50"
-          y="67"
-          textAnchor="middle"
-          className="fill-muted-foreground text-[5px]"
+        <svg
+          viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+          className="h-full w-full"
+          role="img"
+          aria-label={`Colored Gaussian noise ellipse stretched by ${formatFixed(stretch, 1)} and rotated ${angle} degrees, with the quiet codeword separation direction along its short axis.`}
         >
-          orange direction: quieter separation after whitening
-        </text>
-      </svg>
+          <defs>
+            <radialGradient id={gradientId} cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#1e3a8a" stopOpacity="0.2" />
+              <stop offset="60%" stopColor="#1e3a8a" stopOpacity="0.08" />
+              <stop offset="100%" stopColor="#1e3a8a" stopOpacity="0.02" />
+            </radialGradient>
+            <marker
+              id={arrowId}
+              markerWidth="9"
+              markerHeight="9"
+              refX="4.2"
+              refY="4"
+              orient="auto-start-reverse"
+            >
+              <path d="M1 1 L7.4 4 L1 7 Z" className="fill-muted-foreground" />
+            </marker>
+          </defs>
+
+          <g className="stroke-border" opacity="0.55">
+            {verticalIndices.map((index) => (
+              <line
+                key={`v-${index}`}
+                x1={centerX + index * unit}
+                y1={gridTop}
+                x2={centerX + index * unit}
+                y2={gridBottom}
+                strokeWidth="1"
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
+            {horizontalIndices.map((index) => (
+              <line
+                key={`h-${index}`}
+                x1={gridLeft}
+                y1={centerY + index * unit}
+                x2={gridRight}
+                y2={centerY + index * unit}
+                strokeWidth="1"
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
+          </g>
+
+          <g className="stroke-muted-foreground" opacity="0.85">
+            <line
+              x1={gridLeft}
+              y1={centerY}
+              x2={gridRight}
+              y2={centerY}
+              strokeWidth="1.1"
+              vectorEffect="non-scaling-stroke"
+            />
+            <line
+              x1={centerX}
+              y1={gridTop}
+              x2={centerX}
+              y2={gridBottom}
+              strokeWidth="1.1"
+              vectorEffect="non-scaling-stroke"
+            />
+          </g>
+          {xTickValues.map((value) => (
+            <text
+              key={`xt-${value}`}
+              x={centerX + value * unit}
+              y={centerY + 14}
+              textAnchor="middle"
+              className="fill-muted-foreground font-mono text-[9px]"
+            >
+              {value}
+            </text>
+          ))}
+          {yTickValues.map((value) => (
+            <text
+              key={`yt-${value}`}
+              x={centerX - 7}
+              y={centerY - value * unit + 3}
+              textAnchor="end"
+              className="fill-muted-foreground font-mono text-[9px]"
+            >
+              {value}
+            </text>
+          ))}
+
+          <g transform={`translate(${centerX} ${centerY}) rotate(${angle})`}>
+            <ellipse
+              cx="0"
+              cy="0"
+              rx={majorRadius}
+              ry={minorRadius}
+              fill={`url(#${gradientId})`}
+            />
+            {contourLevels.map((level) => (
+              <ellipse
+                key={`c-${level}`}
+                cx="0"
+                cy="0"
+                rx={majorRadius * level}
+                ry={minorRadius * level}
+                fill="none"
+                className="stroke-primary"
+                strokeWidth={level === 1 ? 1.6 : 1}
+                opacity={level === 1 ? 0.75 : 0.32}
+              />
+            ))}
+          </g>
+
+          {Math.abs(angle) > 3 ? (
+            <>
+              <path
+                d={`M ${arcStart.x.toFixed(2)} ${arcStart.y.toFixed(2)} A ${arcRadius} ${arcRadius} 0 0 ${arcSweep} ${arcEnd.x.toFixed(2)} ${arcEnd.y.toFixed(2)}`}
+                fill="none"
+                className="stroke-muted-foreground"
+                strokeWidth="1"
+                opacity="0.7"
+                vectorEffect="non-scaling-stroke"
+              />
+              <text
+                x={arcLabel.x}
+                y={arcLabel.y}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                className="fill-muted-foreground text-[10px] italic"
+              >
+                {'\u03c6'}
+              </text>
+            </>
+          ) : null}
+
+          <line
+            x1={noisyStart.x}
+            y1={noisyStart.y}
+            x2={noisyEnd.x}
+            y2={noisyEnd.y}
+            className="stroke-muted-foreground"
+            strokeWidth="1.4"
+            strokeDasharray="5 4"
+            markerStart={`url(#${arrowId})`}
+            markerEnd={`url(#${arrowId})`}
+            vectorEffect="non-scaling-stroke"
+          />
+          <text
+            x={noisyLabel.x}
+            y={noisyLabel.y}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            className="fill-muted-foreground font-mono text-[10px]"
+          >
+            {'\u03bb'}max
+          </text>
+
+          <line
+            x1={quietTop.x}
+            y1={quietTop.y}
+            x2={quietBottom.x}
+            y2={quietBottom.y}
+            className="stroke-accent"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            vectorEffect="non-scaling-stroke"
+          />
+          <circle
+            cx={quietTop.x}
+            cy={quietTop.y}
+            r="4.6"
+            className="fill-accent stroke-card"
+            strokeWidth="2"
+          />
+          <circle
+            cx={quietBottom.x}
+            cy={quietBottom.y}
+            r="4.6"
+            className="fill-accent stroke-card"
+            strokeWidth="2"
+          />
+          <circle
+            cx={centerX}
+            cy={centerY}
+            r="3"
+            className="fill-primary stroke-card"
+            strokeWidth="1.5"
+          />
+          <text
+            x={quietLabel.x}
+            y={quietLabel.y}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            className="fill-accent font-mono text-[10px]"
+          >
+            {'\u03bb'}min
+          </text>
+        </svg>
+      </figure>
+      <p className="mt-3 text-center text-xs text-muted-foreground">
+        Concentric contours are the colored-noise covariance. Codewords
+        separated along the short ({'\u03bb'}min) axis are easiest to tell
+        apart; the long ({'\u03bb'}max) axis only looks larger in raw Euclidean
+        distance.
+      </p>
     </SandboxShell>
   )
 }

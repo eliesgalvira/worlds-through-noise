@@ -912,6 +912,62 @@ function GeometrySandbox({ moduleId }: { readonly moduleId: string }) {
   const [angle, setAngle] = useState(24)
   const quietScore = 1 / stretch
 
+  const VIEW_W = 480
+  const VIEW_H = 300
+  const unit = 28
+  const centerX = 240
+  const centerY = 150
+  const gridHalfX = 7
+  const gridHalfY = 4
+  const phiRad = (angle * Math.PI) / 180
+  const cosPhi = Math.cos(phiRad)
+  const sinPhi = Math.sin(phiRad)
+  const minorRadius = unit
+  const majorRadius = stretch * unit
+  const project = (localX: number, localY: number) => ({
+    x: centerX + localX * cosPhi - localY * sinPhi,
+    y: centerY + localX * sinPhi + localY * cosPhi,
+  })
+  const contourLevels = [0.42, 0.72, 1] as const
+  const gridLeft = centerX - gridHalfX * unit
+  const gridRight = centerX + gridHalfX * unit
+  const gridTop = centerY - gridHalfY * unit
+  const gridBottom = centerY + gridHalfY * unit
+  const verticalIndices = Array.from(
+    { length: gridHalfX * 2 + 1 },
+    (_value, index) => index - gridHalfX,
+  )
+  const horizontalIndices = Array.from(
+    { length: gridHalfY * 2 + 1 },
+    (_value, index) => index - gridHalfY,
+  )
+  const xTickValues = [-6, -4, -2, 2, 4, 6]
+  const yTickValues = [-4, -2, 2, 4]
+
+  const noisyHalf = majorRadius * 1.12
+  const noisyStart = project(-noisyHalf, 0)
+  const noisyEnd = project(noisyHalf, 0)
+  const noisyLabel = project(noisyHalf + 13, 0)
+  const quietHalf = Math.max(minorRadius * 1.55, 46)
+  const quietTop = project(0, -quietHalf)
+  const quietBottom = project(0, quietHalf)
+  const quietLabel = project(0, -quietHalf - 14)
+
+  const arcRadius = 0.72 * unit
+  const arcStart = { x: centerX + arcRadius, y: centerY }
+  const arcEnd = {
+    x: centerX + arcRadius * cosPhi,
+    y: centerY + arcRadius * sinPhi,
+  }
+  const arcSweep = angle >= 0 ? 1 : 0
+  const arcMid = phiRad / 2
+  const arcLabel = {
+    x: centerX + (arcRadius + 12) * Math.cos(arcMid),
+    y: centerY + (arcRadius + 12) * Math.sin(arcMid),
+  }
+  const gradientId = `noise-fill-${moduleId}`
+  const arrowId = `noisy-arrow-${moduleId}`
+
   return (
     <SandboxShell
       moduleId={moduleId}
@@ -953,50 +1009,222 @@ function GeometrySandbox({ moduleId }: { readonly moduleId: string }) {
         </p>
       }
     >
-      <svg
-        viewBox="0 0 100 70"
-        className="h-72 w-full"
-        role="img"
-        aria-label="Colored Gaussian noise ellipse and quiet codeword direction."
+      <ChartLegend
+        items={[
+          { label: 'noise covariance', color: '#1e3a8a' },
+          { label: 'quiet separation direction', color: '#d97706' },
+          { label: 'noisy direction', color: '#6b6257', kind: 'dash' },
+        ]}
+      />
+      <figure
+        className="w-full overflow-hidden rounded-md border border-border bg-card"
+        style={{ height: 340 }}
       >
-        <g transform={`translate(50 35) rotate(${angle})`}>
-          <ellipse
-            cx="0"
-            cy="0"
-            rx={14 * stretch}
-            ry="14"
-            className="fill-primary"
-            opacity="0.1"
-          />
-          <ellipse
-            cx="0"
-            cy="0"
-            rx={14 * stretch}
-            ry="14"
-            className="stroke-primary"
-            strokeWidth="1.2"
-            fill="none"
-          />
-          <line
-            x1="0"
-            y1="-24"
-            x2="0"
-            y2="24"
-            className="stroke-accent"
-            strokeWidth="1.8"
-          />
-          <circle cx="0" cy="-24" r="2.6" className="fill-accent" />
-          <circle cx="0" cy="24" r="2.6" className="fill-accent" />
-        </g>
-        <text
-          x="50"
-          y="67"
-          textAnchor="middle"
-          className="fill-muted-foreground text-[5px]"
+        <svg
+          viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+          className="h-full w-full"
+          role="img"
+          aria-label={`Colored Gaussian noise ellipse stretched by ${formatFixed(stretch, 1)} and rotated ${angle} degrees, with the quiet codeword separation direction along its short axis.`}
         >
-          orange direction: quieter separation after whitening
-        </text>
-      </svg>
+          <defs>
+            <radialGradient id={gradientId} cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#1e3a8a" stopOpacity="0.2" />
+              <stop offset="60%" stopColor="#1e3a8a" stopOpacity="0.08" />
+              <stop offset="100%" stopColor="#1e3a8a" stopOpacity="0.02" />
+            </radialGradient>
+            <marker
+              id={arrowId}
+              markerWidth="9"
+              markerHeight="9"
+              refX="4.2"
+              refY="4"
+              orient="auto-start-reverse"
+            >
+              <path d="M1 1 L7.4 4 L1 7 Z" className="fill-muted-foreground" />
+            </marker>
+          </defs>
+
+          <g className="stroke-border" opacity="0.55">
+            {verticalIndices.map((index) => (
+              <line
+                key={`v-${index}`}
+                x1={centerX + index * unit}
+                y1={gridTop}
+                x2={centerX + index * unit}
+                y2={gridBottom}
+                strokeWidth="1"
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
+            {horizontalIndices.map((index) => (
+              <line
+                key={`h-${index}`}
+                x1={gridLeft}
+                y1={centerY + index * unit}
+                x2={gridRight}
+                y2={centerY + index * unit}
+                strokeWidth="1"
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
+          </g>
+
+          <g className="stroke-muted-foreground" opacity="0.85">
+            <line
+              x1={gridLeft}
+              y1={centerY}
+              x2={gridRight}
+              y2={centerY}
+              strokeWidth="1.1"
+              vectorEffect="non-scaling-stroke"
+            />
+            <line
+              x1={centerX}
+              y1={gridTop}
+              x2={centerX}
+              y2={gridBottom}
+              strokeWidth="1.1"
+              vectorEffect="non-scaling-stroke"
+            />
+          </g>
+          {xTickValues.map((value) => (
+            <text
+              key={`xt-${value}`}
+              x={centerX + value * unit}
+              y={centerY + 14}
+              textAnchor="middle"
+              className="fill-muted-foreground font-mono text-[9px]"
+            >
+              {value}
+            </text>
+          ))}
+          {yTickValues.map((value) => (
+            <text
+              key={`yt-${value}`}
+              x={centerX - 7}
+              y={centerY - value * unit + 3}
+              textAnchor="end"
+              className="fill-muted-foreground font-mono text-[9px]"
+            >
+              {value}
+            </text>
+          ))}
+
+          <g transform={`translate(${centerX} ${centerY}) rotate(${angle})`}>
+            <ellipse
+              cx="0"
+              cy="0"
+              rx={majorRadius}
+              ry={minorRadius}
+              fill={`url(#${gradientId})`}
+            />
+            {contourLevels.map((level) => (
+              <ellipse
+                key={`c-${level}`}
+                cx="0"
+                cy="0"
+                rx={majorRadius * level}
+                ry={minorRadius * level}
+                fill="none"
+                className="stroke-primary"
+                strokeWidth={level === 1 ? 1.6 : 1}
+                opacity={level === 1 ? 0.75 : 0.32}
+              />
+            ))}
+          </g>
+
+          {Math.abs(angle) > 3 ? (
+            <>
+              <path
+                d={`M ${arcStart.x.toFixed(2)} ${arcStart.y.toFixed(2)} A ${arcRadius} ${arcRadius} 0 0 ${arcSweep} ${arcEnd.x.toFixed(2)} ${arcEnd.y.toFixed(2)}`}
+                fill="none"
+                className="stroke-muted-foreground"
+                strokeWidth="1"
+                opacity="0.7"
+                vectorEffect="non-scaling-stroke"
+              />
+              <text
+                x={arcLabel.x}
+                y={arcLabel.y}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                className="fill-muted-foreground text-[10px] italic"
+              >
+                {'\u03c6'}
+              </text>
+            </>
+          ) : null}
+
+          <line
+            x1={noisyStart.x}
+            y1={noisyStart.y}
+            x2={noisyEnd.x}
+            y2={noisyEnd.y}
+            className="stroke-muted-foreground"
+            strokeWidth="1.4"
+            strokeDasharray="5 4"
+            markerStart={`url(#${arrowId})`}
+            markerEnd={`url(#${arrowId})`}
+            vectorEffect="non-scaling-stroke"
+          />
+          <text
+            x={noisyLabel.x}
+            y={noisyLabel.y}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            className="fill-muted-foreground font-mono text-[10px]"
+          >
+            {'\u03bb'}max
+          </text>
+
+          <line
+            x1={quietTop.x}
+            y1={quietTop.y}
+            x2={quietBottom.x}
+            y2={quietBottom.y}
+            className="stroke-accent"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            vectorEffect="non-scaling-stroke"
+          />
+          <circle
+            cx={quietTop.x}
+            cy={quietTop.y}
+            r="4.6"
+            className="fill-accent stroke-card"
+            strokeWidth="2"
+          />
+          <circle
+            cx={quietBottom.x}
+            cy={quietBottom.y}
+            r="4.6"
+            className="fill-accent stroke-card"
+            strokeWidth="2"
+          />
+          <circle
+            cx={centerX}
+            cy={centerY}
+            r="3"
+            className="fill-primary stroke-card"
+            strokeWidth="1.5"
+          />
+          <text
+            x={quietLabel.x}
+            y={quietLabel.y}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            className="fill-accent font-mono text-[10px]"
+          >
+            {'\u03bb'}min
+          </text>
+        </svg>
+      </figure>
+      <p className="mt-3 text-center text-xs text-muted-foreground">
+        Concentric contours are the colored-noise covariance. Codewords
+        separated along the short ({'\u03bb'}min) axis are easiest to tell
+        apart; the long ({'\u03bb'}max) axis only looks larger in raw Euclidean
+        distance.
+      </p>
     </SandboxShell>
   )
 }

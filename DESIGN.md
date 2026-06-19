@@ -251,8 +251,10 @@ The wordmark is one signal traveling left to right: a wireframe globe replaces t
 When changing the wordmark, edit it as a graphic:
 
 1. Keep the root SVG viewBox and intrinsic aspect ratio stable unless the full mark is being redesigned.
-2. Align the strike path directly to the outlined H crossbar in SVG coordinates.
-3. Keep the globe optical overshoot relative to the solid letter outlines, not to CSS `em` metrics.
+2. Regenerate the letter paths by setting the wordmark text in Spectral 600, converting the text to outlines in a vector editor or font-outline tool, and exporting SVG path data into the existing groups.
+3. Align the strike path directly to the outlined H crossbar in SVG coordinates.
+4. Keep the globe optical overshoot relative to the solid letter outlines, not to CSS `em` metrics.
+5. Verify the result visually at both header and hero sizes; the path data itself is not meaningfully reviewable by reading the code.
 
 ## Navigation and responsive behavior
 

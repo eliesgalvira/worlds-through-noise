@@ -30,7 +30,9 @@ function buildWordmarkSignal(): string {
 const WORDMARK_SIGNAL_D = buildWordmarkSignal()
 
 // Spectral SemiBold outlines, generated once so the wordmark cannot shift when
-// web fonts load or fail. The accessible name stays on the root SVG.
+// web fonts load or fail. To regenerate, outline the text runs in Spectral 600
+// with a vector/font tool, export SVG paths, then verify the rendered mark.
+// The accessible name stays on the root SVG.
 const WORDMARK_W_D =
   'M32.70 0.50L27.80 0.50L8.90-60.50L1.30-64.40L1.30-66L30.30-66L30.30-64.40L21.80-60.60L33.80-20.20L34.30-20.20L51.60-66.50L56.60-66.50L74.10-20.20L74.60-20.20L86.50-60.60L78-64.40L78-66L100.40-66L100.40-64.40L93.60-60.80L74.50 0.50L69.60 0.50L51.60-45.80L51-45.80L32.70 0.50Z'
 const WORDMARK_RLDS_D =

@@ -12,7 +12,9 @@ const FIRST_PAINT_FONT_FACES: ReadonlyArray<string> = [
 
 // Normal connections should paint with the web fonts already resolved. Slow or
 // failed font loads get a bounded delay, then `font-display: optional` prevents
-// a late fallback-to-webfont swap from creating layout shift.
+// a late fallback-to-webfont swap from creating layout shift. This assumes the
+// pre-React document has no visible text that would start an earlier optional
+// font-display window.
 const FIRST_PAINT_FONT_BUDGET_MS = 1000
 
 function loadFontFaceBestEffort(font: string): Effect.Effect<void> {

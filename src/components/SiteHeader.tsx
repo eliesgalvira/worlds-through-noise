@@ -36,7 +36,7 @@ function SiteHeader() {
           className="flex items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           aria-label="Worlds Through Noise, home"
         >
-          <Logo className="text-base sm:text-lg" />
+          <Logo className="text-[0.93rem] sm:text-lg" />
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">

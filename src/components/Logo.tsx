@@ -67,7 +67,7 @@ function Logo({ className }: LogoProps) {
       role="img"
       aria-label="Worlds Through Noise"
       className={cn(
-        'inline-flex select-none items-center gap-[0.5em] font-serif font-semibold uppercase leading-none tracking-[0.06em]',
+        'inline-flex w-[14.75em] select-none items-center gap-[0.5em] overflow-visible whitespace-nowrap font-serif font-semibold uppercase leading-none tracking-[0.06em]',
         className,
       )}
     >

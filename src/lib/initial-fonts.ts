@@ -38,6 +38,8 @@ function loadInitialFonts(): Promise<void> {
   )
 
   return Effect.runPromise(
+    // Both branches intentionally produce void: either fonts are ready or the
+    // first-paint budget has elapsed, and rendering may proceed.
     Effect.race(fontsReady, Effect.sleep(FIRST_PAINT_FONT_BUDGET_MS)),
   )
 }

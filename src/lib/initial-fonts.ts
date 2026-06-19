@@ -7,6 +7,7 @@ const FIRST_PAINT_FONT_FACES: ReadonlyArray<string> = [
   '600 1em Spectral',
   '400 1em "IBM Plex Mono"',
   '500 1em "IBM Plex Mono"',
+  '600 1em "IBM Plex Mono"',
 ]
 
 // Normal connections should paint with the web fonts already resolved. Slow or

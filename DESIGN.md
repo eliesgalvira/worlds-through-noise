@@ -219,7 +219,7 @@ This section records committed engineering decisions so future work matches the 
 ## Stack and conventions
 
 - React 19, Vite, TypeScript, Tailwind CSS v4 (CSS-first, configured through `@theme inline` in `src/index.css`, not a JS config), shadcn primitives in the new-york style, `react-router-dom` v7.
-- Fonts load from Google Fonts in `index.html`: Inter (`--font-sans`), Spectral (`--font-serif`), IBM Plex Mono (`--font-mono`). The serif is the brand voice (wordmark, headings); the mono is for eyebrows, variables, and model summaries.
+- Fonts load from Google Fonts in `index.html`: Inter (`--font-sans`), Spectral (`--font-serif`), IBM Plex Mono (`--font-mono`). The serif is the brand voice for headings; the mono is for eyebrows, variables, and model summaries. Fonts use `display=optional`, with a small first-paint budget in `src/lib/initial-fonts.ts` so normal loads paint with web fonts and slow/error cases fall back without late swaps.
 - The page background is warm paper plus a faint blue 24px grid (see `body` in `src/index.css`). Treat it as part of the field-notebook identity; do not paint full-bleed opaque backgrounds over it without reason.
 
 ### Lint rules that shape the code
@@ -246,25 +246,13 @@ Two exports: `Logo` (full wordmark) and `LogoMark` (compact globe-with-noise ico
 
 The wordmark is one signal traveling left to right: a wireframe globe replaces the O in WORLDS, then a single line crosses THROUGH clean and ramps into noise across NOISE.
 
-### Strike-line alignment (read before touching the logo)
+`Logo` is an SVG graphic, not live text. The letters are Spectral SemiBold outlines committed as path data, and the orange strike is drawn in the same viewBox as the letters. This is intentional: the H crossbar alignment must not depend on webfont timing, fallback metrics, line boxes, tracking utilities, or browser font synthesis.
 
-The strike is an absolutely positioned SVG overlaid on the THROUGH+NOISE span. It must sit on the capital H crossbar, NOT the line-box center (`top-50%` is wrong because the line box includes descender space) and NOT the geometric cap center either. In Spectral the H crossbar sits about 1.5 percent of cap height above the geometric cap center, so measure the actual crossbar, not the midpoint between cap top and baseline. The committed value is:
+When changing the wordmark, edit it as a graphic:
 
-```
-top-[46.85%] ... -translate-y-1/2
-```
-
-Because `top` is a percentage of the em box, this one value holds at every font size, so the small header logo and the large hero logo stay aligned together. If the serif, weight, tracking, or `leading` ever changes, re-measure rather than eyeballing:
-
-1. Temporarily render the hero `Logo` at a large fixed size with a unique class.
-2. To find the true crossbar, element-screenshot the logo once with the strike hidden (`opacity-0`), and read the black crossbar band of the H directly.
-3. Restore the strike and solve for `top%` so the orange line center lands on that crossbar center. Two data points pin the linear relationship exactly; target tolerance is sub-pixel on the large render.
-
-The stroke is also slightly thicker than the crossbar (`strokeWidth={2.2}` in the 240x24 viewBox) so it fully covers the crossbar with margin on both edges. This matters at small sizes: when the line only just matches the crossbar thickness, sub-pixel rounding lets a one-pixel sliver of the black crossbar show through. Keep the line centered and a touch thicker rather than nudging it off-center to hide a sliver.
-
-### Globe-O sizing
-
-The globe replacing the O is a thin wireframe, so matching it to cap height makes it read smaller than the solid letters. It is set to overshoot to about 1.10x cap height (`h-[0.78em] w-[0.78em]`) and nudged with `-translate-y-[0.035em]` so its center matches the caps. If the globe ever looks small again, it is the hollow-shape optical effect, increase the overshoot rather than assuming a scaling bug.
+1. Keep the root SVG viewBox and intrinsic aspect ratio stable unless the full mark is being redesigned.
+2. Align the strike path directly to the outlined H crossbar in SVG coordinates.
+3. Keep the globe optical overshoot relative to the solid letter outlines, not to CSS `em` metrics.
 
 ## Navigation and responsive behavior
 

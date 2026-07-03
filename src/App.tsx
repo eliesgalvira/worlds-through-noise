@@ -1,10 +1,9 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { SiteLayout } from '@/components/SiteLayout.tsx'
-import { DetectionPage } from '@/pages/DetectionPage.tsx'
-import { EstimationPage } from '@/pages/EstimationPage.tsx'
-import { FilteringPage } from '@/pages/FilteringPage.tsx'
+import { lessons } from '@/content/lessons.ts'
 import { HomePage } from '@/pages/HomePage.tsx'
+import { LessonPage } from '@/pages/LessonPage.tsx'
 import { NotFoundPage } from '@/pages/NotFoundPage.tsx'
 
 function ScrollToTop() {
@@ -28,9 +27,13 @@ function App() {
       <Routes>
         <Route element={<SiteLayout />}>
           <Route index element={<HomePage />} />
-          <Route path="/detection" element={<DetectionPage />} />
-          <Route path="/estimation" element={<EstimationPage />} />
-          <Route path="/filtering" element={<FilteringPage />} />
+          {lessons.map((lesson) => (
+            <Route
+              key={lesson.route}
+              path={`/${lesson.route}`}
+              element={<LessonPage lesson={lesson} />}
+            />
+          ))}
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

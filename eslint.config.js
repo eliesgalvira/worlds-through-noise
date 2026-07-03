@@ -496,6 +496,8 @@ export default defineConfig([
     'dist/**',
     'node_modules/**',
     '.repos/**',
+    'scripts/**',
+    'course/**',
     'coverage/**',
     '*.gen.ts',
     '*.gen.tsx',

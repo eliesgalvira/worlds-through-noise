@@ -26,18 +26,17 @@ function buildToc(
         depth: 1 as const,
       },
       {
-        id: `${module.id}-sandbox`,
-        title: 'Interactive sandbox',
+        id: `${module.id}-figure`,
+        title: 'Perform the action',
         depth: 2 as const,
       },
       {
         id: `${module.id}-transfer`,
-        title: 'Prediction check',
+        title: 'Prediction & transfer',
         depth: 2 as const,
       },
     ]),
-    { id: 'case-bank', title: 'Case-study sandboxes', depth: 1 },
-    { id: 'final-challenge', title: 'Final challenge', depth: 1 },
+    { id: 'exam-bank', title: 'Exam bank', depth: 1 },
   ]
 }
 

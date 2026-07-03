@@ -1,5 +1,3 @@
-import * as Effect from 'effect/Effect'
-
 const FIRST_PAINT_FONT_FACES: ReadonlyArray<string> = [
   '400 1em Inter',
   '500 1em Inter',
@@ -17,33 +15,27 @@ const FIRST_PAINT_FONT_FACES: ReadonlyArray<string> = [
 // font-display window.
 const FIRST_PAINT_FONT_BUDGET_MS = 1000
 
-function loadFontFaceBestEffort(font: string): Effect.Effect<void> {
-  return Effect.promise(() =>
-    document.fonts.load(font).then(
-      () => undefined,
-      () => undefined,
-    ),
-  )
-}
-
 function loadInitialFonts(): Promise<void> {
   if (typeof document === 'undefined' || !('fonts' in document)) {
-    return Effect.runPromise(Effect.void)
+    return Promise.resolve()
   }
 
-  const fontsReady = Effect.all(
-    FIRST_PAINT_FONT_FACES.map(loadFontFaceBestEffort),
-    {
-      concurrency: 'unbounded',
-      discard: true,
-    },
-  )
+  const fontsReady = Promise.all(
+    FIRST_PAINT_FONT_FACES.map((font) =>
+      document.fonts.load(font).then(
+        () => undefined,
+        () => undefined,
+      ),
+    ),
+  ).then(() => undefined)
 
-  return Effect.runPromise(
-    // Both branches intentionally produce void: either fonts are ready or the
-    // first-paint budget has elapsed, and rendering may proceed.
-    Effect.race(fontsReady, Effect.sleep(FIRST_PAINT_FONT_BUDGET_MS)),
-  )
+  const budget = new Promise<void>((resolve) => {
+    setTimeout(resolve, FIRST_PAINT_FONT_BUDGET_MS)
+  })
+
+  // Either fonts are ready or the first-paint budget has elapsed, and
+  // rendering may proceed.
+  return Promise.race([fontsReady, budget])
 }
 
 export { loadInitialFonts }

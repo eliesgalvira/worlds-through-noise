@@ -260,13 +260,14 @@ When changing the wordmark, edit it as a graphic:
 
 - Breakpoint contract: Tailwind `md` (768px) is the divide between mobile and desktop chrome.
 - `SiteHeader`: inline nav on `md` and up (`hidden md:flex`); below `md` a hamburger button (lucide `Menu` / `X`, `md:hidden`) toggles a stacked panel rendered under the bar. The panel lists each route as label + tagline, with the `Soon` tag for coming-soon routes. It carries `aria-expanded` / `aria-controls`, closes on `Escape`, and closes on link click.
-- Lesson pages use the two-column narrative + sticky lab layout on desktop and stack on mobile (`LessonLayout`). Keep controls directly beneath the visual they drive.
+- Lesson pages (`src/pages/LessonPage.tsx`) use a narrative column with a sticky table-of-contents (`StickyLessonNav`) on desktop and a collapsible variant on mobile. Figure controls sit beside the visual on desktop and stack under it on mobile (`FigureShell`).
 
 ## Component inventory (reuse, do not recreate)
 
 - UI primitives (`src/components/ui/`): `Button` + `button-variants`, `Card` set, `Badge` + `badge-variants`, `Slider`, `Separator`, `Label`.
-- Domain components (`src/components/`): `SliderControl` (label + variable + plain-English meaning), `MetricStat`, `EquationReveal` (sentence first, symbols on reveal), `LabPanel`, `ConceptBadge`, `PredictionPrompt`, plus `Logo` / `LogoMark`.
-- Frame: `SiteLayout`, `SiteHeader`, `SiteFooter` (carries the "Made by Elies" credit), `LessonLayout`.
+- Domain components (`src/components/`): `SliderControl` (label + variable + plain-English meaning), `EquationReveal` (sentence first, symbols on reveal), `PredictionPrompt`, `LessonModule` (trap/object/action/payoff + figure dispatch), `StickyLessonNav`, plus `Logo` / `LogoMark`.
+- Figures (`src/components/figures/`): `FigureShell`, `Plot`, `ReadoutRow`, `Legend` in `shared.tsx`; one figure component per lesson module, dispatched by module id in `LessonModule.tsx`. All readouts must be genuinely computed.
+- Frame: `SiteLayout`, `SiteHeader`, `SiteFooter` (carries the "Made by Elies" credit).
 - Routes are declared once in `src/lib/routes.ts` as `siteRoutes`, each with `path`, `label`, `tagline`, and `status` (`available` | `coming-soon`). Drive nav and indexes from this list.
 
 ## Anti-slop notes specific to this site

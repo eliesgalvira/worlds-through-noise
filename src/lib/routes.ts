@@ -9,21 +9,33 @@ export type SiteRoute = {
 
 export const siteRoutes: ReadonlyArray<SiteRoute> = [
   {
+    path: '/processes',
+    label: 'Random processes',
+    tagline: 'The machine behind the trace: ensembles, memory, R_x.',
+    status: 'available',
+  },
+  {
     path: '/detection',
     label: 'Detection',
-    tagline: 'Which hidden world produced the data?',
+    tagline: 'Spend a false-alarm budget where evidence is strongest.',
     status: 'available',
   },
   {
     path: '/estimation',
     label: 'Estimation',
-    tagline: 'What hidden value made the data likely?',
+    tagline: 'Judge the machine by its cloud; curvature sets the floor.',
     status: 'available',
   },
   {
-    path: '/filtering',
-    label: 'Filtering',
-    tagline: 'How does the hidden state evolve through time?',
-    status: 'coming-soon',
+    path: '/wiener',
+    label: 'Wiener filtering',
+    tagline: 'Every optimal filter is the bottom of the same bowl.',
+    status: 'available',
+  },
+  {
+    path: '/adaptive',
+    label: 'Adaptive filtering',
+    tagline: 'Roll the ball down the bowl — then price the fog.',
+    status: 'available',
   },
 ]

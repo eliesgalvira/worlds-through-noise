@@ -4,52 +4,43 @@
 
 Worlds Through Noise
 
+## Slogan
+
+See worlds through noise and hear noise through walls.
+
 ## Product
 
-An interactive web textbook for detection, estimation, and later filtering in audiovisual signal processing.
+An interactive study companion for a university course on statistical signal processing (PSAVC): random processes, detection, estimation, Wiener filtering, and adaptive filtering.
 
 ## Audience
 
-University students who can handle mathematics but do not yet feel what the mathematics is doing.
+The site's owner (and students like them): can handle the mathematics, but wants to _feel_ what the mathematics is doing before the exam asks for it.
 
-## Product Promise
+## Teaching Tenet
 
-The user should leave each route able to predict how the system behaves when noise, sample count, priors, costs, or thresholds change.
+Teach by example, as defined in `EXAMPLES.md`:
 
-## Tone
-
-Rigorous, visual, warm, public-science explanatory.
-
-Not childish.
-Not a formula dump.
-Not a generic AI education dashboard.
-
-## Learning Philosophy
-
-Start with the human problem.
-Let the user manipulate the phenomenon.
-Reveal the mathematical compression only after intuition exists.
-Every module must test prediction, not memorization.
+1. Name the **trap** — how the notation misleads before the object exists in the mind.
+2. Hand over the **object** — a concrete, manipulable thing (an ensemble to slice, a budget to spend, springs to balance, a bowl to roll down).
+3. Make the learner **perform the unseen action** in an interactive figure whose readouts are genuinely computed.
+4. Only then show the equation, which should read like a description of what the learner just did.
+5. Close with a transfer prompt tied to real past exams.
 
 ## Anti-Goals
 
-- No decorative math.
-- No dense theorem blocks before interaction.
-- No generic purple-gradient SaaS look.
-- No glassmorphism-heavy panels.
-- No gamification that distracts from understanding.
-- No animations without explanatory purpose.
+- No concept exposition without an object and an action.
+- No fabricated meters: every displayed number derives from the model or from a real simulation.
+- No decorative math, no theorem dumps before interaction.
+- No generic SaaS/dashboard aesthetics; no third-party charting libraries.
 
-## Primary Routes
+## Routes
 
-- `/detection`
-- `/estimation`
-- `/filtering`
-
-## Future Route
-
-`/filtering` is reserved and should appear as a quiet locked or coming-soon route.
+- `/processes` — Tema 1: random processes, autocorrelation, R_x and its eigen-structure.
+- `/detection` — Tema 2: Neyman-Pearson, matched filtering, energy detection, MAP/Bayes.
+- `/estimation` — Tema 3: bias/variance, CRB, ML, fusion/BLUE, MAP.
+- `/wiener` — Tema 4: normal equations, cancellation, prediction.
+- `/adaptive` — Tema 5: steepest descent, LMS, misadjustment.
 
 ## Unifying Sentence
 
-Detection asks which world produced the data. Estimation asks what hidden value made the data likely. Filtering will ask how that hidden value evolves through time.
+Characterize the random machine, decide which machine dealt the data, estimate the dial the machine was set to, then build — and finally adapt — the filter that undoes it.

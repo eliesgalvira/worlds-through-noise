@@ -64,7 +64,7 @@ function HomePage() {
 
         <div className="mt-10 max-w-2xl">
           <h1 className="font-serif text-2xl leading-snug text-foreground md:text-[2rem]">
-            Learn to infer hidden causes from corrupted traces.
+            See worlds through noise and hear noise through walls.
           </h1>
           <p className="mt-5 text-lg leading-8 text-muted-foreground">
             Manipulate the phenomenon first. Watch noise, samples, priors, and

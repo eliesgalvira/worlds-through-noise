@@ -1,4 +1,5 @@
 import { SliderControl } from '@/components/SliderControl.tsx'
+import { MathText } from '@/components/MathText.tsx'
 import {
   FigureShell,
   Legend,
@@ -50,7 +51,7 @@ function BitVoteFigure() {
   return (
     <FigureShell
       title="Count the ones — then let the prior lean on the count"
-      instruction="A bit is written five times; each copy flips with probability ε. The bars show the exactly computed distribution of the count of ones under each stored bit. The tinted region is where the rule says “bit = 1.” Now make ones rare, or make missing them expensive, and watch the boundary walk."
+      instruction="A bit is written five times; each copy flips with probability $\varepsilon$. The bars show the exactly computed distribution of the count of ones under each stored bit. The tinted region is where the rule says “bit = 1.” Now make ones rare, or make missing them expensive, and watch the boundary walk."
       controls={
         <>
           <SliderControl
@@ -91,12 +92,12 @@ function BitVoteFigure() {
       readout={
         <>
           <ReadoutRow
-            label="Pr(decide 1 | bit was 0)"
+            label="$\Pr(\hat{b}{=}1 \mid b{=}0)$"
             value={formatPercentValue(pFalseOne)}
             tone="bad"
           />
           <ReadoutRow
-            label="Pr(decide 0 | bit was 1)"
+            label="$\Pr(\hat{b}{=}0 \mid b{=}1)$"
             value={formatPercentValue(pMissOne)}
             tone="h1"
           />
@@ -105,8 +106,7 @@ function BitVoteFigure() {
             value={formatPercentValue(pError)}
           />
           <p className="text-xs leading-5 text-muted-foreground">
-            With P(1) = 50% and equal costs the boundary sits at majority vote —
-            check it, then break it.
+            <MathText text="With $\Pr(1) = 0.5$ and equal costs the boundary sits at majority vote — check it, then break it." />
           </p>
         </>
       }

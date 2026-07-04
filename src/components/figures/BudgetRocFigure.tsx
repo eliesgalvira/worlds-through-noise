@@ -59,7 +59,7 @@ function BudgetRocFigure() {
   return (
     <FigureShell
       title="Spend the budget, read the catch"
-      instruction="Pick the false-alarm budget α: the dam slides until the spilled H₀ area equals it — that position is Q⁻¹(α). The H₁ area beyond the dam is your detection probability, one point on the ROC. Sweep in your head; the curve is the full menu."
+      instruction="Pick the false-alarm budget $\alpha$: the dam slides until the spilled $\mathcal{H}_0$ area equals it — that position is $Q^{-1}(\alpha)$. The $\mathcal{H}_1$ area beyond the dam is your detection probability, one point on the ROC. Sweep in your head; the curve is the full menu."
       controls={
         <>
           <SliderControl
@@ -69,7 +69,7 @@ function BudgetRocFigure() {
             min={0.5}
             max={40}
             step={0.5}
-            meaning="Fraction of H₀ probability you are licensed to spill."
+            meaning="Fraction of $\mathcal{H}_0$ probability you are licensed to spill."
             onValueChange={setAlphaPct}
             format={(v) => `${v.toFixed(1)}%`}
           />
@@ -80,7 +80,7 @@ function BudgetRocFigure() {
             min={0}
             max={14}
             step={0.5}
-            meaning="NA²/σ² — grows with more samples or less noise."
+            meaning="$NA^2/\sigma^2$ — grows with more samples or less noise."
             onValueChange={setEnrDb}
             format={(v) => `${v.toFixed(1)} dB`}
           />
@@ -89,16 +89,16 @@ function BudgetRocFigure() {
       readout={
         <>
           <ReadoutRow
-            label="Threshold γ = Q⁻¹(α)"
+            label="Threshold $\gamma = Q^{-1}(\alpha)$"
             value={formatNumber(gamma, 2)}
           />
           <ReadoutRow
-            label="Separation √ENR"
+            label="Separation $\sqrt{ENR}$"
             value={formatNumber(separation, 2)}
             tone="h1"
           />
           <ReadoutRow
-            label="P_D = Q(Q⁻¹(α) − √ENR)"
+            label="$P_D = Q(Q^{-1}(\alpha) - \sqrt{ENR})$"
             value={formatPercentValue(pd)}
             tone="good"
           />
@@ -107,9 +107,15 @@ function BudgetRocFigure() {
     >
       <Legend
         items={[
-          { label: 'H₀ (noise only)', swatchClass: 'stroke-h0' },
-          { label: 'H₁ (signal present)', swatchClass: 'stroke-h1' },
-          { label: 'spilled budget α', swatchClass: 'stroke-false-alarm' },
+          { label: '$\\mathcal{H}_0$ (noise only)', swatchClass: 'stroke-h0' },
+          {
+            label: '$\\mathcal{H}_1$ (signal present)',
+            swatchClass: 'stroke-h1',
+          },
+          {
+            label: 'spilled budget $\\alpha$',
+            swatchClass: 'stroke-false-alarm',
+          },
         ]}
       />
       <div className="grid grid-cols-2 gap-2">

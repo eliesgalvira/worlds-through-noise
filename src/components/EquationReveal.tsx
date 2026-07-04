@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import katex from 'katex'
 import { Eye, EyeOff } from 'lucide-react'
+import { MathText } from '@/components/MathText.tsx'
 import { cn } from '@/lib/utils.ts'
 
 type EquationRevealProps = {
@@ -40,7 +41,9 @@ function EquationReveal({
 
   return (
     <figure className={cn('border-y border-border bg-card/40 py-5', className)}>
-      <p className="text-base leading-7 text-foreground">{sentence}</p>
+      <p className="text-base leading-7 text-foreground">
+        <MathText text={sentence} />
+      </p>
 
       <div className="mt-4">
         {revealed ? (
@@ -78,7 +81,7 @@ function EquationReveal({
 
       {caption !== undefined ? (
         <figcaption className="mt-3 text-xs leading-5 text-muted-foreground">
-          {caption}
+          <MathText text={caption} />
         </figcaption>
       ) : null}
     </figure>

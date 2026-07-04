@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Lightbulb } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { MathText } from '@/components/MathText.tsx'
 import { cn } from '@/lib/utils.ts'
 
 type PredictionPromptProps = {
@@ -31,7 +32,9 @@ function PredictionPrompt({
           <p className="text-xs font-medium uppercase tracking-wide text-accent">
             Predict first
           </p>
-          <p className="text-base leading-7 text-foreground">{question}</p>
+          <p className="text-base leading-7 text-foreground">
+            <MathText text={question} />
+          </p>
         </div>
       </div>
 

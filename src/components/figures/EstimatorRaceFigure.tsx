@@ -129,7 +129,7 @@ function EstimatorRaceFigure() {
             min={8}
             max={256}
             step={8}
-            meaning="Consistency: watch the good pile tighten as N grows."
+            meaning="Consistency: watch the good pile tighten as $N$ grows."
             onValueChange={(v) => {
               setN(v)
               rerun(kind, v)
@@ -175,8 +175,11 @@ function EstimatorRaceFigure() {
       <Legend
         items={[
           { label: 'sample mean pile', swatchClass: 'stroke-h0' },
-          { label: 'midrange (max+min)/2 pile', swatchClass: 'stroke-h1' },
-          { label: 'hidden truth θ', swatchClass: 'stroke-truth' },
+          {
+            label: 'midrange $(\\max{+}\\min)/2$ pile',
+            swatchClass: 'stroke-h1',
+          },
+          { label: 'hidden truth $\\theta$', swatchClass: 'stroke-truth' },
         ]}
       />
       <Plot

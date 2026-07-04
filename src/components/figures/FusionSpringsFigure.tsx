@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { SliderControl } from '@/components/SliderControl.tsx'
+import { MathText } from '@/components/MathText.tsx'
 import {
   FigureShell,
   Legend,
@@ -45,7 +46,7 @@ function FusionSpringsFigure() {
   return (
     <FigureShell
       title="Every measurement is a spring; the estimate is the balance point"
-      instruction="Three sensors read the same hidden humidity with different noise. Each pulls the estimate toward its reading with stiffness 1/σ². Slacken a sensor and watch the balance slide away from it — then switch on the prior: one more spring, anchored at old knowledge."
+      instruction="Three sensors read the same hidden humidity with different noise. Each pulls the estimate toward its reading with stiffness $1/\sigma^2$. Slacken a sensor and watch the balance slide away from it — then switch on the prior: one more spring, anchored at old knowledge."
       controls={
         <>
           {SENSOR_READINGS.map((reading, index) => (
@@ -57,7 +58,9 @@ function FusionSpringsFigure() {
               min={0.8}
               max={12}
               step={0.1}
-              meaning={index === 0 ? 'Stiff spring: small σ pulls hard.' : ''}
+              meaning={
+                index === 0 ? 'Stiff spring: small $\\sigma$ pulls hard.' : ''
+              }
               onValueChange={(v) => {
                 setSigmas((prev) => prev.map((s, i) => (i === index ? v : s)))
               }}
@@ -82,7 +85,7 @@ function FusionSpringsFigure() {
               min={1}
               max={15}
               step={0.5}
-              meaning="Small σ_θ: a stubborn prior."
+              meaning="Small $\sigma_\theta$: a stubborn prior."
               onValueChange={setPriorSigma}
               format={(v) => v.toFixed(1)}
             />
@@ -97,19 +100,18 @@ function FusionSpringsFigure() {
             tone="h1"
           />
           <ReadoutRow
-            label="Estimator variance 1/Σ(1/σᵢ²)"
+            label="Estimator variance $1/\sum(1/\sigma_i^2)$"
             value={formatNumber(variance, 3)}
             tone="good"
           />
           {priorOn ? (
             <ReadoutRow
-              label="Data share α in θ̂ = αθ̂_ML + (1−α)μ_θ"
+              label="Data share $\alpha$ in $\hat{\theta} = \alpha\hat{\theta}_{ML} + (1-\alpha)\mu_\theta$"
               value={formatNumber(alpha, 2)}
             />
           ) : null}
           <p className="text-xs leading-5 text-muted-foreground">
-            Break a sensor completely (σ → 12) and the fusion quietly ignores
-            it: the defective-pixel exam problem in one gesture.
+            <MathText text="Break a sensor completely ($\sigma \to 12$) and the fusion quietly ignores it: the defective-pixel exam problem in one gesture." />
           </p>
         </>
       }
@@ -118,7 +120,10 @@ function FusionSpringsFigure() {
         items={[
           { label: 'sensor readings (springs)', swatchClass: 'stroke-h0' },
           { label: 'prior anchor', swatchClass: 'stroke-prior' },
-          { label: 'balance point θ̂', swatchClass: 'stroke-threshold' },
+          {
+            label: 'balance point $\\hat{\\theta}$',
+            swatchClass: 'stroke-threshold',
+          },
         ]}
       />
       <Plot
@@ -239,8 +244,7 @@ function FusionSpringsFigure() {
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        Spring thickness is the honest weight 1/σᵢ². With the prior on, the
-        dashed ring marks where the data alone would balance.
+        <MathText text="Spring thickness is the honest weight $1/\sigma_i^2$. With the prior on, the dashed ring marks where the data alone would balance." />
       </p>
     </FigureShell>
   )

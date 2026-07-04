@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { SliderControl } from '@/components/SliderControl.tsx'
+import { MathText } from '@/components/MathText.tsx'
 import {
   FigureShell,
   Legend,
@@ -53,8 +54,8 @@ function PowerTerrainFigure() {
 
   return (
     <FigureShell
-      title="Walk the power terrain P_y = hᴴR_x h"
-      instruction="Every point of the plane is a 2-tap filter; the ellipses are iso-power curves of the honestly computed quadratic form. Drag h around the unit circle and hunt for the loudest direction — then check where the eigenvector arrows point."
+      title="Walk the power terrain $P_y = \mathbf{h}^H\mathbf{R}_x\mathbf{h}$"
+      instruction="Every point of the plane is a 2-tap filter; the ellipses are iso-power curves of the honestly computed quadratic form. Drag $\mathbf{h}$ around the unit circle and hunt for the loudest direction — then check where the eigenvector arrows point."
       controls={
         <>
           <SliderControl
@@ -87,28 +88,28 @@ function PowerTerrainFigure() {
                 setSnap(event.target.checked)
               }}
             />
-            Constrain to the unit circle ‖h‖ = 1
+            <MathText text="Constrain to the unit circle $\|\mathbf{h}\| = 1$" />
           </label>
         </>
       }
       readout={
         <>
           <ReadoutRow
-            label="Output power hᴴR_x h"
+            label="Output power $\mathbf{h}^H\mathbf{R}_x\mathbf{h}$"
             value={formatNumber(py, 3)}
             tone="h1"
           />
           <ReadoutRow
-            label="λ_max (best possible on circle)"
+            label="$\lambda_{\max}$ (best possible on circle)"
             value={formatNumber(eig.lambda1, 3)}
             tone="good"
           />
           <ReadoutRow
-            label="λ_min (noise-only floor)"
+            label="$\lambda_{\min}$ (noise-only floor)"
             value={formatNumber(eig.lambda2, 3)}
           />
           <ReadoutRow
-            label="Eigenvalue spread λ_max/λ_min"
+            label="Eigenvalue spread $\lambda_{\max}/\lambda_{\min}$"
             value={formatNumber(eig.lambda1 / Math.max(eig.lambda2, 1e-9), 1)}
           />
         </>
@@ -118,11 +119,14 @@ function PowerTerrainFigure() {
         items={[
           { label: 'iso-power ellipses', swatchClass: 'stroke-h0' },
           {
-            label: 'unit circle ‖h‖=1',
+            label: 'unit circle $\\|\\mathbf{h}\\|=1$',
             swatchClass: 'stroke-border',
             dash: true,
           },
-          { label: 'eigenvectors of R_x', swatchClass: 'stroke-detection' },
+          {
+            label: 'eigenvectors of $\\mathbf{R}_x$',
+            swatchClass: 'stroke-detection',
+          },
         ]}
       />
       <Plot
@@ -233,8 +237,7 @@ function PowerTerrainFigure() {
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        With A → 0 the ellipses become circles: white noise has no preferred
-        direction, and every unit filter earns exactly σ².
+        <MathText text="With $A \to 0$ the ellipses become circles: white noise has no preferred direction, and every unit filter earns exactly $\sigma^2$." />
       </p>
     </FigureShell>
   )

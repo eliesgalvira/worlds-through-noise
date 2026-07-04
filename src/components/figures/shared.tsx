@@ -1,4 +1,5 @@
 import type { PointerEvent as ReactPointerEvent, ReactNode } from 'react'
+import { MathText } from '@/components/MathText.tsx'
 
 type FigureShellProps = {
   readonly title: string
@@ -28,10 +29,10 @@ function FigureShell({
         Perform the action
       </p>
       <h4 className="mt-2 max-w-3xl font-serif text-xl font-semibold leading-snug text-foreground">
-        {title}
+        <MathText text={title} />
       </h4>
       <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-        {instruction}
+        <MathText text={instruction} />
       </p>
       <div className="mt-5 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,19rem)]">
         <div className="min-w-0 lg:self-center">{children}</div>
@@ -121,7 +122,9 @@ function ReadoutRow({ label, value, tone = 'default' }: ReadoutRowProps) {
             : 'text-foreground'
   return (
     <p className="flex items-baseline justify-between gap-3 text-muted-foreground">
-      <span>{label}</span>
+      <span>
+        <MathText text={label} />
+      </span>
       <span className={`font-mono text-[13px] ${toneClass}`}>{value}</span>
     </p>
   )
@@ -151,7 +154,7 @@ function Legend({ items }: LegendProps) {
               className={item.swatchClass}
             />
           </svg>
-          {item.label}
+          <MathText text={item.label} />
         </span>
       ))}
     </div>

@@ -59,7 +59,7 @@ function CurvatureFigure() {
   return (
     <FigureShell
       title="Watch the landscape sharpen — information is curvature"
-      instruction="The curve is the log-likelihood of every candidate θ, computed from the actual samples (dots). Its peak is θ̂_ML; its sharpness is Fisher information. Draw fresh samples and watch the peak wobble exactly as much as the flatness allows — then raise N."
+      instruction="The curve is the log-likelihood of every candidate $\theta$, computed from the actual samples (dots). Its peak is $\hat{\theta}_{ML}$; its sharpness is Fisher information. Draw fresh samples and watch the peak wobble exactly as much as the flatness allows — then raise $N$."
       controls={
         <>
           <SliderControl
@@ -99,12 +99,12 @@ function CurvatureFigure() {
       readout={
         <>
           <ReadoutRow
-            label="Peak θ̂_ML (sample mean)"
+            label="Peak $\hat{\theta}_{ML}$ (sample mean)"
             value={formatNumber(sampleMean, 3)}
             tone="h1"
           />
           <ReadoutRow
-            label="CRB std σ/√N"
+            label="CRB std $\sigma/\sqrt{N}$"
             value={formatNumber(crbStd, 3)}
             tone="good"
           />
@@ -131,11 +131,11 @@ function CurvatureFigure() {
       <Legend
         items={[
           {
-            label: 'log-likelihood of θ (this sample)',
+            label: 'log-likelihood of $\\theta$ (this sample)',
             swatchClass: 'stroke-h0',
           },
           { label: 'CRB width at the peak', swatchClass: 'stroke-detection' },
-          { label: 'true θ', swatchClass: 'stroke-truth', dash: true },
+          { label: 'true $\\theta$', swatchClass: 'stroke-truth', dash: true },
         ]}
       />
       <Plot

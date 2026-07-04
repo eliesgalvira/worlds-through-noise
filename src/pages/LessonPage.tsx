@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { LessonModule } from '@/components/LessonModule.tsx'
+import { MathText } from '@/components/MathText.tsx'
 import { StickyLessonNav } from '@/components/StickyLessonNav.tsx'
 import { WorkedProblem } from '@/components/WorkedProblem.tsx'
 import { Button } from '@/components/ui/button.tsx'
@@ -33,14 +34,14 @@ function LessonPage({ lesson }: LessonPageProps) {
             {lesson.title}
           </h1>
           <p className="mt-6 max-w-3xl text-xl leading-9 text-foreground">
-            {lesson.thesis}
+            <MathText text={lesson.thesis} />
           </p>
           {lesson.intro.map((paragraph) => (
             <p
               key={paragraph.slice(0, 32)}
               className="mt-5 max-w-3xl text-base leading-7 text-muted-foreground"
             >
-              {paragraph}
+              <MathText text={paragraph} />
             </p>
           ))}
         </header>

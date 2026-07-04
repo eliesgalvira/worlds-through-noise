@@ -69,7 +69,7 @@ function AutocorrelationFigure() {
   return (
     <FigureShell
       title="Slide a copy of the signal past itself"
-      instruction="The faint trace is the signal; the amber trace is the same signal shifted by the lag m. The overlap product, averaged, is one point of the autocorrelation — already plotted below for every lag. Try all three signals and watch memory die fast, slowly, or never."
+      instruction="The faint trace is the signal; the amber trace is the same signal shifted by the lag $m$. The overlap product, averaged, is one point of the autocorrelation — already plotted below for every lag. Try all three signals and watch memory die fast, slowly, or never."
       controls={
         <>
           <div className="flex flex-wrap gap-2">
@@ -112,14 +112,17 @@ function AutocorrelationFigure() {
       }
       readout={
         <>
-          <ReadoutRow label="r̂(0) — power" value={formatNumber(r0, 2)} />
+          <ReadoutRow
+            label="$\hat{r}(0)$ — power"
+            value={formatNumber(r0, 2)}
+          />
           <ReadoutRow
             label={`r̂(${lag}) — resemblance at lag ${lag}`}
             value={formatNumber(rm, 2)}
             tone="h1"
           />
           <ReadoutRow
-            label="Normalized r̂(m)/r̂(0)"
+            label="Normalized $\hat{r}(m)/\hat{r}(0)$"
             value={formatNumber(rm / (r0 || 1), 2)}
             tone={Math.abs(rm / (r0 || 1)) > 0.4 ? 'good' : 'default'}
           />
@@ -128,7 +131,7 @@ function AutocorrelationFigure() {
     >
       <Legend
         items={[
-          { label: 'signal x(n)', swatchClass: 'stroke-h0' },
+          { label: 'signal $x(n)$', swatchClass: 'stroke-h0' },
           { label: `shifted copy x(n−m)`, swatchClass: 'stroke-h1' },
         ]}
       />

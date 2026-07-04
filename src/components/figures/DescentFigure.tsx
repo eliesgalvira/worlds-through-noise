@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
+import { MathText } from '@/components/MathText.tsx'
 import {
   FigureShell,
   Legend,
@@ -87,7 +88,7 @@ function DescentFigure() {
   return (
     <FigureShell
       title="Roll the ball — then break the speed limit"
-      instruction="Click anywhere to drop the filter, press play, and watch steepest descent hop against the local slope. On the stretched bowl, find the μ that makes the steep axis overshoot while the shallow axis still crawls — then push μ past 2/λ_max and watch it explode."
+      instruction="Click anywhere to drop the filter, press play, and watch steepest descent hop against the local slope. On the stretched bowl, find the $\mu$ that makes the steep axis overshoot while the shallow axis still crawls — then push $\mu$ past $2/\lambda_{\max}$ and watch it explode."
       controls={
         <>
           <div className="flex flex-wrap gap-2">
@@ -157,17 +158,17 @@ function DescentFigure() {
         <>
           <ReadoutRow label="Iterations" value={`${trajectory.length - 1}`} />
           <ReadoutRow
-            label="Excess error Δξ(h_k)"
+            label="Excess error $\Delta\xi(\mathbf{h}_k)$"
             value={formatNumber(xiExcess(last.h0, last.h1), 4)}
             tone="h1"
           />
           <ReadoutRow
-            label="μ vs limit 2/λ_max"
+            label="$\mu$ vs limit $2/\lambda_{\max}$"
             value={`${formatNumber(mu, 3)} / ${formatNumber(muMax, 3)}`}
             tone={diverging ? 'bad' : 'good'}
           />
           <ReadoutRow
-            label="Contraction of slow mode |1−μλ_min|"
+            label="Contraction of slow mode $|1-\mu\lambda_{\min}|$"
             value={formatNumber(Math.abs(1 - mu * eig.lambda2), 3)}
           />
         </>
@@ -240,8 +241,7 @@ function DescentFigure() {
         )}
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        Every hop is the real recursion h_{'{k+1}'} = h_k − μ(R h_k − r): the
-        zig-zag, the valley crawl and the explosion are computed, not drawn.
+        <MathText text="Every hop is the real recursion $\mathbf{h}_{k+1} = \mathbf{h}_k - \mu(\mathbf{R}\mathbf{h}_k - \mathbf{r})$: the zig-zag, the valley crawl and the explosion are computed, not drawn." />
       </p>
     </FigureShell>
   )

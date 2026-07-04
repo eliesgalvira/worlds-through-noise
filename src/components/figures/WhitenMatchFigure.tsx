@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
+import { MathText } from '@/components/MathText.tsx'
 import {
   FigureShell,
   Legend,
@@ -168,12 +169,12 @@ function WhitenMatchFigure() {
       readout={
         <>
           <ReadoutRow
-            label="Separation d² along θ"
+            label="Separation $d^2$ along $\theta$"
             value={formatNumber(d2, 2)}
             tone="h1"
           />
           <ReadoutRow
-            label="Best possible d² (this picture)"
+            label="Best possible $d^2$ (this picture)"
             value={formatNumber(best.value, 2)}
             tone="good"
           />
@@ -190,8 +191,11 @@ function WhitenMatchFigure() {
     >
       <Legend
         items={[
-          { label: 'H₀ cloud (noise)', swatchClass: 'stroke-h0' },
-          { label: 'H₁ cloud (pulse + noise)', swatchClass: 'stroke-h1' },
+          { label: '$\\mathcal{H}_0$ cloud (noise)', swatchClass: 'stroke-h0' },
+          {
+            label: '$\\mathcal{H}_1$ cloud (pulse + noise)',
+            swatchClass: 'stroke-h1',
+          },
           { label: 'your direction', swatchClass: 'stroke-threshold' },
           {
             label: 'optimal direction',
@@ -277,8 +281,7 @@ function WhitenMatchFigure() {
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        The meter is the honest deflection (uᵀΔμ)²/uᵀCu of the current picture —
-        drag on the plot to aim the direction.
+        <MathText text="The meter is the honest deflection $(\mathbf{u}^T\Delta\boldsymbol{\mu})^2 / \mathbf{u}^T\mathbf{C}\mathbf{u}$ of the current picture — drag on the plot to aim the direction." />
       </p>
     </FigureShell>
   )

@@ -11,7 +11,8 @@ export const siteRoutes: ReadonlyArray<SiteRoute> = [
   {
     path: '/processes',
     label: 'Random processes',
-    tagline: 'The machine behind the trace: ensembles, memory, R_x.',
+    tagline:
+      'The machine behind the trace: ensembles, memory, $\\mathbf{R}_x$.',
     status: 'available',
   },
   {

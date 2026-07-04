@@ -117,12 +117,12 @@ function EnsembleFigure() {
       readout={
         <>
           <ReadoutRow
-            label="Slice mean m̂(n)"
+            label="Slice mean $\hat{m}(n)$"
             value={formatNumber(mean, 2)}
             tone="h0"
           />
           <ReadoutRow
-            label="Slice variance σ̂²(n)"
+            label="Slice variance $\hat{\sigma}^2(n)$"
             value={formatNumber(variance, 2)}
             tone="h1"
           />

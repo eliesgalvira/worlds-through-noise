@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
+import { MathText } from '@/components/MathText.tsx'
 import {
   FigureShell,
   Legend,
@@ -83,7 +84,7 @@ function LmsFigure() {
   return (
     <FigureShell
       title="The drunken descent that never sits still"
-      instruction="A real LMS run on the two-microphone canceller: 2 600 honest iterations of h(n+1) = h(n) + μ·y(n)·z(n). Watch the learning curve flatten above the floor — that gap is the misadjustment you pay forever. Then let the world drift and see why tiny μ stops being safe."
+      instruction="A real LMS run on the two-microphone canceller: 2 600 honest iterations of $h(n{+}1) = h(n) + \mu\,y(n)\,z(n)$. Watch the learning curve flatten above the floor — that gap is the misadjustment you pay forever. Then let the world drift and see why tiny $\mu$ stops being safe."
       controls={
         <>
           <SliderControl
@@ -122,7 +123,7 @@ function LmsFigure() {
       readout={
         <>
           <ReadoutRow
-            label="Theory: misadjustment μ·P_y/2"
+            label="Theory: misadjustment $\mu P_y/2$"
             value={formatNumber(theoryExcess, 3)}
             tone="good"
           />
@@ -140,17 +141,16 @@ function LmsFigure() {
             />
           )}
           <p className="text-xs leading-5 text-muted-foreground">
-            Same μ buys convergence speed, steady-state jitter AND tracking
-            agility — one coin, three purchases.
+            <MathText text="Same $\mu$ buys convergence speed, steady-state jitter AND tracking agility — one coin, three purchases." />
           </p>
         </>
       }
     >
       <Legend
         items={[
-          { label: 'coefficient h(n)', swatchClass: 'stroke-h0' },
+          { label: 'coefficient $h(n)$', swatchClass: 'stroke-h0' },
           {
-            label: 'true optimum h_opt(n)',
+            label: 'true optimum $h_{opt}(n)$',
             swatchClass: 'stroke-detection',
             dash: true,
           },
@@ -195,9 +195,12 @@ function LmsFigure() {
       <div className="mt-2" />
       <Legend
         items={[
-          { label: 'smoothed error power |z(n)|²', swatchClass: 'stroke-h1' },
           {
-            label: 'floor ξ_min (music power)',
+            label: 'smoothed error power $|z(n)|^2$',
+            swatchClass: 'stroke-h1',
+          },
+          {
+            label: 'floor $\\xi_{\\min}$ (music power)',
             swatchClass: 'stroke-truth',
             dash: true,
           },

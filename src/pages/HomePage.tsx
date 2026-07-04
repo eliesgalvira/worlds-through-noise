@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 import { Logo } from '@/components/Logo.tsx'
+import { MathText } from '@/components/MathText.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { lessons } from '@/content/lessons.ts'
 import { siteRoutes } from '@/lib/routes.ts'
@@ -75,7 +76,7 @@ function HomePage() {
                       {route.label}
                     </h3>
                     <p className="mt-1 text-muted-foreground">
-                      {route.tagline}
+                      <MathText text={route.tagline} />
                     </p>
                     {lesson !== undefined ? (
                       <p className="mt-2 font-mono text-xs text-muted-foreground/80">

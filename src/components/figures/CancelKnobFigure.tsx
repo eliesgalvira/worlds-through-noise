@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { SliderControl } from '@/components/SliderControl.tsx'
+import { MathText } from '@/components/MathText.tsx'
 import {
   FigureShell,
   Legend,
@@ -82,7 +83,7 @@ function CancelKnobFigure() {
   return (
     <FigureShell
       title="Turn the knob until the jackhammer disappears"
-      instruction="Mic 1 hears music + jackhammer (top trace). Mic 2 hears the jackhammer with a music leak α. The knob subtracts h·(mic 2). Find the quietest h by ear/eye, check it against the parabola — then raise the leak α and feel the tradeoff appear."
+      instruction="Mic 1 hears music + jackhammer (top trace). Mic 2 hears the jackhammer with a music leak $\alpha$. The knob subtracts $h \cdot$ (mic 2). Find the quietest $h$ by ear/eye, check it against the parabola — then raise the leak $\alpha$ and feel the tradeoff appear."
       controls={
         <>
           <SliderControl
@@ -112,12 +113,12 @@ function CancelKnobFigure() {
       readout={
         <>
           <ReadoutRow
-            label="Measured residual power P_z"
+            label="Measured residual power $P_z$"
             value={formatNumber(pz, 3)}
             tone="h1"
           />
           <ReadoutRow
-            label="Optimum h_opt = (α+1)/(α²+1)"
+            label="Optimum $h_{opt} = \frac{\alpha+1}{\alpha^2+1}$"
             value={formatNumber(hOpt, 3)}
             tone="good"
           />
@@ -130,8 +131,7 @@ function CancelKnobFigure() {
             }
           />
           <p className="text-xs leading-5 text-muted-foreground">
-            P_z is measured from the actual waveform; the parabola is the theory
-            (1−hα)² + (1−h)². They agree — that is the point.
+            <MathText text="$P_z$ is measured from the actual waveform; the parabola is the theory $(1-h\alpha)^2 + (1-h)^2$. They agree — that is the point." />
           </p>
         </>
       }
@@ -139,7 +139,10 @@ function CancelKnobFigure() {
       <Legend
         items={[
           { label: 'mic 1: music + jackhammer', swatchClass: 'stroke-h0' },
-          { label: 'output z(n) after subtraction', swatchClass: 'stroke-h1' },
+          {
+            label: 'output $z(n)$ after subtraction',
+            swatchClass: 'stroke-h1',
+          },
         ]}
       />
       <Plot

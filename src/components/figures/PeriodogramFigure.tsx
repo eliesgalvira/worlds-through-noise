@@ -51,7 +51,7 @@ function PeriodogramFigure() {
   return (
     <FigureShell
       title="Sweep a detector bank across the band"
-      instruction="Each candidate frequency proposes a template; the meter is the honest correlation |Σx(n)e^{−j2πfn}|²/N between your actual noisy samples and that template. Slide the candidate and hunt the hidden tone — then raise N and watch the peak sharpen like N³."
+      instruction="Each candidate frequency proposes a template; the meter is the honest correlation $|\sum x(n)e^{-j2\pi f n}|^2/N$ between your actual noisy samples and that template. Slide the candidate and hunt the hidden tone — then raise $N$ and watch the peak sharpen like $N^3$."
       controls={
         <>
           <SliderControl
@@ -72,7 +72,7 @@ function PeriodogramFigure() {
             min={16}
             max={256}
             step={8}
-            meaning="Frequency information grows like N³."
+            meaning="Frequency information grows like $N^3$."
             onValueChange={setN}
             format={(v) => `N = ${v.toFixed(0)}`}
           />
@@ -107,7 +107,7 @@ function PeriodogramFigure() {
             tone="h1"
           />
           <ReadoutRow
-            label="Peak of the bank: f̂_ML"
+            label="Peak of the bank: $\hat{f}_{ML}$"
             value={formatNumber(fMl, 3)}
             tone="good"
           />
@@ -116,7 +116,7 @@ function PeriodogramFigure() {
             value={formatNumber(TRUE_FREQ, 3)}
           />
           <ReadoutRow
-            label="CRB std of f̂ (≈1/N^1.5)"
+            label="CRB std of $\hat{f}$ ($\approx 1/N^{1.5}$)"
             value={formatNumber(crbStd, 5)}
           />
         </>
@@ -124,9 +124,13 @@ function PeriodogramFigure() {
     >
       <Legend
         items={[
-          { label: 'periodogram |X(f)|²/N', swatchClass: 'stroke-h0' },
+          { label: 'periodogram $|X(f)|^2/N$', swatchClass: 'stroke-h0' },
           { label: 'your candidate', swatchClass: 'stroke-threshold' },
-          { label: 'true tone ± CRB', swatchClass: 'stroke-truth', dash: true },
+          {
+            label: 'true tone $\\pm$ CRB',
+            swatchClass: 'stroke-truth',
+            dash: true,
+          },
         ]}
       />
       <Plot

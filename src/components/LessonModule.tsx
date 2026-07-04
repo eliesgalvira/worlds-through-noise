@@ -1,4 +1,5 @@
 import { EquationReveal } from '@/components/EquationReveal.tsx'
+import { MathText } from '@/components/MathText.tsx'
 import { PredictionPrompt } from '@/components/PredictionPrompt.tsx'
 import { AutocorrelationFigure } from '@/components/figures/AutocorrelationFigure.tsx'
 import { BitVoteFigure } from '@/components/figures/BitVoteFigure.tsx'
@@ -72,7 +73,9 @@ function LabeledParagraph({
       <p className="font-mono text-xs uppercase tracking-[0.14em] text-accent">
         {label}
       </p>
-      <p className="mt-1.5 text-base leading-7 text-foreground">{text}</p>
+      <p className="mt-1.5 text-base leading-7 text-foreground">
+        <MathText text={text} />
+      </p>
     </div>
   )
 }
@@ -95,7 +98,7 @@ function LessonModule({ module }: LessonModuleProps) {
           {module.title}
         </h2>
         <p className="mt-3 border-l border-accent pl-4 text-lg leading-8 text-muted-foreground">
-          {module.question}
+          <MathText text={module.question} />
         </p>
       </header>
 
@@ -129,14 +132,14 @@ function LessonModule({ module }: LessonModuleProps) {
       >
         <PredictionPrompt
           question={module.prediction.question}
-          answer={module.prediction.answer}
+          answer={<MathText text={module.prediction.answer} />}
         />
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-accent">
             Transfer to the exam
           </p>
           <p className="mt-2 text-base leading-7 text-foreground">
-            {module.transfer}
+            <MathText text={module.transfer} />
           </p>
           {module.examRefs.length > 0 ? (
             <ul className="mt-3 space-y-1 text-sm leading-6 text-muted-foreground">
@@ -145,7 +148,7 @@ function LessonModule({ module }: LessonModuleProps) {
                   <span aria-hidden="true" className="text-accent">
                     →
                   </span>
-                  {ref}
+                  <MathText text={ref} />
                 </li>
               ))}
             </ul>

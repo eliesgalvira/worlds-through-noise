@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import { MathText } from '@/components/MathText.tsx'
 import { Label } from '@/components/ui/label.tsx'
 import { Slider } from '@/components/ui/slider.tsx'
 import { cn } from '@/lib/utils.ts'
@@ -72,7 +73,9 @@ function SliderControl({
         }}
       />
       {meaning !== undefined ? (
-        <p className="text-xs leading-5 text-muted-foreground">{meaning}</p>
+        <p className="text-xs leading-5 text-muted-foreground">
+          <MathText text={meaning} />
+        </p>
       ) : null}
     </div>
   )

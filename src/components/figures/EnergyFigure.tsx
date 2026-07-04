@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { SliderControl } from '@/components/SliderControl.tsx'
+import { MathText } from '@/components/MathText.tsx'
 import {
   FigureShell,
   Legend,
@@ -59,8 +60,8 @@ function EnergyFigure() {
 
   return (
     <FigureShell
-      title="Two loudness gauges, separating at √N"
-      instruction="Nobody knows the waveform, so the detector can only measure energy. The bumps are exact chi-squared densities of the measured power under each hypothesis. Slide N: the centers stay P apart while the widths shrink like 1/√N — separation is slow. Compare the jailer with the receiver, who knows the waveform and gains the full N."
+      title="Two loudness gauges, separating at $\sqrt{N}$"
+      instruction="Nobody knows the waveform, so the detector can only measure energy. The bumps are exact chi-squared densities of the measured power under each hypothesis. Slide $N$: the centers stay $P$ apart while the widths shrink like $1/\sqrt{N}$ — separation is slow. Compare the jailer with the receiver, who knows the waveform and gains the full $N$."
       controls={
         <>
           <SliderControl
@@ -101,30 +102,37 @@ function EnergyFigure() {
       readout={
         <>
           <ReadoutRow
-            label="Jailer's P_D (energy detector)"
+            label="Jailer's $P_D$ (energy detector)"
             value={formatPercentValue(pdJailer)}
             tone={pdJailer - alpha < 0.08 ? 'bad' : 'h1'}
           />
           <ReadoutRow
-            label="Receiver's P_D (knows waveform)"
+            label="Receiver's $P_D$ (knows waveform)"
             value={formatPercentValue(pdReceiver)}
             tone="good"
           />
-          <ReadoutRow label="P_FA (both)" value={formatPercentValue(alpha)} />
+          <ReadoutRow
+            label="$P_{FA}$ (both)"
+            value={formatPercentValue(alpha)}
+          />
           <p className="text-xs leading-5 text-muted-foreground">
-            When the jailer's P_D ≈ α, the transmission is statistically
-            invisible: energy detection only gains √N, coherent detection gains
-            N.
+            <MathText text="When the jailer's $P_D \approx \alpha$, the transmission is statistically invisible: energy detection only gains $\sqrt{N}$, coherent detection gains $N$." />
           </p>
         </>
       }
     >
       <Legend
         items={[
-          { label: 'H₀: noise power only', swatchClass: 'stroke-h0' },
-          { label: 'H₁: noise + covert signal', swatchClass: 'stroke-h1' },
           {
-            label: 'threshold (spends α)',
+            label: '$\\mathcal{H}_0$: noise power only',
+            swatchClass: 'stroke-h0',
+          },
+          {
+            label: '$\\mathcal{H}_1$: noise + covert signal',
+            swatchClass: 'stroke-h1',
+          },
+          {
+            label: 'threshold (spends $\\alpha$)',
             swatchClass: 'stroke-threshold',
             dash: true,
           },
@@ -172,9 +180,7 @@ function EnergyFigure() {
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        Densities and tails are exact χ²₂ₙ computations — watch how skewed they
-        are at small N, where the exponential special case P_D = P_FA^(σ₀²/σ₁²)
-        lives.
+        <MathText text="Densities and tails are exact $\chi^2_{2N}$ computations — watch how skewed they are at small $N$, where the exponential special case $P_D = P_{FA}^{\sigma_0^2/\sigma_1^2}$ lives." />
       </p>
     </FigureShell>
   )

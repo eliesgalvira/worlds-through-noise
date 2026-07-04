@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { SliderControl } from '@/components/SliderControl.tsx'
+import { MathText } from '@/components/MathText.tsx'
 import {
   FigureShell,
   Legend,
@@ -108,7 +109,7 @@ function PredictorFigure() {
   return (
     <FigureShell
       title="Watch the error filter dig its own notch"
-      instruction="The predictor is designed only from the autocorrelation — nobody tells it the tone's frequency. The curve is the prediction-error filter's response |H_eq(f)|², honestly computed from h_opt = R⁻¹r. Raise the SNR and watch a null carve itself at f₀."
+      instruction="The predictor is designed only from the autocorrelation — nobody tells it the tone's frequency. The curve is the prediction-error filter's response $|H_{eq}(f)|^2$, honestly computed from $\mathbf{h}_{opt} = \mathbf{R}^{-1}\mathbf{r}$. Raise the SNR and watch a null carve itself at $f_0$."
       controls={
         <>
           <SliderControl
@@ -129,7 +130,7 @@ function PredictorFigure() {
             min={1}
             max={8}
             step={1}
-            meaning="One tone needs Q ≥ 1; M tones need Q ≥ M."
+            meaning="One tone needs $Q \geq 1$; $M$ tones need $Q \geq M$."
             onValueChange={setTaps}
             format={(v) => `Q = ${v.toFixed(0)}`}
           />
@@ -138,22 +139,21 @@ function PredictorFigure() {
       readout={
         <>
           <ReadoutRow
-            label="ξ_min (unpredictable part)"
+            label="$\xi_{\min}$ (unpredictable part)"
             value={formatNumber(solution.xiMin, 3)}
             tone="h1"
           />
           <ReadoutRow
-            label="Noise floor σ_w²"
+            label="Noise floor $\sigma_w^2$"
             value={formatNumber(sigma2, 3)}
             tone="good"
           />
           <ReadoutRow
-            label="Notch depth at f₀"
+            label="Notch depth at $f_0$"
             value={`${formatNumber(notchDepth, 1)} dB`}
           />
           <p className="text-xs leading-5 text-muted-foreground">
-            ξ_min → σ_w² as SNR grows: the tone becomes perfectly predictable
-            and only the memoryless noise refuses.
+            <MathText text="$\xi_{\min} \to \sigma_w^2$ as SNR grows: the tone becomes perfectly predictable and only the memoryless noise refuses." />
           </p>
         </>
       }
@@ -161,11 +161,11 @@ function PredictorFigure() {
       <Legend
         items={[
           {
-            label: 'prediction-error filter |H_eq(f)|²',
+            label: 'prediction-error filter $|H_{eq}(f)|^2$',
             swatchClass: 'stroke-h0',
           },
           {
-            label: 'hidden tone frequency f₀',
+            label: 'hidden tone frequency $f_0$',
             swatchClass: 'stroke-h1',
             dash: true,
           },
@@ -230,8 +230,7 @@ function PredictorFigure() {
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        This is the ALE: at the output y(n) the tone survives, at the error e(n)
-        it has been notched away — separation without a tuner.
+        <MathText text="This is the ALE: at the output $y(n)$ the tone survives, at the error $e(n)$ it has been notched away — separation without a tuner." />
       </p>
     </FigureShell>
   )

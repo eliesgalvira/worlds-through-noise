@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
+import { MathText } from '@/components/MathText.tsx'
 import {
   FigureShell,
   Legend,
@@ -86,7 +87,7 @@ function TwoWorldsFigure() {
   return (
     <FigureShell
       title="Two machines, one number — and a flipped threshold"
-      instruction="H1 (anemia) is the LEFT pile: sick patients have lower ferritin, so you call H1 below the threshold. Draw a patient, judge them, then raise N and watch both piles tighten by √N until the overlap drains."
+      instruction="$\mathcal{H}_1$ (anemia) is the LEFT pile: sick patients have lower ferritin, so you call $\mathcal{H}_1$ below the threshold. Draw a patient, judge them, then raise $N$ and watch both piles tighten by $\sqrt{N}$ until the overlap drains."
       controls={
         <>
           <SliderControl
@@ -110,7 +111,7 @@ function TwoWorldsFigure() {
             min={X_MIN + 5}
             max={X_MAX - 5}
             step={0.5}
-            meaning="Below γ you declare anemia."
+            meaning="Below $\gamma$ you declare anemia."
             onValueChange={setThreshold}
             format={(v) => `γ = ${v.toFixed(1)}`}
           />
@@ -135,16 +136,19 @@ function TwoWorldsFigure() {
       readout={
         <>
           <ReadoutRow
-            label="P_FA (healthy called anemic)"
+            label="$P_{FA}$ (healthy called anemic)"
             value={formatPercentValue(pFalseAlarm)}
             tone="bad"
           />
           <ReadoutRow
-            label="P_D (anemia caught)"
+            label="$P_D$ (anemia caught)"
             value={formatPercentValue(pDetection)}
             tone="good"
           />
-          <ReadoutRow label="P_M = 1 − P_D" value={formatPercentValue(pMiss)} />
+          <ReadoutRow
+            label="$P_M = 1 - P_D$"
+            value={formatPercentValue(pMiss)}
+          />
           {draw !== null ? (
             <p className="pt-1 text-xs leading-5 text-foreground">
               Patient average: {formatNumber(draw.mean, 1)} → verdict {verdict}.{' '}
@@ -162,9 +166,19 @@ function TwoWorldsFigure() {
     >
       <Legend
         items={[
-          { label: 'H1: anemic (m₁ = 42)', swatchClass: 'stroke-h1' },
-          { label: 'H0: healthy (m₀ = 58)', swatchClass: 'stroke-h0' },
-          { label: 'threshold γ', swatchClass: 'stroke-threshold', dash: true },
+          {
+            label: '$\\mathcal{H}_1$: anemic ($m_1 = 42$)',
+            swatchClass: 'stroke-h1',
+          },
+          {
+            label: '$\\mathcal{H}_0$: healthy ($m_0 = 58$)',
+            swatchClass: 'stroke-h0',
+          },
+          {
+            label: 'threshold $\\gamma$',
+            swatchClass: 'stroke-threshold',
+            dash: true,
+          },
         ]}
       />
       <Plot
@@ -271,8 +285,7 @@ function TwoWorldsFigure() {
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        The red area is the false-alarm probability being manufactured; both
-        error probabilities are computed from N(m, σ²/N), never faked.
+        <MathText text="The red area is the false-alarm probability being manufactured; both error probabilities are computed from $N(m, \sigma^2/N)$, never faked." />
       </p>
     </FigureShell>
   )

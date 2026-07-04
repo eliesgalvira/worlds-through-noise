@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { SliderControl } from '@/components/SliderControl.tsx'
+import { MathText } from '@/components/MathText.tsx'
 import {
   FigureShell,
   Legend,
@@ -58,7 +59,7 @@ function ErrorBowlFigure() {
   return (
     <FigureShell
       title="Feel for the bottom of the bowl"
-      instruction="Every point is a 2-tap filter; the ellipses are iso-error contours of the honestly computed ξ(h). Drag h downhill and watch the second meter: the correlation between input and residual error drains to zero exactly at the bottom — that is the orthogonality principle."
+      instruction="Every point is a 2-tap filter; the ellipses are iso-error contours of the honestly computed $\xi(\mathbf{h})$. Drag $\mathbf{h}$ downhill and watch the second meter: the correlation between input and residual error drains to zero exactly at the bottom — that is the orthogonality principle."
       controls={
         <>
           <SliderControl
@@ -73,30 +74,29 @@ function ErrorBowlFigure() {
             format={(v) => v.toFixed(2)}
           />
           <p className="text-xs leading-5 text-muted-foreground">
-            Scenario: identify the unknown system c = [0.8, −0.5] from its noisy
-            output. Drag directly on the plot.
+            <MathText text="Scenario: identify the unknown system $\mathbf{c} = [0.8, -0.5]^T$ from its noisy output. Drag directly on the plot." />
           </p>
         </>
       }
       readout={
         <>
           <ReadoutRow
-            label="Error power ξ(h)"
+            label="Error power $\xi(\mathbf{h})$"
             value={formatNumber(currentXi, 3)}
             tone="h1"
           />
           <ReadoutRow
-            label="Floor ξ_min (noise on d)"
+            label="Floor $\xi_{\min}$ (noise on $d$)"
             value={formatNumber(xiMin, 3)}
             tone="good"
           />
           <ReadoutRow
-            label="‖E[x·e]‖ — orthogonality meter"
+            label="$\|E\{\mathbf{x}e\}\|$ — orthogonality meter"
             value={formatNumber(residNorm, 3)}
             tone={residNorm < 0.05 ? 'good' : 'bad'}
           />
           <ReadoutRow
-            label="Excess Δhᵀ R Δh"
+            label="Excess $\Delta\mathbf{h}^T\mathbf{R}\,\Delta\mathbf{h}$"
             value={formatNumber(currentXi - xiMin, 3)}
           />
         </>
@@ -104,9 +104,18 @@ function ErrorBowlFigure() {
     >
       <Legend
         items={[
-          { label: 'iso-error contours ξ(h)', swatchClass: 'stroke-h0' },
-          { label: 'bottom h_opt = R⁻¹r', swatchClass: 'stroke-detection' },
-          { label: 'your filter h', swatchClass: 'stroke-threshold' },
+          {
+            label: 'iso-error contours $\\xi(\\mathbf{h})$',
+            swatchClass: 'stroke-h0',
+          },
+          {
+            label: 'bottom $\\mathbf{h}_{opt} = \\mathbf{R}^{-1}\\mathbf{r}$',
+            swatchClass: 'stroke-detection',
+          },
+          {
+            label: 'your filter $\\mathbf{h}$',
+            swatchClass: 'stroke-threshold',
+          },
         ]}
       />
       <Plot

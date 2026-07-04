@@ -11,7 +11,7 @@ import { useState } from 'react'
 
 const COPIES = 5
 const W = 470
-const H = 220
+const H = 280
 
 function BitVoteFigure() {
   const [epsilonPct, setEpsilonPct] = useState(20)

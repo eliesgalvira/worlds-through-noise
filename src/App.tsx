@@ -7,10 +7,17 @@ import { LessonPage } from '@/pages/LessonPage.tsx'
 import { NotFoundPage } from '@/pages/NotFoundPage.tsx'
 
 function ScrollToTop() {
-  const { pathname } = useLocation()
+  const { pathname, hash } = useLocation()
   useEffect(() => {
+    if (hash !== '') {
+      const target = document.getElementById(hash.slice(1))
+      if (target !== null) {
+        target.scrollIntoView()
+        return
+      }
+    }
     window.scrollTo({ top: 0 })
-  }, [pathname])
+  }, [pathname, hash])
   return null
 }
 

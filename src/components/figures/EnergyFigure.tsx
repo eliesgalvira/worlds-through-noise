@@ -17,7 +17,7 @@ import {
 } from '@/domain/math/kernel.ts'
 
 const W = 470
-const H = 230
+const H = 280
 
 function EnergyFigure() {
   const [samples, setSamples] = useState(10)

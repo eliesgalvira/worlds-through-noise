@@ -136,26 +136,309 @@ export const wienerLesson: LessonRecord = {
       ],
     },
   ],
-  examBank: [
+  workedProblems: [
     {
-      exam: 'Final Jun 2026, Ex. 2',
-      title: 'Concert hall vs jackhammer (scalar canceller)',
-      move: 'P_z as a 1-D bowl; h_opt = (α+1)/(α²+1); mic placement drives α → 0.',
+      id: 'wp-two-mics',
+      source: 'Final · 19 Juny 2026 · Ex. 2, parts a–d (of a–g)',
+      title: 'Two microphones: cancel the jackhammer, keep the music',
+      why: 'The W2 canceller as a real exam problem, reduced to a single gain so every Wiener idea is visible by hand: the error-power bowl, the derivative that finds its bottom, and the physical placement rule that the algebra ends up dictating.',
+      statement: [
+        {
+          kind: 'text',
+          content:
+            'A microphone in a concert hall captures $x(n) = s(n) + w(n)$: music $s(n)$ plus, uncorrelated with it, the noise $w(n)$ of a jackhammer outside. Both are zero-mean with unit power. A second microphone captures a simplified mixture $y(n) = \\alpha s(n) + w(n)$, with $0 \\leq \\alpha \\leq 1$. We form',
+        },
+        {
+          kind: 'math',
+          content:
+            'z(n) = x(n) - h\\,y(n), \\qquad h_{opt} = \\arg\\min_h E\\{z^2(n)\\}',
+        },
+      ],
+      related: {
+        text: 'Parts e–g continue on the Adaptive page: LMS learns this h and pays a price',
+        href: '/adaptive#wp-two-mics-lms',
+      },
+      parts: [
+        {
+          label: 'a',
+          prompt: 'Write the power of $z(n)$, $P_z$.',
+          steps: [
+            {
+              title: 'Group by source before squaring',
+              body: 'Substitute both microphone models and collect the music and noise coefficients — $z(n)$ is a two-channel mixture with gains set by $h$.',
+              latex:
+                'z(n) = (s(n) + w(n)) - h(\\alpha s(n) + w(n)) = (1 - h\\alpha)\\,s(n) + (1 - h)\\,w(n)',
+            },
+            {
+              title: 'Add powers of uncorrelated parts',
+              body: 'No cross terms survive ($s \\perp w$, both unit power), so the powers of the two branches simply add.',
+              latex: 'P_z = (1 - h\\alpha)^2 + (1 - h)^2',
+            },
+          ],
+          answer: {
+            sentence:
+              'A one-dimensional parabola in $h$ — the W1 bowl, with one term trying to keep the music and the other trying to kill the noise.',
+            latex: 'P_z = (1 - h\\alpha)^2 + (1 - h)^2',
+          },
+        },
+        {
+          label: 'b',
+          prompt:
+            'Find the $h$ minimizing $P_z$, and verify that $\\alpha = 0$ gives $h_{opt} = 1$, $P_z^{\\min} = 1$.',
+          steps: [
+            {
+              title: 'Descend to the bottom of the bowl',
+              body: 'Set the derivative to zero — the scalar normal equation.',
+              latex:
+                '\\frac{dP_z}{dh} = -2\\alpha(1 - h\\alpha) - 2(1 - h) = 0 \\;\\Longrightarrow\\; h_{opt} = \\frac{\\alpha + 1}{\\alpha^2 + 1}',
+            },
+            {
+              title: 'Check the clean-reference case',
+              body: 'With $\\alpha = 0$ the second microphone hears only the jackhammer: $h_{opt} = 1$ subtracts it exactly, and what remains is the unit-power music, $P_z^{\\min} = 1$ — total noise cancellation.',
+            },
+          ],
+          answer: {
+            sentence:
+              'The optimal gain balances noise cancellation against music self-cancellation; a clean noise reference makes the cancellation perfect.',
+            latex: 'h_{opt} = \\frac{\\alpha + 1}{\\alpha^2 + 1}',
+          },
+        },
+        {
+          label: 'c',
+          prompt:
+            'With $h = h_{opt}$, write $z(n) = A\\,s(n) + B\\,w(n)$, find $A$ and $B$, and obtain the SNR of $z(n)$ as a function of $\\alpha$.',
+          steps: [
+            {
+              title: 'Substitute the optimal gain into both branches',
+              body: 'Each coefficient becomes a rational function of $\\alpha$.',
+              latex:
+                'A = 1 - \\frac{(\\alpha+1)\\alpha}{\\alpha^2+1} = \\frac{1 - \\alpha}{\\alpha^2 + 1}, \\qquad B = 1 - \\frac{\\alpha+1}{\\alpha^2+1} = \\frac{\\alpha(\\alpha - 1)}{\\alpha^2 + 1}',
+            },
+            {
+              title: 'Take the power ratio',
+              body: 'Unit source powers make the SNR just $A^2/B^2$; the $(1-\\alpha)^2$ factors cancel.',
+              latex:
+                'SNR_z = \\frac{A^2}{B^2} = \\frac{(1-\\alpha)^2}{\\alpha^2(1-\\alpha)^2} = \\frac{1}{\\alpha^2}',
+            },
+          ],
+          answer: {
+            sentence:
+              'The output SNR is $1/\\alpha^2$: the only thing that limits the canceller is how much music leaks into the reference microphone.',
+            latex: 'SNR_z = \\frac{1}{\\alpha^2}',
+          },
+        },
+        {
+          label: 'd',
+          prompt:
+            'How should $\\alpha$ be for the best quality? Where should the second microphone be placed?',
+          steps: [
+            {
+              title: 'Read the design rule off the SNR',
+              body: 'SNR $= 1/\\alpha^2$ wants $\\alpha$ as small as possible, ideally $0$. Physically: put the reference microphone outside, right next to the jackhammer and as far from the music as possible. Otherwise Wiener — minimizing total output power — will happily cancel the music too, since to a power-minimizer all power is equally offensive.',
+            },
+          ],
+          answer: {
+            sentence:
+              'Place the reference where it hears the enemy and not the friend: $\\alpha \\to 0$. This is the general rule of Wiener noise cancellation, derived rather than recited.',
+          },
+        },
+      ],
     },
     {
-      exam: 'Final Jun 2025, Ex. 3',
-      title: 'Echo cancellation with correlated speech',
-      move: 'Regularize: R_x + μI shifts all eigenvalues up, taming the eigenvalue spread that ruins convergence.',
+      id: 'wp-pilot-predictor',
+      source: 'Final · 7 Gener 2026 · Ex. 2, parts d–g (of a–k)',
+      title: 'Predicting a pilot tone out of the noise',
+      why: 'The W3 predictor on the course’s favorite signal model $\\mathbf{R}_x = |A_0|^2\\mathbf{s}^*\\mathbf{s}^T + \\sigma^2\\mathbf{I}$: one matrix-inversion-lemma move gives $\\mathbf{h}_{opt}$ in closed form, and the payoff is an SNR multiplied by $Q$. Continues the pilot-tone detector from the Detection page.',
+      statement: [
+        {
+          kind: 'text',
+          content:
+            'Detecting the pilot tone $t(n) = A_0 e^{j2\\pi f_0 n}$ (Detection page, same exam) is hard at low SNR, so a linear predictor $\\mathbf{h}$ of $Q$ coefficients is inserted before the detector: it predicts the tone from the previous $Q$ samples, and detection is then performed on the prediction $\\hat{t}(n)$. The observation is $x(n) = t(n) + w(n)$ with complex white noise of variance $\\sigma^2$, and $SNR = |A_0|^2/\\sigma^2$.',
+        },
+      ],
+      related: {
+        text: 'Parts h–k continue on the Adaptive page: the same predictor learned by LMS',
+        href: '/adaptive#wp-ale-lms',
+      },
+      parts: [
+        {
+          label: 'd',
+          prompt:
+            'Describe the block diagram (predictor + detector), naming every signal involved.',
+          steps: [
+            {
+              title: 'Chain the two blocks',
+              body: 'The predictor reads the vector of the $Q$ past samples $\\mathbf{x}(n-1) = [x(n-1), \\dots, x(n-Q)]^T$ and outputs $\\hat{x}(n) = \\mathbf{h}^H\\mathbf{x}(n-1)$, its guess of the tone at time $n$. That prediction — not the raw sample — feeds the Neyman–Pearson detector of part (b), which compares its statistic against the threshold to decide tone present / tone lost.',
+            },
+          ],
+          answer: {
+            sentence:
+              'Past window → predictor $\\mathbf{h}$ → predicted tone $\\hat{x}(n)$ → matched-filter detector. The predictor’s job is to pass the tone and starve the noise.',
+          },
+        },
+        {
+          label: 'e',
+          prompt:
+            'Find the Wiener solution $\\mathbf{h}_{opt}$ for the predictor and show it can be written as $\\mathbf{h}_{opt} = \\frac{SNR}{1 + Q\\,SNR}\\,e^{-j2\\pi f_0}\\,\\mathbf{s}^*$.',
+          steps: [
+            {
+              title: 'Write the normal equations for prediction',
+              body: 'The desired signal is the next sample, so the cross-correlation vector is the autocorrelation at lag $-1$; the data matrix is the tone-plus-noise workhorse.',
+              latex:
+                '\\mathbf{h}_{opt} = \\mathbf{R}_x^{-1}\\mathbf{r}_x(-1), \\qquad \\mathbf{R}_x = |A_0|^2\\,\\mathbf{s}^*\\mathbf{s}^T + \\sigma^2\\mathbf{I}, \\qquad \\mathbf{r}_x(-1) = |A_0|^2 e^{-j2\\pi f_0}\\,\\mathbf{s}^*',
+            },
+            {
+              title: 'Invert rank-one-plus-identity with the inversion lemma',
+              body: 'The lemma turns the inverse into identity minus a scaled projector onto the tone direction — no honest matrix inversion needed.',
+              latex:
+                '\\mathbf{R}_x^{-1} = \\frac{1}{\\sigma^2}\\left(\\mathbf{I} - \\frac{SNR}{1 + Q\\,SNR}\\,\\mathbf{s}^*\\mathbf{s}^T\\right)',
+            },
+            {
+              title: 'Multiply and collapse',
+              body: 'Using $\\mathbf{s}^T\\mathbf{s}^* = Q$, the two terms combine into a single coefficient in front of $\\mathbf{s}^*$.',
+              latex:
+                '\\mathbf{h}_{opt} = \\frac{SNR}{1 + Q\\,SNR}\\,e^{-j2\\pi f_0}\\,\\mathbf{s}^*',
+              note: 'Shape: a matched filter pointed at the tone direction, scaled down by how much the noise is trusted; the $e^{-j2\\pi f_0}$ advances the phase by the one-step prediction.',
+            },
+          ],
+          answer: {
+            sentence:
+              'The optimal predictor is a shrunk, phase-advanced matched filter along the tone’s steering vector.',
+            latex:
+              '\\mathbf{h}_{opt} = \\frac{SNR}{1 + Q\\,SNR}\\,e^{-j2\\pi f_0}\\,\\mathbf{s}^*',
+          },
+        },
+        {
+          label: 'f',
+          prompt:
+            'Find $SNR_{out} = P_{t_{out}}/P_{w_{out}}$ at the predictor output, in terms of $SNR$ and $Q$.',
+          steps: [
+            {
+              title: 'Pass tone and noise through the filter separately',
+              body: 'The tone projects fully onto $\\mathbf{h}_{opt}$ (coherent gain $Q$); the white noise only contributes through $\\|\\mathbf{h}_{opt}\\|^2$.',
+              latex:
+                'P_{t_{out}} = |A_0|^2\\left(\\frac{Q\\,SNR}{1 + Q\\,SNR}\\right)^2, \\qquad P_{w_{out}} = \\sigma^2\\|\\mathbf{h}_{opt}\\|^2 = \\sigma^2\\,\\frac{Q\\,SNR^2}{(1 + Q\\,SNR)^2}',
+            },
+            {
+              title: 'Divide and cancel',
+              body: 'The $(1+Q\\,SNR)^2$ denominators cancel and one factor of $Q\\,SNR$ survives.',
+              latex: 'SNR_{out} = \\frac{P_{t_{out}}}{P_{w_{out}}} = Q\\,SNR',
+            },
+          ],
+          answer: {
+            sentence:
+              'The predictor multiplies the SNR by the number of taps: $Q$ samples of a perfectly predictable tone average coherently while the noise averages incoherently.',
+            latex: 'SNR_{out} = Q \\cdot SNR',
+          },
+        },
+        {
+          label: 'g',
+          prompt:
+            'How does using the predictor affect the detection probability of part (c) (Detection page)?',
+          steps: [
+            {
+              title: 'Carry the improved SNR into the ROC',
+              body: 'Strictly, the noise at the predictor output is no longer white, so the NP test should be re-derived. But if it can be taken as approximately white, the part-(c) formula applies with $SNR \\to Q\\,SNR$.',
+              latex:
+                'P_d = Q\\!\\left(Q^{-1}(P_{fa}) - \\sqrt{2N\\,Q\\,SNR}\\right)',
+            },
+          ],
+          answer: {
+            sentence:
+              'The deflection gains a factor $\\sqrt{Q}$: every extra predictor tap works like lengthening the detector’s observation window.',
+            latex:
+              'P_d = Q\\!\\left(Q^{-1}(P_{fa}) - \\sqrt{2NQ\\,SNR}\\right)',
+          },
+        },
+      ],
     },
     {
-      exam: 'Teoría T4, Ejemplo 2',
-      title: 'Channel equalization',
-      move: 'h_opt = (CᴴC + I/SNR)⁻¹Cᴴδ: zero-forcer at high SNR, channel-matched filter at low SNR.',
-    },
-    {
-      exam: 'Teoría T4, Ejemplo 1',
-      title: 'System identification',
-      move: 'White excitation makes R_x diagonal: h_opt = SNR/(SNR+1)·c, a shrunk copy of the unknown system.',
+      id: 'wp-ar-wiener',
+      source: 'Exercise collection · Temes 4–5 (Feb 2026) · Ex. 4.1',
+      title: 'The canonical AR(1) denoiser',
+      why: 'The collection’s opening exercise and the numbers everyone should have solved once by hand: build $r_s(m)$ from the AR recursion (a Tema 1 move), fill the $2 \\times 2$ normal equations, and price the cleanup with the MMSE formula.',
+      statement: [
+        {
+          kind: 'text',
+          content:
+            'Let $x(n) = s(n) + w(n)$, where $s(n)$ is an AR process satisfying the recursion',
+        },
+        {
+          kind: 'math',
+          content: 's(n) = 0.8\\,s(n-1) + v(n)',
+        },
+        {
+          kind: 'text',
+          content:
+            'and $v(n)$, $w(n)$ are uncorrelated white noises with powers $\\sigma_v^2 = 0.49$ and $\\sigma_w^2 = 1$.',
+        },
+      ],
+      parts: [
+        {
+          label: 'a',
+          prompt:
+            'Determine the autocorrelation sequences of $s(n)$ and of $x(n)$.',
+          steps: [
+            {
+              title: 'Milk the recursion for the autocorrelation',
+              body: 'Multiply the recursion by $s(n-m)$ and take expectations: for $m \\geq 1$ the innovation $v(n)$ is uncorrelated with the past, giving a geometric decay; at $m = 0$ the innovation contributes.',
+              latex:
+                'r_s(m) = 0.8\\,r_s(m-1) \\; (m \\geq 1), \\qquad r_s(0) = \\frac{\\sigma_v^2}{1 - 0.8^2} = \\frac{0.49}{0.36} = \\frac{49}{36}',
+            },
+            {
+              title: 'Add the white observation noise',
+              body: 'Signal and noise are uncorrelated, so autocorrelations add; the noise only shows up at lag zero.',
+              latex:
+                'r_s(m) = \\frac{49}{36}\\,0.8^{|m|}, \\qquad r_x(m) = r_s(m) + \\delta(m)',
+            },
+          ],
+          answer: {
+            sentence:
+              'A geometrically fading memory of about 1.36 at lag zero, plus a unit noise spike on top — the exact shape the P2 slider builds.',
+            latex: 'r_x(m) = \\tfrac{49}{36}\\,0.8^{|m|} + \\delta(m)',
+          },
+        },
+        {
+          label: 'b',
+          prompt:
+            'Design a Wiener filter of length $M = 2$ to estimate $s(n)$ from the samples of $x(n)$.',
+          steps: [
+            {
+              title: 'Fill the normal equations',
+              body: 'The data correlation matrix uses $r_x$; the cross-correlation with the desired clean signal is just $r_s$ (the noise is uncorrelated with $s$).',
+              latex:
+                '\\begin{bmatrix} \\tfrac{49}{36}{+}1 & \\tfrac{49}{36}\\,0.8 \\\\[2pt] \\tfrac{49}{36}\\,0.8 & \\tfrac{49}{36}{+}1 \\end{bmatrix}\\begin{bmatrix} h_0 \\\\ h_1 \\end{bmatrix} = \\begin{bmatrix} \\tfrac{49}{36} \\\\[2pt] \\tfrac{49}{36}\\,0.8 \\end{bmatrix}',
+            },
+            {
+              title: 'Solve the 2×2 system',
+              body: 'Numerically: $r_x(0) = 2.361$, $r_x(1) = 1.089$, $r_s(0) = 1.361$. Cramer or elimination gives the pair of taps.',
+              latex: '\\hat{s}(n) = 0.462\\,x(n) + 0.248\\,x(n-1)',
+            },
+          ],
+          answer: {
+            sentence:
+              'The filter keeps less than half of the current sample and borrows a quarter of the previous one — averaging along the signal’s memory to dilute the memoryless noise.',
+            latex: 'h_0 = 0.462, \\qquad h_1 = 0.248',
+          },
+        },
+        {
+          label: 'c',
+          prompt: 'Compute the minimum mean squared error for $M = 2$.',
+          steps: [
+            {
+              title: 'Use the MMSE shortcut',
+              body: 'At the bottom of the bowl the error is the desired-signal power minus what the filter managed to explain.',
+              latex:
+                'E_{\\min} = r_s(0) - \\mathbf{h}^T\\mathbf{r}_{sx} = \\frac{49}{36} - \\left(0.462 \\cdot \\frac{49}{36} + 0.248 \\cdot \\frac{49}{36} \\cdot 0.8\\right) = 0.462',
+            },
+          ],
+          answer: {
+            sentence:
+              'The two-tap filter cuts the error power from $r_s(0) \\approx 1.36$ (using no filter at all would leave the full unit noise on top) down to $0.462$ — and the coincidence with $h_0 = 0.462$ is exactly that, a coincidence of these numbers.',
+            latex: 'E_{\\min} = 0.462',
+          },
+        },
+      ],
     },
   ],
 }

@@ -215,15 +215,18 @@ function PowerTerrainFigure() {
           strokeWidth={1.5}
         />
         <text
-          x={hPoint.x + 10}
+          x={hPoint.x - 10}
           y={hPoint.y - 8}
+          textAnchor="end"
           className="fill-foreground font-mono text-[11px]"
         >
           h
         </text>
         <text
-          x={bestPoint.x + 8}
-          y={bestPoint.y + 14}
+          x={toScreen(eig.u1[0] * 1.52, eig.u1[1] * 1.52).x}
+          y={toScreen(eig.u1[0] * 1.52, eig.u1[1] * 1.52).y}
+          textAnchor="middle"
+          dominantBaseline="middle"
           className="fill-detection font-mono text-[10px]"
         >
           u_max

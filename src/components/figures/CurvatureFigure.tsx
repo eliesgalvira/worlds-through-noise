@@ -13,7 +13,7 @@ import { gaussianVector, makeRng } from '@/domain/math/kernel.ts'
 
 const TRUTH = 1
 const W = 470
-const H = 240
+const H = 290
 const T_MIN = -1.5
 const T_MAX = 3.5
 

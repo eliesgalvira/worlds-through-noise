@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AlignLeft, ChevronDown } from 'lucide-react'
-import type { LessonModuleRecord } from '@/domain/types.ts'
+import type { LessonModuleRecord, WorkedProblemRecord } from '@/domain/types.ts'
 import { cn } from '@/lib/utils.ts'
 
 type TocItem = {
@@ -11,11 +11,13 @@ type TocItem = {
 
 type StickyLessonNavProps = {
   readonly modules: ReadonlyArray<LessonModuleRecord>
+  readonly problems: ReadonlyArray<WorkedProblemRecord>
   readonly variant: 'desktop' | 'mobile'
 }
 
 function buildToc(
   modules: ReadonlyArray<LessonModuleRecord>,
+  problems: ReadonlyArray<WorkedProblemRecord>,
 ): ReadonlyArray<TocItem> {
   return [
     { id: 'lesson-intro', title: 'Introduction', depth: 1 },
@@ -36,7 +38,12 @@ function buildToc(
         depth: 2 as const,
       },
     ]),
-    { id: 'exam-bank', title: 'Exam bank', depth: 1 },
+    { id: 'exam-bank', title: 'Exam workbook', depth: 1 },
+    ...problems.map((problem) => ({
+      id: problem.id,
+      title: problem.title,
+      depth: 2 as const,
+    })),
   ]
 }
 
@@ -275,8 +282,8 @@ function TocList({
   )
 }
 
-function StickyLessonNav({ modules, variant }: StickyLessonNavProps) {
-  const items = useMemo(() => buildToc(modules), [modules])
+function StickyLessonNav({ modules, problems, variant }: StickyLessonNavProps) {
+  const items = useMemo(() => buildToc(modules, problems), [modules, problems])
   const activeId = useActiveToc(items)
   const [open, setOpen] = useState(false)
   const activeIndex = Math.max(

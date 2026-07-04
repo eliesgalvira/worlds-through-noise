@@ -8,7 +8,7 @@ import { ar1, gaussianVector, makeRng } from '@/domain/math/kernel.ts'
 const TRACES = 28
 const SAMPLES = 96
 const W = 460
-const H = 210
+const H = 280
 const HIST_W = 130
 
 type ProcessKind = 'white' | 'colored' | 'burst'
@@ -35,9 +35,9 @@ function makeEnsemble(kind: ProcessKind, seed: number): Array<Array<number>> {
 }
 
 const KIND_LABEL: Record<ProcessKind, string> = {
-  white: 'White noise',
-  colored: 'Filtered (AR) noise',
-  burst: 'Amplitude burst',
+  white: 'White',
+  colored: 'Filtered (AR)',
+  burst: 'Burst',
 }
 
 function EnsembleFigure() {

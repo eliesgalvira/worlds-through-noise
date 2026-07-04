@@ -81,7 +81,8 @@ function HomePage() {
                       <p className="mt-2 font-mono text-xs text-muted-foreground/80">
                         {lesson.modules.map((m) => m.id).join(' · ')} —{' '}
                         {lesson.modules.length} figures,{' '}
-                        {lesson.examBank.length} exam problems mapped
+                        {lesson.workedProblems.length} exam problems worked step
+                        by step
                       </p>
                     ) : null}
                   </div>
@@ -124,9 +125,12 @@ function HomePage() {
             </li>
             <li>
               <span className="font-mono text-sm text-accent">04</span>{' '}
-              <span className="text-foreground">Close with the exam bank.</span>{' '}
-              Each tema ends with real past-exam problems and the one move that
-              unlocks each.
+              <span className="text-foreground">
+                Close with the exam workbook.
+              </span>{' '}
+              Each tema ends with real recent exam problems. Solve on paper
+              first; the solution then unfolds one move at a time, so you can
+              stop revealing the moment you see the way.
             </li>
           </ol>
         </div>

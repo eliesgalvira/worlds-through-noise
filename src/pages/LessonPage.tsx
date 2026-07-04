@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { LessonModule } from '@/components/LessonModule.tsx'
 import { StickyLessonNav } from '@/components/StickyLessonNav.tsx'
+import { WorkedProblem } from '@/components/WorkedProblem.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { lessons } from '@/content/lessons.ts'
 import type { LessonRecord } from '@/domain/types.ts'
@@ -45,7 +46,11 @@ function LessonPage({ lesson }: LessonPageProps) {
         </header>
       </div>
 
-      <StickyLessonNav modules={lesson.modules} variant="mobile" />
+      <StickyLessonNav
+        modules={lesson.modules}
+        problems={lesson.workedProblems}
+        variant="mobile"
+      />
 
       <div className="mx-auto grid max-w-[92rem] gap-12 px-4 py-10 sm:px-6 xl:grid-cols-[minmax(0,1fr)_17rem]">
         <main className="min-w-0">
@@ -59,35 +64,24 @@ function LessonPage({ lesson }: LessonPageProps) {
           >
             <div className="max-w-3xl">
               <p className="font-mono text-sm uppercase tracking-[0.16em] text-accent">
-                Exam bank
+                Exam workbook
               </p>
               <h2 className="mt-2 font-serif text-3xl font-semibold text-foreground">
-                Where this tema actually shows up
+                Real problems, worked one move at a time
               </h2>
               <p className="mt-3 text-base leading-7 text-muted-foreground">
-                Real PSAVC exam problems and the single move that unlocks each
-                one. Solve them on paper; come back to the figures when a move
-                feels arbitrary.
+                These are real recent exam and collection problems, chosen
+                because each one runs the moves this tema just taught. Read the
+                statement, solve on paper, and only then walk the solution —
+                each step is revealed one honest move at a time, so you can stop
+                the moment you see where it goes.
               </p>
             </div>
-            <ul className="mt-8 max-w-3xl">
-              {lesson.examBank.map((problem) => (
-                <li
-                  key={`${problem.exam}-${problem.title}`}
-                  className="border-t border-border py-4 first:border-t-0"
-                >
-                  <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
-                    {problem.exam}
-                  </p>
-                  <p className="mt-1 font-medium text-foreground">
-                    {problem.title}
-                  </p>
-                  <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                    {problem.move}
-                  </p>
-                </li>
+            <div className="mt-8 max-w-3xl">
+              {lesson.workedProblems.map((problem) => (
+                <WorkedProblem key={problem.id} problem={problem} />
               ))}
-            </ul>
+            </div>
             <div className="mt-10 flex flex-wrap gap-3">
               {next !== undefined ? (
                 <Button asChild>
@@ -105,7 +99,11 @@ function LessonPage({ lesson }: LessonPageProps) {
         </main>
 
         <aside className="hidden xl:block">
-          <StickyLessonNav modules={lesson.modules} variant="desktop" />
+          <StickyLessonNav
+            modules={lesson.modules}
+            problems={lesson.workedProblems}
+            variant="desktop"
+          />
         </aside>
       </div>
     </>

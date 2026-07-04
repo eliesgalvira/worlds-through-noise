@@ -4,7 +4,7 @@ This is a field guide to mathematical explanations where the hard part is not a
 calculation, but finding the representation in which the calculation becomes
 natural.
 
-The framing comes from David Bessis's *Mathematica*, especially chapters 1-3,
+The framing comes from David Bessis's _Mathematica_, especially chapters 1-3,
 5-6, and 9-12, plus the 3Blue1Brown transcript corpus downloaded under
 `/home/bigweld/Sandbox/3b1b_transcripts`.
 
@@ -171,7 +171,7 @@ Examples: Hamming codes, binary counting on fingers, roots of unity filters.
 
 ### 1. Gauss / Thurston Sum: 1 + 2 + ... + 100
 
-- Source: Bessis, *Mathematica*, chapter 12; classic Gauss anecdote.
+- Source: Bessis, _Mathematica_, chapter 12; classic Gauss anecdote.
 - Trap: Seeing the expression as a long list of additions.
 - Better object: A triangular pile of blocks: row 1 has one block, row 2 has two
   blocks, and so on up to row 100.
@@ -189,7 +189,7 @@ would make that maneuver unavoidable.
 
 ### 2. Average of 1 Through 100
 
-- Source: Bessis, *Mathematica*, chapter 12.
+- Source: Bessis, _Mathematica_, chapter 12.
 - Trap: Guessing the center as `50` because 50 feels like the middle of the
   written range.
 - Better object: A bag with checks from `$1` through `$100`, or 100 people each
@@ -208,7 +208,7 @@ off by one half, and update it.
 
 ### 3. Ball and Bat
 
-- Source: Bessis, *Mathematica*, chapter 11.
+- Source: Bessis, _Mathematica_, chapter 11.
 - Trap: Hearing "$1 more" and immediately splitting `$1.10` into `$1 + 10c`.
 - Better object: Two price segments, one exactly `$1` longer than the other.
 - Unseen action: Remove the `$1` difference first. What remains is two equal
@@ -225,7 +225,7 @@ the equal parts."
 
 ### 4. Decimal Notation and 1,000,000 - 1
 
-- Source: Bessis, *Mathematica*, chapter 4 and chapter 11.
+- Source: Bessis, _Mathematica_, chapter 4 and chapter 11.
 - Trap: Treating decimal notation as mere writing.
 - Better object: A place-value machine with columns that borrow and carry.
 - Unseen action: Collapse one unit from the million column into a full cascade
@@ -243,7 +243,7 @@ consciousness.
 
 ### 5. Straight Line and Circle
 
-- Source: Bessis, *Mathematica*, chapter 3.
+- Source: Bessis, _Mathematica_, chapter 3.
 - Trap: "A line can intersect a circle in at most two points" sounds like a fact
   to remember.
 - Better object: A line sweeping across a circle.

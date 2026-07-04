@@ -15,7 +15,7 @@ import { linspace, normalCdf, normalPdf } from '@/domain/math/distributions.ts'
 import { gaussianVector, makeRng } from '@/domain/math/kernel.ts'
 
 const W = 470
-const H = 220
+const H = 260
 const X_MIN = 20
 const X_MAX = 80
 // Ferritin screen: the SICK world has the LOWER mean.
@@ -215,17 +215,13 @@ function TwoWorldsFigure() {
           strokeWidth={2}
           strokeDasharray="5 3"
         />
-        <text
-          x={xOf(threshold) - 6}
-          y={22}
-          textAnchor="end"
-          className="fill-h1 font-mono text-[10px]"
-        >
+        <text x={14} y={22} className="fill-h1 font-mono text-[10px]">
           ← decide H1
         </text>
         <text
-          x={xOf(threshold) + 6}
+          x={W - 14}
           y={22}
+          textAnchor="end"
           className="fill-h0 font-mono text-[10px]"
         >
           decide H0 →

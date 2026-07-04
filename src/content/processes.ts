@@ -132,21 +132,244 @@ export const processesLesson: LessonRecord = {
       ],
     },
   ],
-  examBank: [
+  workedProblems: [
     {
-      exam: 'Parcial Abr 2026, Ex. 1',
-      title: 'Amplifier gain: mean and variance both carry information',
-      move: 'Write f(x; A) noting that A scales both the mean αA and the noise σ²A² — the log-likelihood then has a −N ln A term.',
+      id: 'wp-sinusoid-predictor',
+      source: 'Exercise collection · Temes 4–5 (Feb 2026) · Ex. 4.8',
+      title: 'A sinusoid that predicts itself',
+      why: 'Tema 1 never gets its own exam problem — its moves open the others. This exercise runs both P1 and P2: an ensemble average over the random phase gives the exact $r_x(m)$, then a single recorded realization has to reproduce it by time averages, and you watch the biased estimator fall short.',
+      statement: [
+        {
+          kind: 'text',
+          content: 'Consider the stochastic process consisting of the sinusoid',
+        },
+        {
+          kind: 'math',
+          content:
+            'x(n) = 2\\cos\\!\\left(\\tfrac{\\pi}{2}n + \\varphi\\right)',
+        },
+        {
+          kind: 'text',
+          content:
+            'where the phase $\\varphi$ is a random variable uniformly distributed in $[-\\pi, \\pi)$.',
+        },
+      ],
+      parts: [
+        {
+          label: 'a',
+          prompt:
+            'Give the expression of the autocorrelation $r_x(m)$ of the process. Starting from the orthogonality principle, derive the equations of the optimal linear predictor of order 2 and solve them for the predictor coefficients.',
+          steps: [
+            {
+              title: 'Average over the phase, not over time',
+              body: 'The only random thing here is $\\varphi$, so the expectation is an average over the phase deck. Expand the product of cosines; the term carrying $2\\varphi$ averages to zero over a full uniform circle.',
+              latex:
+                '\\begin{aligned} r_x(m) &= E\\{x(n+m)\\,x(n)\\} = 2\\cos\\!\\left(\\tfrac{\\pi}{2}m\\right) + 2\\,\\underbrace{E\\left\\{\\cos\\!\\left(\\tfrac{\\pi}{2}(2n+m) + 2\\varphi\\right)\\right\\}}_{=\\,0} \\\\[2pt] &= 2\\cos\\!\\left(\\tfrac{\\pi}{2}m\\right) \\end{aligned}',
+              note: 'No $n$ survives — the phase average makes the process stationary, exactly the P1 move.',
+            },
+            {
+              title: 'Impose orthogonality of the error to the data',
+              body: 'The order-2 predictor is $\\hat{x}(n) = a_1 x(n-1) + a_2 x(n-2)$. The optimal error $e(n) = x(n) - \\hat{x}(n)$ must be orthogonal to every sample the predictor is allowed to use.',
+              latex:
+                'E\\{e(n)\\,x(n-k)\\} = 0,\\; k=1,2 \\;\\Longrightarrow\\; \\begin{bmatrix} r_x(0) & r_x(1) \\\\ r_x(1) & r_x(0) \\end{bmatrix} \\begin{bmatrix} a_1 \\\\ a_2 \\end{bmatrix} = \\begin{bmatrix} r_x(1) \\\\ r_x(2) \\end{bmatrix}',
+            },
+            {
+              title: 'Insert the three lags and solve',
+              body: 'From step 1: $r_x(0) = 2$, $r_x(1) = 2\\cos(\\pi/2) = 0$, $r_x(2) = 2\\cos(\\pi) = -2$. The matrix is diagonal, so the system falls apart into two scalar equations.',
+              latex:
+                '\\begin{bmatrix} 2 & 0 \\\\ 0 & 2 \\end{bmatrix} \\begin{bmatrix} a_1 \\\\ a_2 \\end{bmatrix} = \\begin{bmatrix} 0 \\\\ -2 \\end{bmatrix} \\;\\Longrightarrow\\; a_1 = 0,\\quad a_2 = -1',
+            },
+          ],
+          answer: {
+            sentence:
+              'The optimal order-2 predictor is $\\hat{x}(n) = -x(n-2)$: the tone never forgets itself, and two samples back it is exactly its own negative.',
+            latex: 'a_1 = 0, \\qquad a_2 = -1',
+          },
+        },
+        {
+          label: 'b',
+          prompt:
+            'Now take the realization of the process with phase $\\varphi = 0$. With $N = 8$, sketch $x(n)$ for $n = 0, \\dots, N-1$ and use the picture to explain the coefficient values found in part (a).',
+          steps: [
+            {
+              title: 'List the eight samples',
+              body: 'With $\\varphi = 0$, $x(n) = 2\\cos(\\pi n / 2)$ cycles with period 4.',
+              latex:
+                'x(n) = 2,\\; 0,\\; -2,\\; 0,\\; 2,\\; 0,\\; -2,\\; 0 \\qquad (n = 0,\\dots,7)',
+            },
+            {
+              title: 'Read the predictor off the picture',
+              body: 'Every sample is minus the sample two steps before: $x(n) = -x(n-2)$ holds exactly, for every $n$. The sample one step before is useless (it sits on a zero crossing when the current sample peaks), which is why $a_1 = 0$.',
+            },
+          ],
+          answer: {
+            sentence:
+              'The coefficients just restate the period-4 structure of the wave: $a_2 = -1$ copies the sample from half a period ago with a sign flip, and the prediction error is exactly zero.',
+          },
+        },
+        {
+          label: 'c',
+          prompt:
+            'Determine the predictor coefficients using the biased estimator of the autocorrelation on this realization. Compare the results for $N = 8$ and $N = 4$ against part (a). What happens as $N \\to \\infty$, and why?',
+          steps: [
+            {
+              title: 'Estimate the lags with the biased formula',
+              body: 'The biased estimator always divides by $N$, even though only $N - m$ products exist at lag $m$. On the record $2, 0, -2, 0, \\dots$ the lag-1 products are all zero, and each nonzero lag-2 product equals $-4$.',
+              latex:
+                '\\hat{r}_x(m) = \\frac{1}{N} \\sum_{n=0}^{N-1-m} x(n)\\,x(n+m): \\qquad \\hat{r}_x(0) = 2, \\quad \\hat{r}_x(1) = 0, \\quad \\hat{r}_x(2) = \\begin{cases} -\\tfrac{12}{8} = -\\tfrac{3}{2} & N = 8 \\\\[2pt] -\\tfrac{4}{4} = -1 & N = 4 \\end{cases}',
+            },
+            {
+              title: 'Solve the same normal equations with the estimates',
+              body: 'The estimated matrix is still diagonal with $\\hat{r}_x(0) = 2$, so $a_2 = \\hat{r}_x(2) / 2$.',
+              latex:
+                'N = 8: \\; a_1 = 0,\\; a_2 = -\\tfrac{3}{4} \\qquad\\quad N = 4: \\; a_1 = 0,\\; a_2 = -\\tfrac{1}{2}',
+            },
+            {
+              title: 'Let the record grow',
+              body: 'At lag $m$ the biased estimator misses exactly $m$ products but still divides by $N$, so it multiplies the true lag by $(N-m)/N$. As $N \\to \\infty$ that triangular taper flattens out and $a_2 \\to -1$: the time average converges to the ensemble answer of part (a) — ergodicity at work.',
+            },
+          ],
+          answer: {
+            sentence:
+              'The biased estimate shrinks the lag-2 correlation by the factor $(N-2)/N$ — a half at $N=4$, a quarter at $N=8$ — and the predictor inherits the shrinkage; only as $N \\to \\infty$ does $a_2$ reach $-1$.',
+            latex:
+              'a_2 = -\\tfrac{1}{2} \\;(N{=}4), \\qquad a_2 = -\\tfrac{3}{4} \\;(N{=}8), \\qquad a_2 \\to -1 \\;(N \\to \\infty)',
+          },
+        },
+        {
+          label: 'd',
+          prompt:
+            'Repeat part (c) with $N = 8$ for the unbiased estimator. Compare the resulting coefficients. Why does the biased estimator do worse here?',
+          steps: [
+            {
+              title: 'Divide by the number of products actually summed',
+              body: 'The unbiased estimator divides each lag by $N - m$ instead of $N$, removing the triangular taper.',
+              latex:
+                '\\hat{r}_x^{u}(m) = \\frac{1}{N-m} \\sum_{n=0}^{N-1-m} x(n)\\,x(n+m): \\qquad \\hat{r}_x^{u}(0) = 2, \\quad \\hat{r}_x^{u}(1) = 0, \\quad \\hat{r}_x^{u}(2) = -\\tfrac{12}{6} = -2',
+            },
+            {
+              title: 'Solve and compare',
+              body: 'The normal equations now reproduce the exact lags of part (a), so the coefficients come out exact: $a_1 = 0$, $a_2 = -1$. The biased estimator does worse on this signal because its taper $(N-m)/N$ systematically underestimates long-lag memory, pulling the predictor toward doing nothing — even though on noisy data the same taper is what keeps estimated correlation matrices well behaved.',
+            },
+          ],
+          answer: {
+            sentence:
+              'The unbiased estimate recovers $a_1 = 0$, $a_2 = -1$ exactly at $N = 8$. The biased version loses because its built-in triangular window shrinks exactly the lag the predictor needs.',
+            latex: 'a_1 = 0, \\qquad a_2 = -1',
+          },
+        },
+      ],
     },
     {
-      exam: 'Parcial Oct 2025, Ex. 1',
-      title: 'Codeword separation in colored noise',
-      move: 'Distance that matters is Mahalanobis distance; separation is best along the quiet eigen-direction of C.',
-    },
-    {
-      exam: 'Tema 1 collection',
-      title: 'R_x of tone + white noise, eigenvalues and eigenvectors',
-      move: 'R_x = |A|²ssᴴ + σ²I has one eigenvalue N|A|² + σ² along s/‖s‖ and the rest σ² — memorize the shape, not the algebra.',
+      id: 'wp-tone-noise',
+      source: 'Exercise collection · Temes 4–5 (Feb 2026) · Ex. 4.9',
+      title: 'Tone in noise: the workhorse autocorrelation',
+      why: 'This is the $r_x(m) = P\\cos(\\omega_1 m) + \\sigma_w^2\\,\\delta(m)$ object that P2 builds and P3 walks on. Part (d) is the eigenvalue fact the Oct 2025 exam (Detection workbook, last part) pays real points for.',
+      statement: [
+        {
+          kind: 'text',
+          content:
+            'A signal $x(n)$ consists of a sinusoid of power $P$, frequency $\\omega_1$ and phase uniformly distributed in $[0, 2\\pi)$, immersed in white noise of power $\\sigma_w^2$, independent of the sinusoid.',
+        },
+      ],
+      parts: [
+        {
+          label: 'a',
+          prompt: 'Find the exact autocorrelation of $x(n)$.',
+          steps: [
+            {
+              title: 'Autocorrelation of the tone alone',
+              body: 'A sinusoid of power $P$ has amplitude $\\sqrt{2P}$. The same phase-averaging as in Ex. 4.8 kills the $2\\varphi$ term and leaves a cosine in the lag.',
+              latex:
+                'r_s(m) = E\\left\\{\\sqrt{2P}\\cos(\\omega_1(n{+}m) + \\varphi)\\cdot\\sqrt{2P}\\cos(\\omega_1 n + \\varphi)\\right\\} = P\\cos(\\omega_1 m)',
+            },
+            {
+              title: 'Independent parts add their autocorrelations',
+              body: 'Tone and noise are independent and zero-mean, so cross terms vanish and the white noise contributes only at zero lag.',
+              latex:
+                'r_x(m) = r_s(m) + r_w(m) = P\\cos(\\omega_1 m) + \\sigma_w^2\\,\\delta(m)',
+              note: 'Memorize the shape: an everlasting cosine floor plus a spike of noise power at $m = 0$.',
+            },
+          ],
+          answer: {
+            sentence:
+              'The tone never forgets itself; the noise forgets instantly.',
+            latex: 'r_x(m) = P\\cos(\\omega_1 m) + \\sigma_w^2\\,\\delta(m)',
+          },
+        },
+        {
+          label: 'b',
+          prompt:
+            'Determine the coefficients of the optimal order-2 predictor as functions of $\\omega_1$ and $\\sigma_w^2$.',
+          steps: [
+            {
+              title: 'Fill the normal equations with the lags',
+              body: 'The predictor $\\hat{x}(n) = h_0 x(n-1) + h_1 x(n-2)$ needs $r_x(0) = P + \\sigma_w^2$, $r_x(1) = P\\cos\\omega_1$, $r_x(2) = P\\cos 2\\omega_1$.',
+              latex:
+                '\\begin{bmatrix} P + \\sigma_w^2 & P\\cos\\omega_1 \\\\ P\\cos\\omega_1 & P + \\sigma_w^2 \\end{bmatrix} \\begin{bmatrix} h_0 \\\\ h_1 \\end{bmatrix} = \\begin{bmatrix} P\\cos\\omega_1 \\\\ P\\cos 2\\omega_1 \\end{bmatrix}',
+            },
+            {
+              title: 'Solve the 2×2 system (Cramer)',
+              body: 'Divide each determinant by $\\Delta = (P+\\sigma_w^2)^2 - (P\\cos\\omega_1)^2$.',
+              latex:
+                'h_0 = \\frac{P\\cos\\omega_1\\left[(P + \\sigma_w^2) - P\\cos 2\\omega_1\\right]}{(P+\\sigma_w^2)^2 - (P\\cos\\omega_1)^2}, \\qquad h_1 = \\frac{(P + \\sigma_w^2)P\\cos 2\\omega_1 - (P\\cos\\omega_1)^2}{(P+\\sigma_w^2)^2 - (P\\cos\\omega_1)^2}',
+              note: 'Sanity check the knobs: as $\\sigma_w^2$ grows, both coefficients shrink — the noisier the data, the less the predictor dares to move.',
+            },
+          ],
+          answer: {
+            sentence:
+              'The coefficients above interpolate between “trust the cosine memory” and “do nothing” as the noise power dials up.',
+          },
+        },
+        {
+          label: 'c',
+          prompt:
+            'Assuming no noise, determine the coefficient values and the prediction error power.',
+          steps: [
+            {
+              title: 'Set the noise to zero and simplify',
+              body: 'With $\\sigma_w^2 = 0$ the fractions collapse under $1 - \\cos 2\\omega_1 = 2\\sin^2\\omega_1$ and $\\cos 2\\omega_1 - \\cos^2\\omega_1 = -\\sin^2\\omega_1$.',
+              latex: 'h_0 = 2\\cos\\omega_1, \\qquad h_1 = -1',
+            },
+            {
+              title: 'Recognize the exact recursion',
+              body: 'These are the coefficients of the trigonometric identity $\\cos(\\omega_1 n) = 2\\cos\\omega_1 \\cos(\\omega_1(n{-}1)) - \\cos(\\omega_1(n{-}2))$: a clean sinusoid satisfies the recursion exactly, so the predictor makes no error at all.',
+              latex: 'E_{\\min} = r_x(0) - h_0 r_x(1) - h_1 r_x(2) = 0',
+            },
+          ],
+          answer: {
+            sentence:
+              'A noiseless sinusoid is perfectly predictable from two past samples — all its randomness was in the phase, and two samples pin the phase down.',
+            latex:
+              'h_0 = 2\\cos\\omega_1, \\qquad h_1 = -1, \\qquad E_{\\min} = 0',
+          },
+        },
+        {
+          label: 'd',
+          prompt:
+            'Show that the noise power $\\sigma_w^2$ is the smallest eigenvalue of the correlation matrix of size $M \\geq 3$.',
+          steps: [
+            {
+              title: 'Split the matrix into tone plus noise floor',
+              body: 'A real sinusoid is two complex exponentials, so its correlation matrix $\\mathbf{R}_s$ has rank 2 whatever the size $M$: only two directions in signal space are ever occupied by the tone.',
+              latex:
+                '\\mathbf{R}_x = \\mathbf{R}_s + \\sigma_w^2 \\mathbf{I}, \\qquad \\operatorname{rank}(\\mathbf{R}_s) = 2',
+            },
+            {
+              title: 'Shift the eigenvalues by the noise floor',
+              body: 'Adding $\\sigma_w^2 \\mathbf{I}$ shifts every eigenvalue of $\\mathbf{R}_s$ up by $\\sigma_w^2$ without touching the eigenvectors. For $M \\geq 3$, $\\mathbf{R}_s$ has at least $M - 2$ zero eigenvalues, and $\\mathbf{R}_s$ is positive semidefinite so the other two shifted eigenvalues sit above the floor.',
+              latex:
+                '\\lambda_i(\\mathbf{R}_x) = \\lambda_i(\\mathbf{R}_s) + \\sigma_w^2 \\;\\Longrightarrow\\; \\lambda_{\\min}(\\mathbf{R}_x) = \\sigma_w^2 \\quad (M \\geq 3)',
+              note: 'This is the P3 terrain in words: outside the two tone directions, the landscape is a flat noise floor of height $\\sigma_w^2$.',
+            },
+          ],
+          answer: {
+            sentence:
+              'For $M \\geq 3$ the smallest eigenvalue of $\\mathbf{R}_x$ equals the noise power, with eigenvectors spanning every direction the tone does not occupy — the fact the eigen-design exam questions cash in.',
+            latex: '\\lambda_{\\min}(\\mathbf{R}_x) = \\sigma_w^2',
+          },
+        },
+      ],
     },
   ],
 }

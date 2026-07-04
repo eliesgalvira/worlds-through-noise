@@ -36,10 +36,51 @@ export type LessonModuleRecord = {
   readonly examRefs: ReadonlyArray<string>
 }
 
-export type ExamProblemRecord = {
-  readonly exam: string
+/** A block of problem prose (`text`, inline math between $…$) or display math (`math`). */
+export type ProblemBlock =
+  | { readonly kind: 'text'; readonly content: string }
+  | { readonly kind: 'math'; readonly content: string }
+
+export type SolutionStepRecord = {
+  /** The move being made, as a short imperative. */
   readonly title: string
-  readonly move: string
+  /** Why this move, in prose; supports inline $math$. */
+  readonly body: string
+  /** The derivation or result of the step, as display math. */
+  readonly latex?: string
+  /** Interpretation aside shown under the math. */
+  readonly note?: string
+}
+
+export type ProblemPartRecord = {
+  /** The part letter as printed on the exam: 'a', 'b', … */
+  readonly label: string
+  /** The question as asked; supports inline $math$. */
+  readonly prompt: string
+  /** Display math belonging to the prompt (a proposed estimator, a model). */
+  readonly promptMath?: string
+  readonly steps: ReadonlyArray<SolutionStepRecord>
+  /** The final result, stated plainly. */
+  readonly answer: {
+    readonly sentence: string
+    readonly latex?: string
+  }
+}
+
+export type WorkedProblemRecord = {
+  readonly id: string
+  /** Where the problem comes from: exam sitting or collection number. */
+  readonly source: string
+  readonly title: string
+  /** Why this problem earned its slot; supports inline $math$. */
+  readonly why: string
+  readonly statement: ReadonlyArray<ProblemBlock>
+  readonly parts: ReadonlyArray<ProblemPartRecord>
+  /** Cross-link when the same exam problem continues on another page. */
+  readonly related?: {
+    readonly text: string
+    readonly href: string
+  }
 }
 
 export type LessonRecord = {
@@ -49,5 +90,5 @@ export type LessonRecord = {
   readonly thesis: string
   readonly intro: ReadonlyArray<string>
   readonly modules: ReadonlyArray<LessonModuleRecord>
-  readonly examBank: ReadonlyArray<ExamProblemRecord>
+  readonly workedProblems: ReadonlyArray<WorkedProblemRecord>
 }

@@ -12,7 +12,7 @@ Use `PRODUCT.md` for product intent and `DESIGN.md` for visual direction before 
 
 ## Architecture
 
-- `src/content/` — lesson data, one file per tema (`processes`, `detection`, `estimation`, `wiener`, `adaptive`), aggregated in `lessons.ts`. Each module record carries trap/object/action/payoff copy, KaTeX equations, a prediction prompt, an exam transfer prompt, and exam references.
+- `src/content/` — lesson data, one file per tema (`processes`, `detection`, `estimation`, `wiener`, `adaptive`), aggregated in `lessons.ts`. Each module record carries trap/object/action/payoff copy, KaTeX equations, a prediction prompt, an exam transfer prompt, and exam references. Each lesson also carries `workedProblems`: real problems transcribed from `course/` (recent solved exams and the exercise collections) with faithful step-by-step solutions, rendered by `src/components/WorkedProblem.tsx` as an interactive stepper (statement → parts → steps revealed one at a time → boxed result). Prose fields support inline `$…$` KaTeX via `src/components/MathText.tsx`; keep solutions faithful to the printed resolutions, and escape `'` inside single-quoted LaTeX strings.
 - `src/components/figures/` — one interactive figure per module, dispatched by module id in `src/components/LessonModule.tsx`. Shared frame in `figures/shared.tsx` (`FigureShell`, `Plot`, `ReadoutRow`, `Legend`); helpers in `figures/figure-utils.ts`.
 - `src/domain/math/` — pure numerics: distributions, Q/chi-squared tails and inverses, seeded RNG, autocorrelation, periodogram, binomial pmf, 2×2 eigen tools (`kernel.ts`).
 - `src/pages/LessonPage.tsx` renders any lesson; routes are generated from `src/content/lessons.ts`; nav/index derive from `src/lib/routes.ts`.

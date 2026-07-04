@@ -34,7 +34,7 @@ function FigureShell({
         {instruction}
       </p>
       <div className="mt-5 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,19rem)]">
-        <div className="min-w-0">{children}</div>
+        <div className="min-w-0 lg:self-center">{children}</div>
         <div className="space-y-5 border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
           {controls}
           {readout !== undefined ? (

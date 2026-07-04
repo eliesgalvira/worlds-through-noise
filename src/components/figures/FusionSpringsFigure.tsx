@@ -9,7 +9,7 @@ import {
 import { formatNumber } from '@/components/figures/figure-utils.ts'
 
 const W = 470
-const H = 210
+const H = 260
 const X_MIN = 30
 const X_MAX = 70
 

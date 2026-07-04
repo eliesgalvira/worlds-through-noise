@@ -14,7 +14,7 @@ import { makeRng, periodogramAt, toneInNoise } from '@/domain/math/kernel.ts'
 const TRUE_FREQ = 0.21
 const AMPLITUDE = 1
 const W = 470
-const H = 230
+const H = 290
 
 function PeriodogramFigure() {
   const [n, setN] = useState(48)

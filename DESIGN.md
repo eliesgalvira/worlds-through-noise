@@ -239,7 +239,7 @@ ESLint is strict and CI-blocking. Write code that already complies:
 Base tokens live in `:root` and are exposed as Tailwind utilities through `@theme inline`. Use the utility, not a raw hex.
 
 - Surfaces and UI: `background`, `foreground`, `card`, `muted`, `secondary`, `accent`, `border`, `ring`, `primary` (deep blue), `destructive`.
-- Semantic inference roles (utilities like `bg-h0`, `text-estimate`, `bg-truth`): `h0` blue, `h1` amber (`h1-ink` for text), `detection` green, `false-alarm` red, `threshold` dashed stone ink, `cursor` magenta (what the student moves), `estimate` blue, `truth` ink, `prior` indigo. SVG text uses the `plot-text-xs` to `plot-text-lg` utilities, which keep one apparent size (10 to 14 px) whatever the viewBox.
+- Semantic inference roles (utilities like `bg-h0`, `text-estimate`, `bg-truth`): `h0` blue, `h1` amber (`h1-ink` for text), `detection` green, `false-alarm` red, `threshold` dashed stone ink, `cursor` magenta (what the student moves), `estimate` blue, `truth` ink, `prior` indigo. SVG text uses the `plot-text-xs`, `plot-text-sm` and `plot-text` utilities, which keep one apparent size (10, 11 and 12 px) whatever the viewBox.
 - One color, one role per view. `truth` (hidden cause / true parameter) and `estimate` (inference output) are both blue-adjacent in spirit but are distinct tokens; never let a single color stand for two meanings in the same figure. When two roles sit close, separate them further with a ring or shape, as the home figure does for the inference marker.
 - `--radius` is `0.5rem`; use `rounded-md` / `rounded-lg`, not ad hoc radii.
 

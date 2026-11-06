@@ -234,9 +234,6 @@
 @utility plot-text {
   font-size: calc(12px * var(--plot-px, 1));
 }
-@utility plot-text-lg {
-  font-size: calc(14px * var(--plot-px, 1));
-}
 
 * {
   border-color: var(--border);

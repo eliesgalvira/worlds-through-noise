@@ -362,9 +362,13 @@ async function shootSection(
     const bottom = (el: Element) =>
       el.getBoundingClientRect().bottom + window.scrollY
     const figure = document.getElementById(`${sectionId}-figure`)
-    return figure === null
-      ? [top(section), bottom(section)]
-      : [top(section), top(figure), bottom(figure), bottom(section)]
+    const page = document.documentElement.scrollHeight
+    const edges =
+      figure === null
+        ? [top(section), bottom(section)]
+        : [top(section), top(figure), bottom(figure), bottom(section)]
+    // Rounding can put the last edge a pixel past the page.
+    return edges.map((edge) => Math.min(Math.floor(edge), page))
   }, id)
   if (edges === null) {
     failures.push(`section ${id} not found`)
@@ -372,8 +376,8 @@ async function shootSection(
   }
   let part = 0
   for (let index = 0; index + 1 < edges.length; index += 1) {
-    const from = Math.round(edges[index] ?? 0)
-    const to = Math.round(edges[index + 1] ?? 0)
+    const from = edges[index] ?? 0
+    const to = edges[index + 1] ?? 0
     for (const tile of tiles(from, to - from, tileHeight(width))) {
       part += 1
       await page.screenshot({

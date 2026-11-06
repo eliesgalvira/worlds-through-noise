@@ -21,7 +21,7 @@ function LessonModule({ module, figure }: LessonModuleProps) {
   return (
     <section
       id={module.id}
-      className="scroll-mt-24 border-t border-border py-14"
+      className="scroll-mt-32 xl:scroll-mt-24 border-t border-border py-14"
     >
       <header className="max-w-3xl">
         <p className="font-mono text-sm uppercase tracking-[0.16em] text-accent-ink">
@@ -41,7 +41,10 @@ function LessonModule({ module, figure }: LessonModuleProps) {
         <ProseParagraph text={module.action} />
       </div>
 
-      <div id={`${module.id}-figure`} className="mt-8 max-w-4xl scroll-mt-24">
+      <div
+        id={`${module.id}-figure`}
+        className="mt-8 max-w-5xl scroll-mt-32 xl:scroll-mt-24"
+      >
         {figure}
       </div>
 
@@ -61,7 +64,7 @@ function LessonModule({ module, figure }: LessonModuleProps) {
 
       <div
         id={`${module.id}-transfer`}
-        className="mt-8 max-w-3xl scroll-mt-24 space-y-6"
+        className="mt-8 max-w-3xl scroll-mt-32 xl:scroll-mt-24 space-y-6"
       >
         <PredictionPrompt
           question={module.prediction.question}

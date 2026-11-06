@@ -127,7 +127,10 @@ function WorkedProblem({ problem, className }: WorkedProblemProps) {
   return (
     <article
       id={problem.id}
-      className={cn('scroll-mt-24 border-t border-border py-10', className)}
+      className={cn(
+        'scroll-mt-32 xl:scroll-mt-24 border-t border-border py-10',
+        className,
+      )}
     >
       <header>
         <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">

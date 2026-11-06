@@ -20,7 +20,10 @@ function LessonPage({ lesson }: LessonPageProps) {
   return (
     <>
       <div className="mx-auto max-w-6xl px-4 pb-6 pt-12 sm:px-6 lg:pt-16">
-        <header id="lesson-intro" className="max-w-4xl scroll-mt-24">
+        <header
+          id="lesson-intro"
+          className="max-w-4xl scroll-mt-32 xl:scroll-mt-24"
+        >
           <Link
             to="/"
             className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"

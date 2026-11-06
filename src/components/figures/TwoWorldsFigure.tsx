@@ -68,6 +68,16 @@ function TwoWorldsFigure() {
     return `${inner} L ${xOf(to).toFixed(1)} ${H - 34} L ${xOf(from).toFixed(1)} ${H - 34} Z`
   }
 
+  // The decision labels sit on either side of the threshold. Near an edge,
+  // the one without room drops to a second row on the other side, its arrow
+  // still pointing at its region.
+  const leftRoom = xOf(threshold) > 100
+  const rightRoom = xOf(threshold) < W - 100
+  // Each hypothesis is named on the outer foot of its own curve, clear of the
+  // threshold row at the top and of the other curve.
+  const footOf = (mean: number, side: number) =>
+    Math.min(X_MAX - 3, Math.max(X_MIN + 3, mean + side * 2 * sd))
+
   const drawPatient = () => {
     const rng = makeRng(seed)
     const world = rng() < 0.5 ? 'H0' : 'H1'
@@ -232,16 +242,17 @@ function TwoWorldsFigure() {
           strokeDasharray="5 3"
         />
         <text
-          x={Math.max(xOf(threshold) - 6, 96)}
-          y={22}
-          textAnchor="end"
+          x={xOf(threshold) + (leftRoom ? -6 : 6)}
+          y={leftRoom ? 22 : 38}
+          textAnchor={leftRoom ? 'end' : 'start'}
           className="fill-h1-ink font-mono plot-text-sm"
         >
           ← decide H1
         </text>
         <text
-          x={Math.min(xOf(threshold) + 6, W - 96)}
-          y={22}
+          x={xOf(threshold) + (rightRoom ? 6 : -6)}
+          y={rightRoom ? 22 : 38}
+          textAnchor={rightRoom ? 'start' : 'end'}
           className="fill-h0 font-mono plot-text-sm"
         >
           decide H0 →
@@ -296,16 +307,16 @@ function TwoWorldsFigure() {
           sample mean of ferritin (drag to move γ)
         </text>
         <text
-          x={xOf(M1)}
-          y={yOf(normalPdf(M1, M1, sd)) - 8}
+          x={xOf(footOf(M1, -1))}
+          y={Math.min(yOf(normalPdf(footOf(M1, -1), M1, sd)) - 6, H - 52)}
           textAnchor="middle"
           className="fill-h1-ink font-mono plot-text"
         >
           H1
         </text>
         <text
-          x={xOf(M0)}
-          y={yOf(normalPdf(M0, M0, sd)) - 8}
+          x={xOf(footOf(M0, +1))}
+          y={Math.min(yOf(normalPdf(footOf(M0, +1), M0, sd)) - 6, H - 52)}
           textAnchor="middle"
           className="fill-h0 font-mono plot-text"
         >

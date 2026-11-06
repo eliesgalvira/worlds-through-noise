@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { Logo } from '@/components/Logo.tsx'
+import { currentCourse } from '@/course/current-course.ts'
 import { siteRoutes } from '@/lib/routes.ts'
 import { cn } from '@/lib/utils.ts'
 
@@ -34,7 +35,7 @@ function SiteHeader() {
         <Link
           to="/"
           className="flex items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          aria-label="Worlds Through Noise, home"
+          aria-label={currentCourse.manifest.homeAriaLabel}
         >
           <Logo className="text-[0.93rem] sm:text-lg" />
         </Link>

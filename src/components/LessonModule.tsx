@@ -1,90 +1,23 @@
+import type { ReactNode } from 'react'
 import { EquationReveal } from '@/components/EquationReveal.tsx'
 import { MathText } from '@/components/MathText.tsx'
 import { PredictionPrompt } from '@/components/PredictionPrompt.tsx'
-import { AutocorrelationFigure } from '@/components/figures/AutocorrelationFigure.tsx'
-import { BitVoteFigure } from '@/components/figures/BitVoteFigure.tsx'
-import { BudgetRocFigure } from '@/components/figures/BudgetRocFigure.tsx'
-import { CancelKnobFigure } from '@/components/figures/CancelKnobFigure.tsx'
-import { CurvatureFigure } from '@/components/figures/CurvatureFigure.tsx'
-import { DescentFigure } from '@/components/figures/DescentFigure.tsx'
-import { EnergyFigure } from '@/components/figures/EnergyFigure.tsx'
-import { EnsembleFigure } from '@/components/figures/EnsembleFigure.tsx'
-import { ErrorBowlFigure } from '@/components/figures/ErrorBowlFigure.tsx'
-import { EstimatorRaceFigure } from '@/components/figures/EstimatorRaceFigure.tsx'
-import { FusionSpringsFigure } from '@/components/figures/FusionSpringsFigure.tsx'
-import { LmsFigure } from '@/components/figures/LmsFigure.tsx'
-import { PeriodogramFigure } from '@/components/figures/PeriodogramFigure.tsx'
-import { PowerTerrainFigure } from '@/components/figures/PowerTerrainFigure.tsx'
-import { PredictorFigure } from '@/components/figures/PredictorFigure.tsx'
-import { TwoWorldsFigure } from '@/components/figures/TwoWorldsFigure.tsx'
-import { WhitenMatchFigure } from '@/components/figures/WhitenMatchFigure.tsx'
 import type { LessonModuleRecord } from '@/domain/types.ts'
 
-function ModuleFigure({ moduleId }: { readonly moduleId: string }) {
-  switch (moduleId) {
-    case 'P1':
-      return <EnsembleFigure />
-    case 'P2':
-      return <AutocorrelationFigure />
-    case 'P3':
-      return <PowerTerrainFigure />
-    case 'D1':
-      return <TwoWorldsFigure />
-    case 'D2':
-      return <BudgetRocFigure />
-    case 'D3':
-      return <WhitenMatchFigure />
-    case 'D4':
-      return <EnergyFigure />
-    case 'D5':
-      return <BitVoteFigure />
-    case 'E1':
-      return <EstimatorRaceFigure />
-    case 'E2':
-      return <CurvatureFigure />
-    case 'E3':
-      return <FusionSpringsFigure />
-    case 'E4':
-      return <PeriodogramFigure />
-    case 'W1':
-      return <ErrorBowlFigure />
-    case 'W2':
-      return <CancelKnobFigure />
-    case 'W3':
-      return <PredictorFigure />
-    case 'A1':
-      return <DescentFigure />
-    case 'A2':
-      return <LmsFigure />
-    default:
-      return null
-  }
-}
-
-function LabeledParagraph({
-  label,
-  text,
-}: {
-  readonly label: string
-  readonly text: string
-}) {
+function ProseParagraph({ text }: { readonly text: string }) {
   return (
-    <div>
-      <p className="font-mono text-xs uppercase tracking-[0.14em] text-accent">
-        {label}
-      </p>
-      <p className="mt-1.5 text-base leading-7 text-foreground">
-        <MathText text={text} />
-      </p>
-    </div>
+    <p className="text-base leading-7 text-foreground">
+      <MathText text={text} />
+    </p>
   )
 }
 
 type LessonModuleProps = {
   readonly module: LessonModuleRecord
+  readonly figure: ReactNode
 }
 
-function LessonModule({ module }: LessonModuleProps) {
+function LessonModule({ module, figure }: LessonModuleProps) {
   return (
     <section
       id={module.id}
@@ -103,17 +36,17 @@ function LessonModule({ module }: LessonModuleProps) {
       </header>
 
       <div className="mt-8 max-w-3xl space-y-5">
-        <LabeledParagraph label="The trap" text={module.trap} />
-        <LabeledParagraph label="The object" text={module.object} />
-        <LabeledParagraph label="The unseen action" text={module.action} />
+        <ProseParagraph text={module.trap} />
+        <ProseParagraph text={module.object} />
+        <ProseParagraph text={module.action} />
       </div>
 
       <div id={`${module.id}-figure`} className="mt-8 max-w-4xl scroll-mt-24">
-        <ModuleFigure moduleId={module.id} />
+        {figure}
       </div>
 
       <div className="mt-8 max-w-3xl space-y-6">
-        <LabeledParagraph label="Why it becomes obvious" text={module.payoff} />
+        <ProseParagraph text={module.payoff} />
         {module.equations.map((equation) => (
           <EquationReveal
             key={equation.latex}

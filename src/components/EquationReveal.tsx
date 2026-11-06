@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
-import katex from 'katex'
+import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
-import { MathText } from '@/components/MathText.tsx'
+import { MathBlock, MathText } from '@/components/MathText.tsx'
 import { cn } from '@/lib/utils.ts'
 
 type EquationRevealProps = {
@@ -22,22 +21,6 @@ function EquationReveal({
   className,
 }: EquationRevealProps) {
   const [revealed, setRevealed] = useState(defaultRevealed)
-  const equationRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!revealed) {
-      return
-    }
-    const element = equationRef.current
-    if (element === null) {
-      return
-    }
-    katex.render(equation, element, {
-      displayMode: true,
-      throwOnError: false,
-      strict: 'ignore',
-    })
-  }, [equation, revealed])
 
   return (
     <figure className={cn('border-y border-border bg-card/40 py-5', className)}>
@@ -47,10 +30,9 @@ function EquationReveal({
 
       <div className="mt-4">
         {revealed ? (
-          <div
-            ref={equationRef}
+          <MathBlock
+            latex={equation}
             className="overflow-x-auto rounded-md border bg-background px-4 py-3 text-foreground"
-            aria-label={equation}
           />
         ) : (
           <button

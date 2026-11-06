@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button.tsx'
+import { MathText } from '@/components/MathText.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
 import { FigureShell, Plot, ReadoutRow } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
@@ -40,9 +41,19 @@ const KIND_LABEL: Record<ProcessKind, string> = {
   burst: 'Burst',
 }
 
+const KIND_MEANING: Record<ProcessKind, string> = {
+  white:
+    'White noise: every sample is a fresh, independent draw. No memory at all — sample 30 knows nothing about sample 29.',
+  colored:
+    'Filtered noise: white noise passed through a filter that keeps 85% of the previous sample. “AR” means autoregressive — regressed on its own past. The memory is what makes the traces smooth.',
+  burst:
+    'A burst: white noise whose loudness swells around $n \\approx 60$ and fades again, like a word spoken between silences. The rule itself changes with $n$.',
+}
+
 function EnsembleFigure() {
   const [kind, setKind] = useState<ProcessKind>('white')
   const [slice, setSlice] = useState(30)
+  const [book, setBook] = useState(7)
   const [seed, setSeed] = useState(11)
 
   const ensemble = useMemo(() => makeEnsemble(kind, seed), [kind, seed])
@@ -52,6 +63,8 @@ function EnsembleFigure() {
   const variance =
     sliceValues.reduce((a, b) => a + (b - mean) * (b - mean), 0) /
     sliceValues.length
+  const bookTrace = ensemble[book] ?? []
+  const bookValue = bookTrace[slice] ?? 0
 
   const yOf = (v: number) => H / 2 - v * (H / 9)
   const xOf = (n: number) => 8 + (n / (SAMPLES - 1)) * (W - 16)
@@ -72,33 +85,51 @@ function EnsembleFigure() {
 
   return (
     <FigureShell
-      title="Slice the deck, not the trace"
-      instruction="Each faint line is one dealt realization of the same process. Drag the slice through time and watch the vertical histogram: if it refuses to move, the process is stationary. Then switch to the amplitude burst."
+      title="One rule, two dials: walk a row, cut a column"
+      instruction="Each faint line is one book read page by page — one realization $x(n, S_k)$. The $S$ slider pulls one book forward (drawn in ink); the $n$ slider cuts a column, and the histogram on the right collects the answers all 28 books give on that page. The stationarity test: cut at $n = 30$, remember the histogram’s shape, then cut at $n = 60$ and compare. White and Filtered give the same shape everywhere; the Burst does not — its middle pages are louder."
       controls={
         <>
-          <div className="flex flex-wrap gap-2">
-            {(['white', 'colored', 'burst'] as const).map((k) => (
-              <Button
-                key={k}
-                type="button"
-                size="sm"
-                variant={kind === k ? 'default' : 'outline'}
-                onClick={() => {
-                  setKind(k)
-                }}
-              >
-                {KIND_LABEL[k]}
-              </Button>
-            ))}
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-2">
+              {(['white', 'colored', 'burst'] as const).map((k) => (
+                <Button
+                  key={k}
+                  type="button"
+                  size="sm"
+                  variant={kind === k ? 'default' : 'outline'}
+                  onClick={() => {
+                    setKind(k)
+                  }}
+                >
+                  {KIND_LABEL[k]}
+                </Button>
+              ))}
+            </div>
+            <p className="text-xs leading-5 text-muted-foreground">
+              <MathText text={KIND_MEANING[kind]} />
+            </p>
           </div>
           <SliderControl
-            label="Slice instant"
+            label="Fix the book"
+            variable="S"
+            value={book + 1}
+            min={1}
+            max={TRACES}
+            step={1}
+            meaning="Which realization you pull forward — the row you walk along."
+            onValueChange={(v) => {
+              setBook(v - 1)
+            }}
+            format={(v) => `S = #${v.toFixed(0)}`}
+          />
+          <SliderControl
+            label="Fix the page"
             variable="n"
             value={slice}
             min={0}
             max={SAMPLES - 1}
             step={1}
-            meaning="Where you cut the deck vertically."
+            meaning="Where you cut the column — the same instant in every book."
             onValueChange={setSlice}
             format={(v) => `n = ${v.toFixed(0)}`}
           />
@@ -117,18 +148,23 @@ function EnsembleFigure() {
       readout={
         <>
           <ReadoutRow
-            label="Slice mean $\hat{m}(n)$"
+            label="$x(n_0, S_k)$ — both dials fixed"
+            value={formatNumber(bookValue, 2)}
+          />
+          <ReadoutRow
+            label="Slice mean $\hat{m}(n_0)$"
             value={formatNumber(mean, 2)}
             tone="h0"
           />
           <ReadoutRow
-            label="Slice variance $\hat{\sigma}^2(n)$"
+            label="Slice variance $\hat{\sigma}^2(n_0)$"
             value={formatNumber(variance, 2)}
             tone="h1"
           />
           <p className="text-xs leading-5 text-muted-foreground">
-            Computed across the {TRACES} realizations at the slice — the
-            vertical average, not the horizontal one.
+            The first row is a plain number. The mean and variance are computed
+            down the column — across the {TRACES} books at this page, never
+            along one book.
           </p>
         </>
       }
@@ -175,6 +211,20 @@ function EnsembleFigure() {
             className="stroke-threshold"
             strokeWidth={2}
           />
+          {bookTrace.length > 0 ? (
+            <path
+              d={bookTrace
+                .map(
+                  (v, n) =>
+                    `${n === 0 ? 'M' : 'L'} ${xOf(n).toFixed(1)} ${yOf(v).toFixed(1)}`,
+                )
+                .join(' ')}
+              fill="none"
+              className="stroke-truth"
+              strokeWidth={1.5}
+              opacity={0.9}
+            />
+          ) : null}
           {sliceValues.map((v, index) => (
             <circle
               key={index}
@@ -185,6 +235,13 @@ function EnsembleFigure() {
               opacity={0.75}
             />
           ))}
+          <circle
+            cx={xOf(slice)}
+            cy={yOf(bookValue)}
+            r={4.5}
+            className="fill-card stroke-truth"
+            strokeWidth={1.8}
+          />
         </Plot>
         <Plot
           viewW={HIST_W}

@@ -1,9 +1,4 @@
-export type LessonRoute =
-  | 'processes'
-  | 'detection'
-  | 'estimation'
-  | 'wiener'
-  | 'adaptive'
+export type LessonRoute = string
 
 export type EquationRecord = {
   /** Plain-language meaning, always shown before the symbols. */
@@ -14,6 +9,7 @@ export type EquationRecord = {
 
 export type LessonModuleRecord = {
   readonly id: string
+  readonly figureKey?: string
   readonly title: string
   /** The question the module answers. */
   readonly question: string

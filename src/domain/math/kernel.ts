@@ -1,4 +1,9 @@
-import { normalCdf, normalInvCdf } from '@/domain/math/distributions.ts'
+import {
+  binomialPmf as binomialProbability,
+  normalCdf,
+  normalInvCdf,
+} from '@/domain/math/distributions.ts'
+import { eigenSymmetric2x2 } from '@/domain/math/linear-algebra.ts'
 
 /** Small, fast, seeded RNG (mulberry32) for reproducible simulations. */
 export function makeRng(seed: number): () => number {
@@ -210,14 +215,7 @@ export function chi2TailInv(p: number, k: number): number {
 }
 
 export function binomialPmf(n: number, k: number, p: number): number {
-  if (k < 0 || k > n) {
-    return 0
-  }
-  const logCoef = logGamma(n + 1) - logGamma(k + 1) - logGamma(n - k + 1)
-  const logP =
-    k * Math.log(Math.max(p, 1e-12)) +
-    (n - k) * Math.log(Math.max(1 - p, 1e-12))
-  return Math.exp(logCoef + logP)
+  return binomialProbability(k, n, p)
 }
 
 export type Matrix2 = {
@@ -237,22 +235,12 @@ export type Eigen2 = {
 
 /** Eigen-decomposition of a symmetric 2x2 matrix [[a, b], [b, d]]. */
 export function eigSym2(a: number, b: number, d: number): Eigen2 {
-  const tr = a + d
-  const det = a * d - b * b
-  const disc = Math.sqrt(Math.max((tr * tr) / 4 - det, 0))
-  const lambda1 = tr / 2 + disc
-  const lambda2 = tr / 2 - disc
-  let v1: readonly [number, number]
-  if (Math.abs(b) > 1e-12) {
-    v1 = [lambda1 - d, b]
-  } else if (a >= d) {
-    v1 = [1, 0]
-  } else {
-    v1 = [0, 1]
-  }
-  const norm = Math.hypot(v1[0], v1[1]) || 1
-  const u1: readonly [number, number] = [v1[0] / norm, v1[1] / norm]
-  const u2: readonly [number, number] = [-u1[1], u1[0]]
+  const eigen = eigenSymmetric2x2([
+    [a, b],
+    [b, d],
+  ])
+  const [lambda1, lambda2] = eigen.values
+  const [u1, u2] = eigen.vectors
   return { lambda1, lambda2, u1, u2 }
 }
 

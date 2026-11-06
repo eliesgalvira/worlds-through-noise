@@ -15,14 +15,22 @@ export const processesLesson: LessonRecord = {
       id: 'P1',
       title: 'One trace hides an ensemble',
       question: 'What exactly is random about a random process?',
-      trap: 'The notation $x(n)$ looks like one signal, so “stationary” sounds like a property of the wiggle you see — maybe it means the wiggle is flat, or repeats. None of that is it.',
+      trap: 'The notation $x(n)$ looks like one signal — a single wiggle — so “stationary” sounds like a property of the wiggle you see. It cannot be: the notation is hiding a second argument. The full name of the object is $x(n, S)$, and until you ask what $S$ is, nothing about it is random at all.',
       object:
-        'A deck of signals. The random process is the dealer; the trace on your screen is one card. Stack forty dealt traces on top of each other and the process becomes visible as a cloud with a shape.',
+        'So here is a picture that gives $S$ a body: an infinite library and a rule. $S$ is the outcome of a chance experiment — you walk in blindfolded and pull one book off the shelf; the draw $S_1$ might be Don Quixote, $S_2$ might be Moby-Dick. $n$ is a page number. The rule $x(n, S)$ returns a number: “count how many times the letter e appears on page $n$ of book $S$.” The random process is the library plus the rule. The trace on your screen is one book’s worth of answers — chance acted exactly once, at the moment the book was pulled.',
       action:
-        'Freeze time: cut the stack vertically at one instant $n$ and collect the forty values into a histogram. Now slide the cut left and right. Stationary means the histogram refuses to move when the cut moves. Switch to the burst process and watch the histogram breathe as you slide — that process is not stationary, and no single trace could have told you.',
+        'With that picture, the figure below becomes an instrument with two dials, and the whole module is learning to turn one dial at a time. Fix the book: read it page after page and you get $x(n, S_1)$ — a fixed list of numbers, called a realization; nothing about it is random anymore. Fix the page instead, say $n_0 = 30$: each book gives its own answer, so “the count on page 30 of a randomly pulled book” is a scalar random variable $x(30, S)$, and the histogram in the figure is its distribution, built from the actual values. Then run the test that defines this module: take the histogram at page 30, take it again at page 60, and compare. Stationary (in the wide sense the course uses) means every page gives the same center and the same width, and the link between two pages depends only on how far apart they are. The burst process fails this visibly: its middle pages are loud and its edges quiet, so the two histograms disagree, and no single book read alone could have told you.',
       payoff:
-        '$E\\{x(n)\\}$ and $\\sigma^2(n)$ stop being formulas: they are the center and width of the vertical slice. Stationarity ($m_x(n) = m_x$, $r_x(n{+}m, n) = r_x(m)$) just says the slices are interchangeable, so one clock time is as good as another. Ergodicity is the separate, stronger claim that the horizontal average along one dealt trace matches the vertical average across the deck — which is the only reason we can measure anything from a single recording.',
+        'Once you have turned both dials yourself, the definitions have nothing left to hide. One rule gives four objects, chosen by which dials you fix: both → a plain number; only $S$ → a realization; only $n$ → a random variable; neither → the process itself. $E\\{x(n_0)\\}$ and $\\sigma^2(n_0)$ stop being formulas: they are the center and the width of the page-$n_0$ histogram — one pair of numbers per page. Stationarity ($m_x(n) = m_x$, $r_x(n{+}m, n) = r_x(m)$) is the statement that these numbers are the same for every page, so one page is as good as another. Ergodicity is a separate and stronger claim: reading ONE book cover to cover gives the same averages as polling the whole library at one page — and it is the only reason we can measure anything from a single recording.',
       equations: [
+        {
+          sentence:
+            'Every object of the course is one of four readings of the same two-input rule.',
+          latex:
+            '\\begin{array}{ll} x(n_0, S_k) & \\text{both fixed: a number} \\\\ x(n, S_k) & S \\text{ fixed: a realization} \\\\ x(n_0, S) & n \\text{ fixed: a random variable} \\\\ \\{x(n, S)\\} & \\text{neither: the process} \\end{array}',
+          caption:
+            '“Realización” and “variable aleatoria” in the slides are dial positions, not new concepts.',
+        },
         {
           sentence:
             'A process is stationary (in the wide sense) when its first and second moments do not care where the time origin is.',
@@ -47,7 +55,7 @@ export const processesLesson: LessonRecord = {
           'No. Slide the slice into the burst: the histogram widens, so $\\sigma^2(n)$ depends on $n$. Stationarity is about the slices, not about the mean alone.',
       },
       transfer:
-        'Speech is processed in short frames. Say precisely which assumption fails on whole sentences and is rescued frame by frame.',
+        'Record a hundred speakers saying the same word. Fixing the speaker gives one waveform — a realization. Fixing sample $n_0 = 500$ (mid-vowel) and drawing speakers at random gives the scalar random variable $x(n_0, S)$. Speech is processed in short frames: say precisely which assumption fails on whole sentences and is rescued frame by frame.',
       examRefs: [
         'Tema 1 slides: /f/→/u/ phoneme transition as a non-stationary power profile',
       ],
@@ -56,13 +64,13 @@ export const processesLesson: LessonRecord = {
       id: 'P2',
       title: 'Autocorrelation is self-resemblance under a shift',
       question: 'What does $r_x(m)$ actually measure?',
-      trap: '$r_x(m) = E\\{x(n{+}m)\\,x^*(n)\\}$ reads as bookkeeping — an expectation with two time indices to memorize, hermitian symmetry as a fact to recite.',
+      trap: 'The autocorrelation is defined as $r_x(m) = E\\{x(n{+}m)\\,x^*(n)\\}$: an average of the signal multiplied by its own value from $m$ samples earlier (the star is a complex conjugate; for real signals ignore it). Read as a formula, it feels like bookkeeping — two time indices to keep straight and a symmetry to recite. What it measures is far simpler than what it says.',
       object:
-        'The signal and a transparent copy of itself on a slider. At shift $m$, lay the copy over the original, multiply the overlapping samples, and average. Signals that still resemble themselves after the shift score high; signals with no memory score zero.',
+        'Picture the signal and a transparent copy of it on a slider. Slide the copy $m$ samples to the side, lay it over the original, multiply the samples that overlap, and average the products. That average is one number, and it is the autocorrelation at lag $m$. It comes out large when the signal still resembles itself after the shift, and near zero when the shift has destroyed all resemblance. In one word: $r_x(m)$ measures memory.',
       action:
-        'Drag the lag $m$ and watch the overlap product being averaged into one number — that number is $\\hat{r}_x(m)$, and it gets stamped onto the growing autocorrelation plot. Do it for white noise (all resemblance dies at $m \\neq 0$), for filtered noise (resemblance fades over a few lags), and for a tone in noise (resemblance never dies, it oscillates forever).',
+        'The figure below performs exactly this multiplication and averaging on a real generated signal. Drag the lag $m$ and watch the overlap product collapse into one number, $\\hat{r}_x(m)$, which is stamped onto the growing autocorrelation plot underneath. Then try all three signals and watch memory die at three different speeds: for white noise all resemblance is gone at the first shift; for filtered noise it fades over a few lags; for the tone in noise it never dies — it oscillates forever.',
       payoff:
-        'Every property becomes visible: $r_x(0)$ is the power because at zero shift a signal resembles itself perfectly; $r_x(m)$ can never beat $r_x(0)$ because nothing overlaps better than no shift; and the power spectral density is just the same information asked in frequency — a wide, slowly-fading $r_x$ means a narrow spectrum, a spiky $r_x$ means a flat one. The Fourier pair is a change of language, not new content.',
+        'After a few drags, the properties you were asked to memorize become things you have seen. $r_x(0)$ is the power, because at zero shift a signal overlaps itself perfectly. No lag can beat $r_x(0)$, because nothing overlaps better than no shift. And the power spectral density is the same information asked in the language of frequency: a wide, slowly-fading $r_x$ means a narrow spectrum, a spiky $r_x$ means a flat one. The Fourier pair is a change of language, not new content.',
       equations: [
         {
           sentence:
@@ -95,13 +103,13 @@ export const processesLesson: LessonRecord = {
       title: 'The correlation matrix is a terrain',
       question:
         'Why do eigenvectors of $\\mathbf{R}_x$ keep deciding the answer to design problems?',
-      trap: '$\\mathbf{R}_x = E\\{\\mathbf{x}\\mathbf{x}^H\\}$ looks like a table of numbers, and “find the eigenvector of the covariance” looks like a trick someone pulls out of a hat in exercise after exercise.',
+      trap: 'Stack a few consecutive samples of the process into a vector $\\mathbf{x}$ and average the outer product: $\\mathbf{R}_x = E\\{\\mathbf{x}\\mathbf{x}^H\\}$ is the correlation matrix (the $H$ means conjugate transpose). On paper it is a table of numbers, and the instruction “find the eigenvector of the covariance,” which exam after exam turns out to need, looks like a trick someone pulls out of a hat. The table is the wrong picture.',
       object:
-        'A landscape. For a 2-tap filter $\\mathbf{h}$, the output power $P_y = \\mathbf{h}^H\\mathbf{R}_x\\mathbf{h}$ assigns a height to every point of the $(h_0, h_1)$ plane. The iso-power curves are ellipses; $\\mathbf{R}_x$ is not a table, it is this terrain. The eigenvectors are the ellipse axes; the eigenvalues are how steeply power grows along each axis.',
+        'Here is the right one: a landscape. Take a filter with two taps, $\\mathbf{h} = [h_0, h_1]^T$, feed it the process, and measure the output power. The result, $P_y = \\mathbf{h}^H\\mathbf{R}_x\\mathbf{h}$, assigns a height to every point of the $(h_0, h_1)$ plane. The curves of equal power are ellipses. The eigenvectors of $\\mathbf{R}_x$ are the axes of those ellipses, and each eigenvalue is how steeply the power grows along its axis. $\\mathbf{R}_x$ is not a table — it is this terrain, and every design problem in the course is a walk on it.',
       action:
-        'Drag $\\mathbf{h}$ across the plane and read the honestly computed power $\\mathbf{h}^H\\mathbf{R}_x\\mathbf{h}$. Then constrain yourself to the unit circle $\\|\\mathbf{h}\\| = 1$ and walk it: the power rises and falls, and its maximum sits exactly where the circle crosses the long axis of the ellipses. You have just solved $\\max \\mathbf{h}^H\\mathbf{R}_x\\mathbf{h}$ subject to $\\|\\mathbf{h}\\| = 1$ with your hands — the answer is the principal eigenvector, and the height there is $\\lambda_{\\max}$.',
+        'Walk it in the figure. Drag $\\mathbf{h}$ across the plane and read the honestly computed power. Then tick the constraint box to stay on the unit circle $\\|\\mathbf{h}\\| = 1$ and go around it: the power rises and falls, and its maximum sits exactly where the circle crosses the long axis of the ellipses. Notice what you just did: you solved the constrained optimization “maximize $\\mathbf{h}^H\\mathbf{R}_x\\mathbf{h}$ subject to $\\|\\mathbf{h}\\| = 1$” with your hands. The answer is the principal eigenvector, and the height there is the largest eigenvalue, $\\lambda_{\\max}$.',
       payoff:
-        'The Tema 1 exam classic — design the filter that maximizes SNR for a tone in white noise — stops being Lagrange-multiplier ritual. $\\mathbf{R}_x = |A|^2\\mathbf{s}\\mathbf{s}^H + \\sigma^2\\mathbf{I}$ makes a cigar-shaped terrain whose long axis is the steering vector $\\mathbf{s}$, so the best unit filter is $\\mathbf{s}$ itself, and every other eigen-direction is pure noise floor $\\sigma^2$. The same terrain runs the whole course: it is the MSE bowl of Tema 4 and the convergence landscape of Tema 5.',
+        'Once you have found the loudest direction by walking, the exam classic — design the filter that maximizes SNR for a tone in white noise — stops being a Lagrange-multiplier ritual. A tone $A e^{j\\phi} e^{j2\\pi f_0 n}$ with random phase $\\phi$, whose $Q$ phase-free samples $e^{j2\\pi f_0 n}$ form the vector $\\mathbf{s}$, plus white noise of power $\\sigma^2$, gives $\\mathbf{R}_x = |A|^2\\mathbf{s}\\mathbf{s}^H + \\sigma^2\\mathbf{I}$: a cigar-shaped terrain whose long axis IS $\\mathbf{s}$. So the best unit-norm filter is $\\mathbf{s}/\\sqrt{Q}$, the tone’s own shape, and every other eigen-direction sits at the flat noise floor $\\sigma^2$. Keep this terrain: it returns as the error bowl of Tema 4 and the convergence landscape of Tema 5.',
       equations: [
         {
           sentence:

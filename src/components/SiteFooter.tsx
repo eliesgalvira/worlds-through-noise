@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { LogoMark } from '@/components/Logo.tsx'
+import { currentCourse } from '@/course/current-course.ts'
 import { siteRoutes } from '@/lib/routes.ts'
 
 function SiteFooter() {
@@ -13,18 +14,17 @@ function SiteFooter() {
           >
             <LogoMark className="h-6 w-6" />
             <span className="font-serif text-sm font-semibold uppercase tracking-[0.06em]">
-              Worlds Through Noise
+              {currentCourse.manifest.name}
             </span>
           </Link>
           <p className="max-w-sm text-sm leading-6 text-muted-foreground">
-            An interactive textbook for detection, estimation, and filtering in
-            audiovisual signal processing.
+            {currentCourse.footer.description}
           </p>
         </div>
 
         <nav aria-label="Modules" className="space-y-3">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Modules
+            {currentCourse.footer.modulesLabel}
           </p>
           <ul className="space-y-2 text-sm">
             {siteRoutes.map((route) => (
@@ -42,19 +42,21 @@ function SiteFooter() {
 
         <div className="space-y-3">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Principle
+            {currentCourse.footer.principleLabel}
           </p>
           <p className="text-sm leading-6 text-muted-foreground">
-            Start with the human problem. Manipulate the phenomenon. Reveal the
-            mathematics only after intuition exists.
+            {currentCourse.footer.principle}
           </p>
         </div>
       </div>
       <div className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <span>Worlds Through Noise. A public-science explainer.</span>
+          <span>{currentCourse.footer.bottomLine}</span>
           <span>
-            Made by <span className="font-medium text-foreground">Elies</span>
+            {currentCourse.footer.creditPrefix}{' '}
+            <span className="font-medium text-foreground">
+              {currentCourse.footer.creditName}
+            </span>
           </span>
         </div>
       </div>

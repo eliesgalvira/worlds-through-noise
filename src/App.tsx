@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { SiteLayout } from '@/components/SiteLayout.tsx'
-import { lessons } from '@/content/lessons.ts'
+import { lessons } from '@/course/catalog.ts'
 import { HomePage } from '@/pages/HomePage.tsx'
 import { LessonPage } from '@/pages/LessonPage.tsx'
 import { NotFoundPage } from '@/pages/NotFoundPage.tsx'

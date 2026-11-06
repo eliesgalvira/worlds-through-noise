@@ -1,21 +1,9 @@
-import katex from 'katex'
+import {
+  parseInlineMath,
+  renderDisplayMath,
+  renderInlineMath,
+} from '@/components/math/render-math.ts'
 import { cn } from '@/lib/utils.ts'
-
-function renderInline(latex: string): string {
-  return katex.renderToString(latex, {
-    displayMode: false,
-    throwOnError: false,
-    strict: 'ignore',
-  })
-}
-
-function renderDisplay(latex: string): string {
-  return katex.renderToString(latex, {
-    displayMode: true,
-    throwOnError: false,
-    strict: 'ignore',
-  })
-}
 
 type MathTextProps = {
   /** Prose with inline math between $…$ delimiters. */
@@ -25,17 +13,21 @@ type MathTextProps = {
 
 /** Renders prose whose $…$ spans become inline KaTeX. */
 function MathText({ text, className }: MathTextProps) {
-  const segments = text.split('$')
+  const segments = parseInlineMath(text)
   return (
     <span className={className}>
       {segments.map((segment, index) =>
-        index % 2 === 1 ? (
+        segment.kind === 'math' ? (
           <span
-            key={`${String(index)}-${segment}`}
-            dangerouslySetInnerHTML={{ __html: renderInline(segment) }}
+            key={`${String(index)}-${segment.content}`}
+            dangerouslySetInnerHTML={{
+              __html: renderInlineMath(segment.content),
+            }}
           />
         ) : (
-          <span key={`${String(index)}-${segment}`}>{segment}</span>
+          <span key={`${String(index)}-${segment.content}`}>
+            {segment.content}
+          </span>
         ),
       )}
     </span>
@@ -53,7 +45,7 @@ function MathBlock({ latex, className }: MathBlockProps) {
     <div
       className={cn('overflow-x-auto py-1 text-foreground', className)}
       aria-label={latex}
-      dangerouslySetInnerHTML={{ __html: renderDisplay(latex) }}
+      dangerouslySetInnerHTML={{ __html: renderDisplayMath(latex) }}
     />
   )
 }

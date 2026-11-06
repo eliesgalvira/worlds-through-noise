@@ -122,3 +122,40 @@ Colores nuevos de esta ronda (texto o trazo sobre cada superficie):
 | texto del botón (papel) sobre tinta | 1.00  | 1.09    | 1.17  | 1.08                | 10.86          |
 
 Detección sobre `muted` (4,22) y sobre `false-alarm/12` (4,41) no se pintan como texto en ninguna pantalla: solo como trazo en las figuras, donde basta 3:1.
+
+## Detección: ronda base
+
+Captura `det-base2` de `main` en `5d0f7298` (tras el catálogo). Detección se reparte en dos paquetes con la misma rúbrica, porque una captura entera son unas 300 imágenes y un revisor no puede leerlas (decidido por el agente, revisable). El paquete 1a lleva D3, D2 y el cuaderno, lo que más pesa en el parcial. El 1b lleva D1, D4 y D5. Cada paquete tiene 73 imágenes, a 1440 y 390 (900 queda fuera para que quepa), `extremo` solo con la figura y `resuelto` solo con lo que va tras la figura. Referencias: R1, R2, R4, R11 y R13, y en el 1a un problema resuelto con pasos.
+
+Lanzados a las 23:26 y 23:28, informes a las 23:39 y 23:41. Auditorías limpias.
+
+| Tarea                      | 1a ancho   | 1a móvil | 1b ancho       | 1b móvil       |
+| -------------------------- | ---------- | -------- | -------------- | -------------- |
+| T1 Motivada                | 2 (DET-07) | 2        | 1 (DET-13)     | 1              |
+| T2 Leer la figura          | 1 (DET-06) | 1        | 1 (DET-10)     | 1              |
+| T3 Predecir y comprobar    | 0 (DET-01) | 0        | 0 (DET-09)     | 0              |
+| T4 Del dibujo a la fórmula | 0 (DET-03) | 0        | 0 (DET-08)     | 0              |
+| T5 Problema de examen      | 0 (DET-02) | 0        | no verificable | no verificable |
+| T6 Orientarse              | 2 (DET-12) | 2        | 3              | 2 (DET-12)     |
+
+### Registro de defectos
+
+| Id     | Gravedad | Qué                                                                                                                                                           | Visto por                                  | Estado  |
+| ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | ------- |
+| DET-01 | bloquea  | Predicción de D3 falsa: con **p** sobre el eje ruidoso, $\mathbf C_w^{-1}\mathbf p \parallel \mathbf p$                                                       | 1a, verificado (Tema 2, p. 33 y 38)        | abierto |
+| DET-02 | bloquea  | Cuaderno de la anemia, g) y h): piden un ROC que no se ve                                                                                                     | 1a, verificado (parcial 2025-04, p. 2 y 5) | abierto |
+| DET-03 | bloquea  | ENR: la nota da $2\lvert A\rvert^2\mathbf p^H\mathbf C_w^{-1}\mathbf p$ como general, pero el 2 es del modelo complejo. Varios nombres para la misma magnitud | 1a, verificado (Tema 2, p. 23, 28 y 31)    | abierto |
+| DET-04 | adivinar | D3 promete histogramas de las sombras y un medidor que la figura no dibuja. La lectura usa u, Δμ y C, y la ecuación h, p y C_w                                | 1a                                         | abierto |
+| DET-05 | adivinar | Ecuaciones cortadas a 390 px sin señal (47 en el cuaderno)                                                                                                    | 1a, 1b                                     | abierto |
+| DET-06 | adivinar | D2: α sale marrón bajo el verde, $P_D$ sin leyenda, el ROC en el ámbar de H1, la línea sin γ, los ejes sin escala, el rótulo cortado a 390                    | 1a                                         | abierto |
+| DET-07 | fricción | La fórmula llega antes que el problema, y las metáforas tapan los términos técnicos                                                                           | 1a, 1b (DET-13)                            | abierto |
+| DET-08 | bloquea  | D4 mezcla el modelo real (texto y examen) y el complejo (figura)                                                                                              | 1b                                         | abierto |
+| DET-09 | bloquea  | Predicción de D4 con «$N = 2$ (complex)»: con $\chi^2_4$ la respuesta 0,32 es falsa                                                                           | 1b                                         | abierto |
+| DET-10 | adivinar | D1: eje sin cifras, área ámbar sin nombre, «decide H0» fijo y tachado por el umbral                                                                           | 1b                                         | abierto |
+| DET-11 | adivinar | D4: eje reescalado sin marcas, etiquetas que chocan                                                                                                           | 1b                                         | abierto |
+| DET-12 | fricción | Índice: «Perform the action» y «Prediction & transfer» se repiten diez veces, la barra del móvil no dice el apartado, faltan problemas sin señal de scroll    | 1a, 1b                                     | abierto |
+| DET-13 | adivinar | Siglas y símbolos sin presentar: NP, σ₀² y σ₁², ENR con una A que no existe en D1, MRB, εᵢ                                                                    | 1b                                         | abierto |
+| DET-14 | adivinar | γ nombra el umbral de la media y el del cociente de verosimilitudes en D1                                                                                     | 1b                                         | abierto |
+| DET-15 | adivinar | El $P_D$ del carcelero pasa a rojo, el color de la falsa alarma                                                                                               | 1b                                         | abierto |
+| DET-16 | menor    | Mezcla de idiomas en las fuentes de examen («TEMA 02», «7 ABRIL 2025») y notación que cambia ($P_D$ y $P_d$)                                                  | 1a, 1b                                     | abierto |
+| DET-17 | menor    | Rótulos SVG con guion bajo («P_FA →»)                                                                                                                         | 1a                                         | abierto |

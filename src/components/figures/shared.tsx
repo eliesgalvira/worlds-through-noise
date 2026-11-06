@@ -58,7 +58,7 @@ type PlotProps = {
 
 /**
  * SVG plot surface with optional pointer dragging in viewBox coordinates. It
- * never grows taller than about half the window, and it publishes
+ * never grows taller than `--plot-max-h` (about half the window), and it publishes
  * `--plot-px` (viewBox units per CSS pixel) so the `plot-text-*` utilities
  * render at the same apparent size in every figure and at every width.
  */
@@ -110,7 +110,7 @@ function Plot({
       role="img"
       aria-label={ariaLabel}
       className={cn(
-        'mx-auto block w-full max-w-[calc(55svh*var(--plot-aspect))] select-none rounded-md border border-border bg-card',
+        'mx-auto block w-full max-w-[calc(var(--plot-max-h,55svh)*var(--plot-aspect))] select-none rounded-md border border-border bg-card',
         onDragPoint !== undefined && 'cursor-crosshair touch-none',
         className,
       )}
@@ -209,4 +209,44 @@ function Legend({ items }: LegendProps) {
   )
 }
 
-export { FigureShell, Plot, ReadoutRow, ReadoutNote, Legend }
+type AxisTicksProps = {
+  /** Baseline y of the axis, in viewBox units. */
+  readonly y: number
+  readonly ticks: ReadonlyArray<{ readonly x: number; readonly label: string }>
+}
+
+/** Small tick marks with their numbers under a horizontal plot axis. */
+function AxisTicks({ y, ticks }: AxisTicksProps) {
+  return (
+    <g className="fill-muted-foreground stroke-muted-foreground">
+      {ticks.map((tick) => (
+        <g key={tick.label}>
+          <line x1={tick.x} y1={y} x2={tick.x} y2={y + 4} strokeWidth={1} />
+          <text
+            x={tick.x}
+            y={y + 14}
+            textAnchor="middle"
+            stroke="none"
+            className="font-mono plot-text-xs"
+          >
+            {tick.label}
+          </text>
+        </g>
+      ))}
+    </g>
+  )
+}
+
+/** A symbol with a subscript inside SVG text, e.g. P with FA. */
+function Sym({ base, sub }: { readonly base: string; readonly sub: string }) {
+  return (
+    <>
+      {base}
+      <tspan baselineShift="sub" fontSize="0.75em">
+        {sub}
+      </tspan>
+    </>
+  )
+}
+
+export { AxisTicks, FigureShell, Legend, Plot, ReadoutNote, ReadoutRow, Sym }

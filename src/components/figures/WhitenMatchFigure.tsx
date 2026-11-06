@@ -170,12 +170,12 @@ function WhitenMatchFigure() {
       readout={
         <>
           <ReadoutRow
-            label="Separation $d^2$ along $\theta$"
+            label="$SNR_y$ along $\theta$"
             value={formatNumber(d2, 2)}
             tone="h1"
           />
           <ReadoutRow
-            label="Best possible $d^2$ (this picture)"
+            label="Best possible: $d_M^2 = \Delta\boldsymbol{\mu}^T\mathbf{C}^{-1}\Delta\boldsymbol{\mu}$"
             value={formatNumber(best.value, 2)}
             tone="good"
           />

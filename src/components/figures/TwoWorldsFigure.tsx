@@ -7,6 +7,8 @@ import {
   Legend,
   Plot,
   ReadoutRow,
+  AxisTicks,
+  Sym,
 } from '@/components/figures/shared.tsx'
 import {
   formatNumber,
@@ -229,17 +231,43 @@ function TwoWorldsFigure() {
           strokeWidth={2}
           strokeDasharray="5 3"
         />
-        <text x={14} y={22} className="fill-h1-ink font-mono plot-text-sm">
+        <text
+          x={Math.max(xOf(threshold) - 6, 96)}
+          y={22}
+          textAnchor="end"
+          className="fill-h1-ink font-mono plot-text-sm"
+        >
           ← decide H1
         </text>
         <text
-          x={W - 14}
+          x={Math.min(xOf(threshold) + 6, W - 96)}
           y={22}
-          textAnchor="end"
           className="fill-h0 font-mono plot-text-sm"
         >
           decide H0 →
         </text>
+        <text
+          x={xOf(threshold) - 6}
+          y={H - 42}
+          textAnchor="end"
+          className="fill-false-alarm font-mono plot-text-sm"
+        >
+          <Sym base="P" sub="FA" />
+        </text>
+        <text
+          x={xOf(threshold) + 6}
+          y={H - 42}
+          className="fill-h1-ink font-mono plot-text-sm"
+        >
+          <Sym base="P" sub="M" />
+        </text>
+        <AxisTicks
+          y={H - 34}
+          ticks={[30, 42, 50, 58, 70].map((v) => ({
+            x: xOf(v),
+            label: String(v),
+          }))}
+        />
         {draw !== null ? (
           <g>
             <line
@@ -261,7 +289,7 @@ function TwoWorldsFigure() {
         ) : null}
         <text
           x={W / 2}
-          y={H - 10}
+          y={H - 4}
           textAnchor="middle"
           className="fill-muted-foreground font-mono plot-text-sm"
         >
@@ -285,7 +313,7 @@ function TwoWorldsFigure() {
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        <MathText text="The red area is the false-alarm probability being manufactured; both error probabilities are computed from $N(m, \sigma^2/N)$, never faked." />
+        <MathText text="Red: healthy patients called anemic, $P_{FA}$. Amber: anemic patients missed, $P_M$. Both are computed from $N(m, \sigma^2/N)$." />
       </p>
     </FigureShell>
   )

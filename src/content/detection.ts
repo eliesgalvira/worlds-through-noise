@@ -28,7 +28,9 @@ export const detectionLesson: LessonRecord = {
           sentence:
             'Evidence is comparative: how ordinary is this trace under $\\mathcal{H}_1$ versus under $\\mathcal{H}_0$.',
           latex:
-            'L(\\mathbf{x}) = \\frac{f(\\mathbf{x}\\mid\\mathcal{H}_1)}{f(\\mathbf{x}\\mid\\mathcal{H}_0)} \\;\\underset{\\mathcal{H}_0}{\\overset{\\mathcal{H}_1}{\\gtrless}}\\; \\gamma',
+            'L(\\mathbf{x}) = \\frac{f(\\mathbf{x}\\mid\\mathcal{H}_1)}{f(\\mathbf{x}\\mid\\mathcal{H}_0)} \\;\\underset{\\mathcal{H}_0}{\\overset{\\mathcal{H}_1}{\\gtrless}}\\; \\eta',
+          caption:
+            '$\\eta$ is a threshold on the ratio, not on ferritin. Because $m_1 < m_0$, $L(\\mathbf{x}) > \\eta$ is the same test as $T(\\mathbf{x}) < \\gamma$, the threshold in the figure.',
         },
         {
           sentence:
@@ -36,7 +38,7 @@ export const detectionLesson: LessonRecord = {
           latex:
             'T(\\mathbf{x}) = \\tfrac{1}{N}\\mathbf{1}^T\\mathbf{x} \\sim \\mathcal{N}\\!\\left(m_i,\\ \\tfrac{\\sigma^2}{N}\\right) \\text{ under } \\mathcal{H}_i',
           caption:
-            'The $\\sqrt{N}$ tightening is the processing gain: $ENR = N A^2/\\sigma^2$ grows linearly with $N$.',
+            'The $\\sqrt{N}$ tightening is the processing gain: $ENR = N(m_1 - m_0)^2/\\sigma^2$ grows linearly with $N$.',
         },
       ],
       prediction: {
@@ -71,7 +73,7 @@ export const detectionLesson: LessonRecord = {
           latex:
             '\\gamma_y = \\sigma_y\\, Q^{-1}(\\alpha), \\qquad P_D = Q\\!\\left(Q^{-1}(\\alpha) - \\sqrt{\\mathrm{ENR}}\\right)',
           caption:
-            '$ENR = NA^2/\\sigma^2$ for the DC problem; for the general pulse it is $2|A|^2\\mathbf{p}^H\\mathbf{C}_w^{-1}\\mathbf{p}$.',
+            'Real data: $ENR = NA^2/\\sigma^2$ for a DC level, $d_M^2 = \\mathbf{a}^T\\mathbf{C}^{-1}\\mathbf{a}$ for a known difference in colored noise. Complex pulse in complex noise: $SNR_y = 2|A|^2\\mathbf{p}^H\\mathbf{C}_w^{-1}\\mathbf{p}$, the 2 because $\\mathrm{Re}\\{z\\}$ keeps half the noise power.',
         },
       ],
       prediction: {
@@ -96,13 +98,13 @@ export const detectionLesson: LessonRecord = {
       object:
         'Move to signal space, where the whole observation vector is one point. The noise turns that point into a cloud around each hypothesis center — around $\\mathbf{0}$ when there is no pulse, around $A\\mathbf{p}$ when there is. White noise makes a round cloud; colored noise makes a tilted ellipse, louder along some directions than others. And a linear detector is nothing but a direction to project onto: a shadow-line, to be chosen so that the shadows of the two clouds separate as cleanly as possible.',
       action:
-        'Hunt for that direction in the figure. Start with colored noise and the naive choice — project straight onto the pulse direction $\\mathbf{p}$ — and watch the two shadow histograms overlap, because $\\mathbf{p}$ points into the loud axis of the ellipse. Then drag the whitening slider, which squeezes the space by $\\mathbf{C}_w^{-1/2}$ until the ellipse becomes a circle. In the squeezed world the best direction is trivially “toward the (squeezed) pulse.” Undo the change of variables, and the composite direction you built with your hands is exactly $\\mathbf{C}_w^{-1}\\mathbf{p}$.',
+        'Hunt for that direction in the figure. Start with colored noise and the naive choice — project straight onto the pulse direction $\\mathbf{p}$ — and watch the two shadow histograms overlap, because $\\mathbf{p}$ leans toward the loud axis of the ellipse. Then drag the whitening slider, which squeezes the space by $\\mathbf{C}_w^{-1/2}$ until the ellipse becomes a circle. In the squeezed world the best direction is trivially “toward the (squeezed) pulse.” Undo the change of variables, and the composite direction you built with your hands is exactly $\\mathbf{C}_w^{-1}\\mathbf{p}$.',
       payoff:
         'That one mental move — make the noise round first, then match — generates the whole family of results, and none of them needs to be memorized separately. The matched filter is the already-white case ($\\mathbf{h} \\propto \\mathbf{p}$). The generalized matched filter is the colored case ($\\mathbf{h} \\propto \\mathbf{C}_w^{-1}\\mathbf{p}$). The Mahalanobis distance is simply length measured after whitening. And pulse design becomes obvious: put your transmit energy along the eigen-direction where the noise is quietest, which gives $SNR_{opt} = 2|A|^2 E_p/\\lambda_{\\min}$.',
       equations: [
         {
           sentence:
-            'The NP detector for a known pulse in Gaussian noise projects the data onto the whitened-then-matched direction.',
+            'The NP detector for a known pulse in complex Gaussian noise $\\mathcal{CN}(\\mathbf{0}, \\mathbf{C}_w)$ projects the data onto the whitened-then-matched direction.',
           latex:
             'y = \\mathrm{Re}\\{A^*\\mathbf{p}^H\\mathbf{C}_w^{-1}\\mathbf{x}\\} \\;\\gtrless\\; \\gamma_y, \\qquad \\mathrm{SNR}_y = 2|A|^2\\,\\mathbf{p}^H\\mathbf{C}_w^{-1}\\mathbf{p}',
         },
@@ -117,9 +119,9 @@ export const detectionLesson: LessonRecord = {
       ],
       prediction: {
         question:
-          'The noise ellipse is loud exactly along $\\mathbf{p}$. Is projecting onto $\\mathbf{p}$ still a good idea?',
+          'The pulse $\\mathbf{p}$ points halfway between the loud and the quiet axis of the noise ellipse. Is projecting straight onto $\\mathbf{p}$ still the best direction?',
         answer:
-          'No — that shadow has maximum noise. $\\mathbf{C}_w^{-1}\\mathbf{p}$ tilts the projection away from the loud axis; in the whitened picture this is obvious, in the original picture it looks like magic.',
+          'No. Along $\\mathbf{p}$ the shadow still collects part of the loud noise. $\\mathbf{C}_w^{-1}\\mathbf{p}$ divides each eigen-component of $\\mathbf{p}$ by its noise power, so the projection swings toward the quiet axis and the separation grows. Only if $\\mathbf{p}$ lies exactly on an axis (an eigenvector of $\\mathbf{C}_w$) is $\\mathbf{C}_w^{-1}\\mathbf{p} \\parallel \\mathbf{p}$, and then $\\mathbf{p}$ itself is already optimal.',
       },
       transfer:
         'Parcial Oct 2025: two codewords in colored noise. Whiten, reduce to a distance comparison, then argue where codewords should be placed. All three parts are the same squeeze.',
@@ -159,9 +161,9 @@ export const detectionLesson: LessonRecord = {
       ],
       prediction: {
         question:
-          '$\\sigma_1^2/\\sigma_0^2 = 2$ and $N = 2$ (complex). Roughly how good can the detector be?',
+          '$\\sigma_1^2/\\sigma_0^2 = 2$ and $N = 2$ real samples. Roughly how good can the detector be?',
         answer:
-          'Poor: with two samples the bumps overlap heavily — $P_D = P_{FA}^{1/2}$ for the exponential case, e.g. only 0.32 at $P_{FA} = 0.1$. Power detection is sample-hungry.',
+          'Poor: with two real samples $y/\\sigma^2$ is $\\chi^2_2$, an exponential, so $P_D = P_{FA}^{\\sigma_0^2/\\sigma_1^2} = P_{FA}^{1/2}$: only 0.32 at $P_{FA} = 0.1$. Check it in the figure with $N = 2$, $P/\\sigma^2 = 1$ and $\\alpha = 10\\%$. Power detection is sample-hungry.',
       },
       transfer:
         'Final Jun 2026, Ex. 3: derive the jailer’s test, apply the Gaussian approximation, then show $P \\propto N^{-2/3}$ defeats the jailer but not the receiver. Every step is a picture from this module.',
@@ -189,13 +191,13 @@ export const detectionLesson: LessonRecord = {
           latex:
             '\\frac{f(\\mathbf{x}\\mid\\mathcal{H}_1)}{f(\\mathbf{x}\\mid\\mathcal{H}_0)} \\;\\gtrless\\; \\frac{P_0\\,(C_{10}-C_{00})}{P_1\\,(C_{01}-C_{11})} = \\gamma_{MRB}',
           caption:
-            'Equal costs reduce MRB to MAP; MAP with equal priors reduces to maximum likelihood.',
+            'Minimum Bayes risk (MRB, the course’s acronym): with equal costs it reduces to MAP, and MAP with equal priors reduces to maximum likelihood.',
         },
         {
           sentence:
-            'For $n$ repeated bits with flip probability $\\varepsilon$ the sufficient statistic is the count of ones, distributed binomially.',
+            'For $n$ repeated copies with flip probability $\\varepsilon$ the sufficient statistic is the count of ones $k$, binomial with $q_0 = \\varepsilon$ and $q_1 = 1 - \\varepsilon$, the chance that one copy reads 1 under each hypothesis.',
           latex:
-            '\\Pr(k \\mid \\mathcal{H}_i) = \\binom{n}{k} \\varepsilon_i^{\\,k} (1-\\varepsilon_i)^{\\,n-k}',
+            '\\Pr(k \\mid \\mathcal{H}_i) = \\binom{n}{k} q_i^{\\,k} (1-q_i)^{\\,n-k}',
         },
       ],
       prediction: {
@@ -356,7 +358,7 @@ export const detectionLesson: LessonRecord = {
         {
           label: 'g',
           prompt:
-            'The exam shows the ROC of $y$ with three marked points (+, o, △). Which corresponds to the NP detector of parts (b)–(e), and which to the MAP detector of part (f)?',
+            'The exam shows one ROC curve of $y$ ($P_{FA}$ from 0 to 0.3) with three marked points: + at about $(0.017, 0.60)$ and △ at $(0.05, 0.77)$, both on the curve, and o at $(0.05, 0.85)$, above it. Which corresponds to the NP detector of parts (b)–(e), and which to the MAP detector of part (f)?',
           steps: [
             {
               title: 'Use what each criterion pins down',
@@ -382,7 +384,7 @@ export const detectionLesson: LessonRecord = {
           ],
           answer: {
             sentence:
-              'The rare-disease prior made MAP the stricter detector: lower threshold, fewer alarms of both kinds.',
+              'The rare-disease prior made MAP the stricter detector: lower threshold, fewer positive calls, true and false.',
             latex: '\\gamma_y^{NP} > \\gamma_y^{MAP}',
           },
         },

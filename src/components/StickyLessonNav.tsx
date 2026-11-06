@@ -21,23 +21,11 @@ function buildToc(
 ): ReadonlyArray<TocItem> {
   return [
     { id: 'lesson-intro', title: 'Introduction', depth: 1 },
-    ...modules.flatMap((module) => [
-      {
-        id: module.id,
-        title: `${module.id}. ${module.title}`,
-        depth: 1 as const,
-      },
-      {
-        id: `${module.id}-figure`,
-        title: 'Perform the action',
-        depth: 2 as const,
-      },
-      {
-        id: `${module.id}-transfer`,
-        title: 'Prediction & transfer',
-        depth: 2 as const,
-      },
-    ]),
+    ...modules.map((module) => ({
+      id: module.id,
+      title: `${module.id}. ${module.title}`,
+      depth: 1 as const,
+    })),
     { id: 'exam-bank', title: 'Exam workbook', depth: 1 },
     ...problems.map((problem) => ({
       id: problem.id,
@@ -267,9 +255,7 @@ function TocList({
                   item.depth === 1 ? 'pl-4' : 'pl-8',
                   active
                     ? 'text-accent-ink'
-                    : item.depth === 1
-                      ? 'text-muted-foreground hover:text-foreground'
-                      : 'text-muted-foreground hover:text-foreground',
+                    : 'text-muted-foreground hover:text-foreground',
                 )}
               >
                 {item.title}

@@ -5,6 +5,8 @@ import {
   Legend,
   Plot,
   ReadoutRow,
+  AxisTicks,
+  Sym,
 } from '@/components/figures/shared.tsx'
 import {
   formatNumber,
@@ -116,9 +118,11 @@ function BudgetRocFigure() {
             label: 'spilled budget $\\alpha$',
             swatchClass: 'stroke-false-alarm',
           },
+          { label: 'caught signal $P_D$', swatchClass: 'stroke-detection' },
+          { label: 'ROC: every budget', swatchClass: 'stroke-foreground' },
         ]}
       />
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid gap-2 sm:grid-cols-2">
         <Plot
           viewW={W}
           viewH={H}
@@ -133,14 +137,14 @@ function BudgetRocFigure() {
             strokeWidth={1}
           />
           <path
-            d={tail(0, gamma)}
-            className="fill-false-alarm"
-            opacity={0.35}
-          />
-          <path
             d={tail(separation, gamma)}
             className="fill-detection"
             opacity={0.22}
+          />
+          <path
+            d={tail(0, gamma)}
+            className="fill-false-alarm"
+            opacity={0.55}
           />
           <path
             d={density(0)}
@@ -164,12 +168,33 @@ function BudgetRocFigure() {
             strokeDasharray="5 3"
           />
           <text
+            x={xOf(gamma) + 4}
+            y={20}
+            className="fill-threshold font-mono plot-text-sm"
+          >
+            γ
+          </text>
+          <text
+            x={xOf(gamma) + 4}
+            y={H - 36}
+            className="fill-false-alarm font-mono plot-text-sm"
+          >
+            α
+          </text>
+          <text
+            x={xOf(separation) + 10}
+            y={(H - 30 + 12) / 2}
+            className="fill-detection font-mono plot-text-sm"
+          >
+            <Sym base="P" sub="D" />
+          </text>
+          <text
             x={W / 2}
             y={H - 8}
             textAnchor="middle"
             className="fill-muted-foreground font-mono plot-text-sm"
           >
-            test statistic y (σ_y = 1)
+            test statistic y (σ<tspan baselineShift="sub">y</tspan> = 1)
           </text>
         </Plot>
         <Plot
@@ -210,23 +235,38 @@ function BudgetRocFigure() {
               )
               .join(' ')}
             fill="none"
-            className="stroke-h1"
+            className="stroke-foreground"
             strokeWidth={2}
           />
           <circle
             cx={rocX(alpha)}
             cy={rocY(pd)}
             r={5}
-            className="fill-threshold stroke-card"
+            className="fill-cursor stroke-card"
             strokeWidth={1.5}
           />
+          <AxisTicks
+            y={H - 30}
+            ticks={[
+              { x: rocX(0), label: '0' },
+              { x: rocX(1), label: '1' },
+            ]}
+          />
+          <text
+            x={22}
+            y={rocY(1) + 4}
+            textAnchor="end"
+            className="fill-muted-foreground font-mono plot-text-xs"
+          >
+            1
+          </text>
           <text
             x={(W + 16) / 2}
             y={H - 8}
             textAnchor="middle"
             className="fill-muted-foreground font-mono plot-text-sm"
           >
-            P_FA →
+            false-alarm rate <Sym base="P" sub="FA" /> →
           </text>
           <text
             x={14}
@@ -235,7 +275,7 @@ function BudgetRocFigure() {
             transform={`rotate(-90 14 ${H / 2})`}
             className="fill-muted-foreground font-mono plot-text-sm"
           >
-            P_D →
+            detection rate <Sym base="P" sub="D" /> →
           </text>
         </Plot>
       </div>

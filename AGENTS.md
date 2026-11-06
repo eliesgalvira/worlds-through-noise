@@ -69,6 +69,6 @@ Use Tailwind CSS and the shadcn component pattern:
 - shared utilities live in `src/lib`,
 - shadcn-style components live in `src/components/ui`,
 - path aliases use `@/`,
-- semantic color utilities exist for inference roles: `h0` (blue), `h1` (amber), `detection` (green), `false-alarm` (red), `threshold` (amber), `truth` (ink), `prior` (indigo) — one color, one role per view.
+- semantic color utilities exist for inference roles: `h0` (blue), `h1` (amber, `h1-ink` for text), `detection` (green), `false-alarm` (red), `threshold` (dashed stone ink), `cursor` (rose: what the student moves), `truth` (ink), `prior` (indigo) — one color, one role per view. Amber text uses `accent-ink`; `scripts/theme-guard.test.ts` fails on amber text in the stroke-only tokens. SVG text uses `plot-text-xs`, `plot-text-sm` or `plot-text`, never a pixel size.
 
 Keep UI consistent with `DESIGN.md`: academic field notebook, signal-processing lab, public-science explainer. The owner explicitly likes two things — the wordmark (`src/components/Logo.tsx`, a committed SVG graphic; see `DESIGN.md` before touching it) and the table-of-contents nav (`StickyLessonNav`). Preserve both.

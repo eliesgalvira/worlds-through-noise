@@ -416,6 +416,8 @@ async function openPage(
     reducedMotion: 'reduce',
   })
   const page = await context.newPage()
+  // A resolved lesson on a phone is a very tall page; three run at once.
+  page.setDefaultTimeout(120_000)
   await page.clock.setFixedTime(FIXED_TIME)
   await page.route('**/*', async (request) => {
     const url = request.request().url()
@@ -434,6 +436,17 @@ async function openPage(
   page.on('pageerror', (error) => {
     failures.push(`pageerror ${String(width)} ${state}: ${error.message}`)
   })
+  // A full-page screenshot stretches the viewport to the page height, which
+  // would also stretch every svh unit and relayout the page mid-capture. Pin
+  // the figures' height cap to the real window.
+  await page.addInitScript(
+    (maxH) => {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.documentElement.style.setProperty('--plot-max-h', maxH)
+      })
+    },
+    `${String(Math.round(viewportHeight(width) * 0.55))}px`,
+  )
   await page.addInitScript(() => {
     // Layout shift during load, before any input from the bench.
     Reflect.set(window, '__shift', 0)

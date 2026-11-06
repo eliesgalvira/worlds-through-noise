@@ -1,12 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  interactionImage,
-  isNeutralName,
-  lessonImage,
-  sectionSlug,
-  tileHeight,
-  tiles,
-} from './nombres.ts'
+import { tileHeight, tiles } from './nombres.ts'
 
 describe('tiles', () => {
   it('covers the span exactly with tiles no taller than the cap', () => {
@@ -31,33 +24,6 @@ describe('tile height', () => {
   it('keeps every tile under the vision downscale limit', () => {
     for (const width of [390, 900, 1440]) {
       expect(Math.max(width, tileHeight(width))).toBeLessThanOrEqual(1568)
-    }
-  })
-})
-
-describe('neutral names', () => {
-  it('accepts what the bench writes', () => {
-    expect(
-      isNeutralName(lessonImage(390, 'resuelto', sectionSlug('D3'), 2)),
-    ).toBe(true)
-    expect(
-      isNeutralName(lessonImage(1440, 'inicial', sectionSlug('exam-bank'), 1)),
-    ).toBe(true)
-    expect(isNeutralName(interactionImage('d2', 900, 4))).toBe(true)
-    expect(isNeutralName('producto-c.png')).toBe(true)
-  })
-
-  it('rejects names that leak a round, a stage or a product', () => {
-    for (const name of [
-      'leccion-1440-inicial-d3-1-ronda2.png',
-      'candidato-1440.png',
-      'antes-d3.png',
-      'producto-brilliant.png',
-      'leccion-1280-inicial-d3-1.png',
-      'interaccion-d2-900-tira.png',
-      'X-overflowing.txt',
-    ]) {
-      expect(isNeutralName(name)).toBe(false)
     }
   })
 })

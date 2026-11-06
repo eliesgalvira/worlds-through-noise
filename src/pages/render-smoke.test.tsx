@@ -23,10 +23,11 @@ describe('server render of every page', () => {
           <LessonPage lesson={lesson} />
         </MemoryRouter>,
       )
-      const figures = html.match(/<svg[^>]*role="img"/g) ?? []
-      expect(figures.length).toBeGreaterThanOrEqual(lesson.modules.length)
       for (const module of lesson.modules) {
-        expect(html).toContain(`id="${module.id}"`)
+        // The figure slot must hold a rendered FigureShell, not stay empty.
+        expect(html).toMatch(
+          new RegExp(`id="${module.id}-figure"[^>]*><section`),
+        )
       }
       expect(html).toContain('id="exam-bank"')
     },

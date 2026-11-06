@@ -1,5 +1,11 @@
-import { execFileSync, spawnSync } from 'node:child_process'
-import { mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
+import {
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -15,7 +21,8 @@ function fixture(extraReference?: string) {
   const base = mkdtempSync(join(tmpdir(), 'wtn-paquete-test-'))
   const capturas = join(base, 'capturas')
   const refs = join(base, 'refs')
-  execFileSync('mkdir', ['-p', capturas, refs])
+  mkdirSync(capturas, { recursive: true })
+  mkdirSync(refs, { recursive: true })
   for (const name of [
     'leccion-1440-inicial-d3-1.png',
     'leccion-390-inicial-d3-1.png',

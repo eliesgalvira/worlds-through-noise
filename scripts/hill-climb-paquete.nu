@@ -73,7 +73,7 @@ def main [
   mkdir $hojas
   let hoja = $hojas | path join $"paquete-($dir | path basename).png"
   let pngs = glob ($dir | path join "*.png") | sort
-  ^magick montage ...$pngs -tile 8x -geometry 300x300+4+4 -background "#ffffff" $hoja
+  ^montage ...$pngs -tile 8x -geometry 300x300+4+4 -background "#ffffff" $hoja
   let resultado = {dir: $dir, hoja: $hoja, imagenes: $n, referencias: ($refs | length)}
   $resultado | to json | save --force ($capturas | path join $"paquete-($dir | path basename).json")
   $resultado

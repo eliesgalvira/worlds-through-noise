@@ -134,8 +134,10 @@ async function setSlider(
     await page.keyboard.press('ArrowRight')
   }
   const reached = await read('aria-valuenow')
-  if (Math.abs(reached - clamped) > 1e-6 && reached < clamped) {
-    failures.push(`${scope} «${label}» stopped at ${String(reached)}`)
+  if (Math.abs(reached - target) > 1e-6) {
+    failures.push(
+      `${scope} «${label}» asked for ${String(target)}, reached ${String(reached)}`,
+    )
   }
 }
 

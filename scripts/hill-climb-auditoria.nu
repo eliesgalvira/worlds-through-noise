@@ -31,16 +31,19 @@ def main [
   if not ($recuerdos | is-empty) {
     error make {msg: $"La memoria del proyecto de revisores no está vacía: ($recuerdos)"}
   }
-  let sesiones = (^rg --files-with-matches --fixed-strings --glob "*.jsonl" $dir $sesiones_claude | lines)
+  let busqueda = (do { ^rg --files-with-matches --fixed-strings --glob "*.jsonl" $dir $sesiones_claude } | complete)
+  let sesiones = $busqueda.stdout | lines
   if ($sesiones | is-empty) { error make {msg: $"Ninguna sesión menciona ($dir)"} }
   # Los asuntos de los últimos commits: un revisor que los ve sabe la ronda.
-  let commits = (^git -C ($repo | path expand) log --all --format=%s -n 60 | lines | where {|s| ($s | str length) > 24 })
+  let commits = (^git -C ($repo | path expand) log --all --format=%s -n 60 | lines | where {|s| ($s | str length) > 12 })
   let delatores = $DELATORES | append $commits
   let filas = $sesiones | each {|sesion|
     let texto = open --raw $sesion
-    # «hill-climb» suelto delata; «ui-hill-climb», el nombre de la skill que
-    # todo agente ve en su lista, no.
-    let sueltos = $texto | str replace --all "ui-hill-climb" "" | str contains "hill-climb"
+    # «hill-climb» suelto delata. La skill `ui-hill-climb` sale en la lista de
+    # skills de todo agente, con su descripción («…hill-climb a UI…»): eso dice
+    # que el método existe, no qué producto ni qué ronda, y no cuenta.
+    let sin_skill = $texto | str replace --all "ui-hill-climb" "" | str replace --all "hill-climb a UI" ""
+    let sueltos = $sin_skill | str contains "hill-climb"
     {
       sesion: $sesion
       delatores: ($delatores | where {|d| $texto | str contains $d } | append (if $sueltos { ["hill-climb"] } else { [] }))

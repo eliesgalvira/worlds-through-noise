@@ -71,17 +71,3 @@ export function interactionImage(
 export function interactionText(figure: string): string {
   return `interaccion-${figure}.txt`
 }
-
-const NEUTRAL = [
-  /^rubrica\.md$/,
-  /^brief\.md$/,
-  /^leccion-(1440|900|390)-(inicial|extremo|resuelto)-[a-z0-9]+-\d+\.png$/,
-  /^interaccion-[a-z0-9]+-(1440|900|390)-\d+\.png$/,
-  /^interaccion-[a-z0-9]+\.txt$/,
-  /^producto-[a-z]\.png$/,
-]
-
-/** True when a bundle file name gives away nothing but width, state and section. */
-export function isNeutralName(name: string): boolean {
-  return NEUTRAL.some((pattern) => pattern.test(name))
-}

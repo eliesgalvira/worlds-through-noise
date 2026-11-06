@@ -6,6 +6,7 @@ import {
   Legend,
   Plot,
   ReadoutRow,
+  ReadoutNote,
 } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
 import { eigSym2 } from '@/domain/math/kernel.ts'
@@ -73,9 +74,9 @@ function ErrorBowlFigure() {
             onValueChange={setInputCorr}
             format={(v) => v.toFixed(2)}
           />
-          <p className="text-xs leading-5 text-muted-foreground">
+          <ReadoutNote>
             <MathText text="Scenario: identify the unknown system $\mathbf{c} = [0.8, -0.5]^T$ from its noisy output. Drag directly on the plot." />
-          </p>
+          </ReadoutNote>
         </>
       }
       readout={
@@ -114,7 +115,7 @@ function ErrorBowlFigure() {
           },
           {
             label: 'your filter $\\mathbf{h}$',
-            swatchClass: 'stroke-threshold',
+            swatchClass: 'stroke-cursor',
           },
         ]}
       />
@@ -166,7 +167,7 @@ function ErrorBowlFigure() {
         <text
           x={toX(hOpt0) + 9}
           y={toY(hOpt1) - 6}
-          className="fill-detection font-mono text-[10px]"
+          className="fill-detection font-mono plot-text-sm"
         >
           h_opt
         </text>
@@ -184,13 +185,13 @@ function ErrorBowlFigure() {
           cx={toX(h.h0)}
           cy={toY(h.h1)}
           r={6.5}
-          className="fill-threshold stroke-card"
+          className="fill-cursor stroke-card"
           strokeWidth={1.5}
         />
         <text
           x={toX(h.h0) + 10}
           y={toY(h.h1) + 4}
-          className="fill-foreground font-mono text-[11px]"
+          className="fill-foreground font-mono plot-text"
         >
           h
         </text>

@@ -94,6 +94,9 @@ describe.skipIf(!hasNu)('hill-climb-paquete.nu', () => {
     const brief = readFileSync(join(dir, 'brief.md'), 'utf8')
     expect(brief).toContain(`${dir}/rubrica.md`)
     expect(brief).not.toMatch(/<dir>|<n>|<m>|<reglas>|hill-climb|worlds/i)
+    const rubric = readFileSync(join(dir, 'rubrica.md'), 'utf8')
+    expect(rubric.startsWith('## 1. Contexto')).toBe(true)
+    expect(rubric).not.toMatch(/ronda|round|hill-climb/i)
   })
 
   it('refuses a reference folder that names a product', () => {

@@ -229,14 +229,14 @@ function TwoWorldsFigure() {
           strokeWidth={2}
           strokeDasharray="5 3"
         />
-        <text x={14} y={22} className="fill-h1 font-mono text-[10px]">
+        <text x={14} y={22} className="fill-h1-ink font-mono plot-text-sm">
           ← decide H1
         </text>
         <text
           x={W - 14}
           y={22}
           textAnchor="end"
-          className="fill-h0 font-mono text-[10px]"
+          className="fill-h0 font-mono plot-text-sm"
         >
           decide H0 →
         </text>
@@ -263,7 +263,7 @@ function TwoWorldsFigure() {
           x={W / 2}
           y={H - 10}
           textAnchor="middle"
-          className="fill-muted-foreground font-mono text-[10px]"
+          className="fill-muted-foreground font-mono plot-text-sm"
         >
           sample mean of ferritin (drag to move γ)
         </text>
@@ -271,7 +271,7 @@ function TwoWorldsFigure() {
           x={xOf(M1)}
           y={yOf(normalPdf(M1, M1, sd)) - 8}
           textAnchor="middle"
-          className="fill-h1 font-mono text-[11px]"
+          className="fill-h1-ink font-mono plot-text"
         >
           H1
         </text>
@@ -279,7 +279,7 @@ function TwoWorldsFigure() {
           x={xOf(M0)}
           y={yOf(normalPdf(M0, M0, sd)) - 8}
           textAnchor="middle"
-          className="fill-h0 font-mono text-[11px]"
+          className="fill-h0 font-mono plot-text"
         >
           H0
         </text>

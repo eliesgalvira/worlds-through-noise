@@ -21,10 +21,10 @@ function LessonModule({ module, figure }: LessonModuleProps) {
   return (
     <section
       id={module.id}
-      className="scroll-mt-24 border-t border-border py-14"
+      className="scroll-mt-32 xl:scroll-mt-24 border-t border-border py-14"
     >
       <header className="max-w-3xl">
-        <p className="font-mono text-sm uppercase tracking-[0.16em] text-accent">
+        <p className="font-mono text-sm uppercase tracking-[0.16em] text-accent-ink">
           {module.id}
         </p>
         <h2 className="mt-2 font-serif text-3xl font-semibold leading-tight text-foreground md:text-4xl">
@@ -41,7 +41,10 @@ function LessonModule({ module, figure }: LessonModuleProps) {
         <ProseParagraph text={module.action} />
       </div>
 
-      <div id={`${module.id}-figure`} className="mt-8 max-w-4xl scroll-mt-24">
+      <div
+        id={`${module.id}-figure`}
+        className="mt-8 max-w-5xl scroll-mt-32 xl:scroll-mt-24"
+      >
         {figure}
       </div>
 
@@ -61,14 +64,14 @@ function LessonModule({ module, figure }: LessonModuleProps) {
 
       <div
         id={`${module.id}-transfer`}
-        className="mt-8 max-w-3xl scroll-mt-24 space-y-6"
+        className="mt-8 max-w-3xl scroll-mt-32 xl:scroll-mt-24 space-y-6"
       >
         <PredictionPrompt
           question={module.prediction.question}
           answer={<MathText text={module.prediction.answer} />}
         />
         <div>
-          <p className="font-mono text-xs uppercase tracking-[0.14em] text-accent">
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-accent-ink">
             Transfer to the exam
           </p>
           <p className="mt-2 text-base leading-7 text-foreground">
@@ -78,7 +81,7 @@ function LessonModule({ module, figure }: LessonModuleProps) {
             <ul className="mt-3 space-y-1 text-sm leading-6 text-muted-foreground">
               {module.examRefs.map((ref) => (
                 <li key={ref} className="flex gap-2">
-                  <span aria-hidden="true" className="text-accent">
+                  <span aria-hidden="true" className="text-accent-ink">
                     →
                   </span>
                   <MathText text={ref} />

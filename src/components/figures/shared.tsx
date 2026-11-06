@@ -1,5 +1,7 @@
+import { useLayoutEffect, useRef } from 'react'
 import type { PointerEvent as ReactPointerEvent, ReactNode } from 'react'
 import { MathText } from '@/components/MathText.tsx'
+import { cn } from '@/lib/utils.ts'
 
 type FigureShellProps = {
   readonly title: string
@@ -10,8 +12,9 @@ type FigureShellProps = {
 }
 
 /**
- * Frame for every interactive figure: visual on the left, controls in a
- * narrow column, readouts under the controls. The visual is the protagonist.
+ * Frame for every interactive figure. The visual takes the full width; the
+ * controls sit right under it, so the figure and the hand that moves it stay
+ * in one view; readouts follow as numbers with their labels.
  */
 function FigureShell({
   title,
@@ -22,29 +25,24 @@ function FigureShell({
 }: FigureShellProps) {
   return (
     <section
-      className="rounded-lg border bg-card/80 p-5 sm:p-6"
+      className="rounded-lg border bg-card/80 p-4 sm:p-6"
       aria-label={title}
     >
-      <p className="font-mono text-xs uppercase tracking-[0.16em] text-accent">
-        Perform the action
-      </p>
-      <h4 className="mt-2 max-w-3xl font-serif text-xl font-semibold leading-snug text-foreground">
+      <h4 className="max-w-3xl font-serif text-xl font-semibold leading-snug text-foreground">
         <MathText text={title} />
       </h4>
-      <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+      <p className="mt-1.5 max-w-3xl text-sm leading-6 text-muted-foreground">
         <MathText text={instruction} />
       </p>
-      <div className="mt-5 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,19rem)]">
-        <div className="min-w-0 lg:self-center">{children}</div>
-        <div className="space-y-5 border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-          {controls}
-          {readout !== undefined ? (
-            <div className="space-y-1.5 border-t border-border pt-4 text-sm leading-6">
-              {readout}
-            </div>
-          ) : null}
-        </div>
+      <div className="mt-4 min-w-0">{children}</div>
+      <div className="mt-5 grid items-start justify-items-start gap-x-8 gap-y-5 border-t border-border pt-5 sm:grid-cols-2 lg:grid-cols-3">
+        {controls}
       </div>
+      {readout !== undefined ? (
+        <div className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-border pt-4 sm:grid-cols-3 lg:grid-cols-4">
+          {readout}
+        </div>
+      ) : null}
     </section>
   )
 }
@@ -58,7 +56,12 @@ type PlotProps = {
   readonly onDragPoint?: (x: number, y: number) => void
 }
 
-/** SVG plot surface with optional pointer dragging in viewBox coordinates. */
+/**
+ * SVG plot surface with optional pointer dragging in viewBox coordinates. It
+ * never grows taller than about half the window, and it publishes
+ * `--plot-px` (viewBox units per CSS pixel) so the `plot-text-*` utilities
+ * render at the same apparent size in every figure and at every width.
+ */
 function Plot({
   viewW,
   viewH,
@@ -67,6 +70,29 @@ function Plot({
   className,
   onDragPoint,
 }: PlotProps) {
+  const svgRef = useRef<SVGSVGElement>(null)
+
+  // Before paint, so the first frame already has the right text size.
+  useLayoutEffect(() => {
+    const svg = svgRef.current
+    if (svg === null) {
+      return
+    }
+    svg.style.setProperty('--plot-aspect', String(viewW / viewH))
+    const publish = () => {
+      const width = svg.getBoundingClientRect().width
+      if (width > 0) {
+        svg.style.setProperty('--plot-px', String(viewW / width))
+      }
+    }
+    publish()
+    const observer = new ResizeObserver(publish)
+    observer.observe(svg)
+    return () => {
+      observer.disconnect()
+    }
+  }, [viewW, viewH])
+
   const emit = (event: ReactPointerEvent<SVGSVGElement>) => {
     if (onDragPoint === undefined) {
       return
@@ -79,10 +105,15 @@ function Plot({
   }
   return (
     <svg
+      ref={svgRef}
       viewBox={`0 0 ${viewW} ${viewH}`}
       role="img"
       aria-label={ariaLabel}
-      className={`block w-full select-none rounded-md border border-border bg-card ${onDragPoint !== undefined ? 'touch-none cursor-crosshair' : ''} ${className ?? ''}`}
+      className={cn(
+        'mx-auto block w-full max-w-[calc(55svh*var(--plot-aspect))] select-none rounded-md border border-border bg-card',
+        onDragPoint !== undefined && 'cursor-crosshair touch-none',
+        className,
+      )}
       onPointerDown={(event) => {
         if (onDragPoint !== undefined) {
           event.currentTarget.setPointerCapture(event.pointerId)
@@ -103,29 +134,46 @@ function Plot({
   )
 }
 
+type Tone = 'default' | 'h0' | 'h1' | 'good' | 'bad'
+
+const TONE_CLASS: Readonly<Record<Tone, string>> = {
+  default: 'text-foreground',
+  h0: 'text-h0',
+  h1: 'text-h1-ink',
+  good: 'text-detection',
+  bad: 'text-false-alarm',
+}
+
 type ReadoutRowProps = {
   readonly label: string
   readonly value: string
-  readonly tone?: 'default' | 'h0' | 'h1' | 'good' | 'bad'
+  readonly tone?: Tone
 }
 
+/** One computed number with what it measures: the value leads. */
 function ReadoutRow({ label, value, tone = 'default' }: ReadoutRowProps) {
-  const toneClass =
-    tone === 'h0'
-      ? 'text-h0'
-      : tone === 'h1'
-        ? 'text-h1'
-        : tone === 'good'
-          ? 'text-detection'
-          : tone === 'bad'
-            ? 'text-false-alarm'
-            : 'text-foreground'
   return (
-    <p className="flex items-baseline justify-between gap-3 text-muted-foreground">
-      <span>
+    <div className="min-w-0">
+      <p className="text-xs leading-5 text-muted-foreground">
         <MathText text={label} />
-      </span>
-      <span className={`font-mono text-[13px] ${toneClass}`}>{value}</span>
+      </p>
+      <p
+        className={cn(
+          'font-mono text-base tabular-nums leading-6',
+          TONE_CLASS[tone],
+        )}
+      >
+        {value}
+      </p>
+    </div>
+  )
+}
+
+/** A sentence about the readouts, spanning the whole readout row. */
+function ReadoutNote({ children }: { readonly children: ReactNode }) {
+  return (
+    <p className="col-span-full max-w-3xl text-xs leading-5 text-muted-foreground">
+      {children}
     </p>
   )
 }
@@ -161,4 +209,4 @@ function Legend({ items }: LegendProps) {
   )
 }
 
-export { FigureShell, Plot, ReadoutRow, Legend }
+export { FigureShell, Plot, ReadoutRow, ReadoutNote, Legend }

@@ -20,7 +20,10 @@ function LessonPage({ lesson }: LessonPageProps) {
   return (
     <>
       <div className="mx-auto max-w-6xl px-4 pb-6 pt-12 sm:px-6 lg:pt-16">
-        <header id="lesson-intro" className="max-w-4xl scroll-mt-24">
+        <header
+          id="lesson-intro"
+          className="max-w-4xl scroll-mt-32 xl:scroll-mt-24"
+        >
           <Link
             to="/"
             className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -28,7 +31,7 @@ function LessonPage({ lesson }: LessonPageProps) {
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             {labels.allLessons}
           </Link>
-          <p className="mt-10 font-mono text-xs uppercase tracking-[0.18em] text-accent">
+          <p className="mt-10 font-mono text-xs uppercase tracking-[0.18em] text-accent-ink">
             {labels.unit} {lesson.ordinal}
           </p>
           <h1 className="mt-3 font-serif text-5xl font-semibold leading-tight text-foreground md:text-6xl">

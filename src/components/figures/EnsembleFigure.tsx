@@ -2,7 +2,12 @@ import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button.tsx'
 import { MathText } from '@/components/MathText.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
-import { FigureShell, Plot, ReadoutRow } from '@/components/figures/shared.tsx'
+import {
+  FigureShell,
+  Plot,
+  ReadoutRow,
+  ReadoutNote,
+} from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
 import { ar1, gaussianVector, makeRng } from '@/domain/math/kernel.ts'
 
@@ -105,9 +110,9 @@ function EnsembleFigure() {
                 </Button>
               ))}
             </div>
-            <p className="text-xs leading-5 text-muted-foreground">
+            <ReadoutNote>
               <MathText text={KIND_MEANING[kind]} />
-            </p>
+            </ReadoutNote>
           </div>
           <SliderControl
             label="Fix the book"
@@ -161,11 +166,11 @@ function EnsembleFigure() {
             value={formatNumber(variance, 2)}
             tone="h1"
           />
-          <p className="text-xs leading-5 text-muted-foreground">
+          <ReadoutNote>
             The first row is a plain number. The mean and variance are computed
             down the column — across the {TRACES} books at this page, never
             along one book.
-          </p>
+          </ReadoutNote>
         </>
       }
     >
@@ -208,7 +213,7 @@ function EnsembleFigure() {
             y1={6}
             x2={xOf(slice)}
             y2={H - 6}
-            className="stroke-threshold"
+            className="stroke-cursor"
             strokeWidth={2}
           />
           {bookTrace.length > 0 ? (
@@ -268,7 +273,7 @@ function EnsembleFigure() {
             x={HIST_W / 2}
             y={12}
             textAnchor="middle"
-            className="fill-muted-foreground font-mono text-[9px]"
+            className="fill-muted-foreground font-mono plot-text-xs"
           >
             f̂(x; n)
           </text>

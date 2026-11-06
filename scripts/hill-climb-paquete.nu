@@ -61,7 +61,11 @@ def main [
   let elegidas = $lecciones | append $interacciones
   for f in $elegidas { cp ($capturas | path join $f) ($dir | path join $f) }
   for ref in $refs { cp $ref ($dir | path join ($ref | path basename)) }
-  cp $rubrica ($dir | path join rubrica.md)
+  # Lo que va antes de la primera línea «---» es para el autor (cuándo se fijó,
+  # cómo se usa) y diría al revisor que hay rondas.
+  let partes = open --raw $rubrica | split row "\n---\n"
+  if ($partes | length) < 2 { error make {msg: $"($rubrica) no tiene la línea --- que separa la cabecera del autor"} }
+  $partes | skip 1 | str join "\n---\n" | str trim | save ($dir | path join rubrica.md)
   let n = $elegidas | where {|f| $f ends-with ".png" } | length
   open --raw $plantilla
   | str replace --all "<dir>" $dir

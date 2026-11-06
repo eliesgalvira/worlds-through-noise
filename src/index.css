@@ -120,11 +120,14 @@
   --muted-foreground: #6b6257;
   --accent: #d97706;
   --accent-foreground: #111111;
+  /* Amber that reads as text: 6.4:1 on paper, 5.5:1 on muted. #d97706 is
+     for strokes, fills and the wordmark only (2.9:1 as text). */
+  --accent-ink: #92400e;
   --destructive: #b91c1c;
   --destructive-foreground: #ffffff;
   --border: #d8cdbb;
   --input: #d8cdbb;
-  --ring: #1e3a8a;
+  --ring: #151515;
   --chart-1: #1e3a8a;
   --chart-2: #047857;
   --chart-3: #d97706;
@@ -136,9 +139,16 @@
   --h0-foreground: #ffffff;
   --h1: #d97706;
   --h1-foreground: #111111;
+  /* H1's amber for text and SVG labels (#d97706 is 2.9:1 as text). Same
+     value as accent-ink today, but a different role. */
+  --h1-ink: #92400e;
   --detection: #047857;
   --false-alarm: #b91c1c;
-  --threshold: #d97706;
+  /* Ink, dashed in figures: amber already means H1 in the same view. */
+  --threshold: #44403c;
+  /* What the student moves in a figure: a direction, a candidate, a filter,
+     a slice. 5.9:1 on cards; rose, so it never sits near the prior's violet. */
+  --cursor: #be185d;
   --estimate: #1e3a8a;
   --truth: #151515;
   --prior: #6d28d9;
@@ -176,6 +186,7 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-accent-ink: var(--accent-ink);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -191,9 +202,11 @@
   --color-h0-foreground: var(--h0-foreground);
   --color-h1: var(--h1);
   --color-h1-foreground: var(--h1-foreground);
+  --color-h1-ink: var(--h1-ink);
   --color-detection: var(--detection);
   --color-false-alarm: var(--false-alarm);
   --color-threshold: var(--threshold);
+  --color-cursor: var(--cursor);
   --color-estimate: var(--estimate);
   --color-truth: var(--truth);
   --color-prior: var(--prior);
@@ -206,6 +219,20 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+}
+
+/*
+ * Figure text keeps one apparent size on screen whatever the viewBox: Plot
+ * sets --plot-px to viewBox units per CSS pixel of its rendered width.
+ */
+@utility plot-text-xs {
+  font-size: calc(10px * var(--plot-px, 1));
+}
+@utility plot-text-sm {
+  font-size: calc(11px * var(--plot-px, 1));
+}
+@utility plot-text {
+  font-size: calc(12px * var(--plot-px, 1));
 }
 
 * {

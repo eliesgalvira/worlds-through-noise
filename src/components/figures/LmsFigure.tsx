@@ -7,6 +7,7 @@ import {
   Legend,
   Plot,
   ReadoutRow,
+  ReadoutNote,
 } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
 import { gaussian, makeRng } from '@/domain/math/kernel.ts'
@@ -140,9 +141,9 @@ function LmsFigure() {
               tone={mu < 0.02 ? 'bad' : 'default'}
             />
           )}
-          <p className="text-xs leading-5 text-muted-foreground">
+          <ReadoutNote>
             <MathText text="Same $\mu$ buys convergence speed, steady-state jitter AND tracking agility — one coin, three purchases." />
-          </p>
+          </ReadoutNote>
         </>
       }
     >
@@ -187,7 +188,7 @@ function LmsFigure() {
         <text
           x={12}
           y={16}
-          className="fill-muted-foreground font-mono text-[9px]"
+          className="fill-muted-foreground font-mono plot-text-xs"
         >
           h(n): never settles, only orbits
         </text>
@@ -231,7 +232,7 @@ function LmsFigure() {
         <text
           x={12}
           y={PANEL_H - 8}
-          className="fill-muted-foreground font-mono text-[9px]"
+          className="fill-muted-foreground font-mono plot-text-xs"
         >
           iteration n →
         </text>

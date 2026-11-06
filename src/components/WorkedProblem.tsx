@@ -14,7 +14,7 @@ function SolutionStep({
 }) {
   return (
     <li className="grid grid-cols-[1.75rem_minmax(0,1fr)] gap-x-2">
-      <span className="pt-0.5 font-mono text-xs text-accent">
+      <span className="pt-0.5 font-mono text-xs text-accent-ink">
         {String(index + 1).padStart(2, '0')}
       </span>
       <div>
@@ -48,7 +48,7 @@ function ProblemPart({ part }: { readonly part: ProblemPartRecord }) {
   return (
     <li className="border-t border-border/70 py-5 first:border-t-0">
       <div className="grid grid-cols-[1.75rem_minmax(0,1fr)] gap-x-2">
-        <span className="pt-1 font-mono text-sm font-medium text-accent">
+        <span className="pt-1 font-mono text-sm font-medium text-accent-ink">
           {part.label})
         </span>
         <div>
@@ -69,7 +69,7 @@ function ProblemPart({ part }: { readonly part: ProblemPartRecord }) {
 
           {done ? (
             <div className="mt-4 border-l-2 border-accent pl-4">
-              <p className="font-mono text-xs uppercase tracking-[0.14em] text-accent">
+              <p className="font-mono text-xs uppercase tracking-[0.14em] text-accent-ink">
                 Result
               </p>
               <p className="mt-1 text-sm leading-6 text-foreground">
@@ -127,7 +127,10 @@ function WorkedProblem({ problem, className }: WorkedProblemProps) {
   return (
     <article
       id={problem.id}
-      className={cn('scroll-mt-24 border-t border-border py-10', className)}
+      className={cn(
+        'scroll-mt-32 xl:scroll-mt-24 border-t border-border py-10',
+        className,
+      )}
     >
       <header>
         <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
@@ -142,7 +145,7 @@ function WorkedProblem({ problem, className }: WorkedProblemProps) {
       </header>
 
       <div className="mt-6 rounded-md border border-border bg-card/40 px-5 py-4">
-        <p className="font-mono text-xs uppercase tracking-[0.14em] text-accent">
+        <p className="font-mono text-xs uppercase tracking-[0.14em] text-accent-ink">
           Statement
         </p>
         <div className="mt-2 space-y-3">
@@ -174,7 +177,7 @@ function WorkedProblem({ problem, className }: WorkedProblemProps) {
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           <Link
             to={problem.related.href}
-            className="inline-flex items-center gap-1.5 font-medium text-accent underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="inline-flex items-center gap-1.5 font-medium text-accent-ink underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             {problem.related.text}
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />

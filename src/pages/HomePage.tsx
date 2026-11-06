@@ -66,7 +66,7 @@ function HomePage() {
                   to={`/${lesson.route}`}
                   className="group grid gap-5 py-6 transition-colors hover:bg-card/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:grid-cols-[4rem_minmax(0,1fr)_2rem] md:items-center"
                 >
-                  <span className="font-mono text-sm text-accent">
+                  <span className="font-mono text-sm text-accent-ink">
                     {number}
                   </span>
                   <div>
@@ -76,7 +76,7 @@ function HomePage() {
                     <p className="mt-1 text-muted-foreground">
                       <MathText text={entry.tagline} />
                     </p>
-                    <p className="mt-2 font-mono text-xs text-muted-foreground/80">
+                    <p className="mt-2 font-mono text-xs text-muted-foreground">
                       {lesson.modules.map((m) => m.id).join(' · ')} —{' '}
                       {lesson.modules.length} figures,{' '}
                       {lesson.workedProblems.length} exam problems worked step
@@ -102,7 +102,7 @@ function HomePage() {
           <ol className="mt-6 space-y-4 text-base leading-7 text-muted-foreground">
             {home.studySteps.map((step, index) => (
               <li key={step.lead}>
-                <span className="font-mono text-sm text-accent">
+                <span className="font-mono text-sm text-accent-ink">
                   {String(index + 1).padStart(2, '0')}
                 </span>{' '}
                 <span className="text-foreground">{step.lead}</span> {step.body}

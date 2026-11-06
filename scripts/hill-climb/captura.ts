@@ -42,6 +42,29 @@ import type { State } from './nombres.ts'
 
 const FIXED_TIME = new Date('2026-11-07T10:00:00+01:00')
 
+/**
+ * Sticky bars (site header, phone table of contents) float over whatever is
+ * scrolled under them. Section tiles and figure frames hide them; the
+ * `cabecera` and `vista` shots keep them, because orienting is their job.
+ */
+const HIDE_STICKY = 'body .sticky { visibility: hidden !important; }'
+
+async function hideSticky(page: Page, hidden: boolean): Promise<void> {
+  await page.evaluate(
+    ({ css, on }) => {
+      const id = 'banco-sin-fijos'
+      document.getElementById(id)?.remove()
+      if (on) {
+        const style = document.createElement('style')
+        style.id = id
+        style.textContent = css
+        document.head.append(style)
+      }
+    },
+    { css: HIDE_STICKY, on: hidden },
+  )
+}
+
 const { values } = parseArgs({
   options: {
     ruta: { type: 'string' },
@@ -339,9 +362,13 @@ async function shootSection(
     const bottom = (el: Element) =>
       el.getBoundingClientRect().bottom + window.scrollY
     const figure = document.getElementById(`${sectionId}-figure`)
-    return figure === null
-      ? [top(section), bottom(section)]
-      : [top(section), top(figure), bottom(figure), bottom(section)]
+    const page = document.documentElement.scrollHeight
+    const edges =
+      figure === null
+        ? [top(section), bottom(section)]
+        : [top(section), top(figure), bottom(figure), bottom(section)]
+    // Rounding can put the last edge a pixel past the page.
+    return edges.map((edge) => Math.min(Math.floor(edge), page))
   }, id)
   if (edges === null) {
     failures.push(`section ${id} not found`)
@@ -349,8 +376,8 @@ async function shootSection(
   }
   let part = 0
   for (let index = 0; index + 1 < edges.length; index += 1) {
-    const from = Math.round(edges[index] ?? 0)
-    const to = Math.round(edges[index + 1] ?? 0)
+    const from = edges[index] ?? 0
+    const to = edges[index + 1] ?? 0
     for (const tile of tiles(from, to - from, tileHeight(width))) {
       part += 1
       await page.screenshot({
@@ -426,8 +453,14 @@ async function openPage(
 async function shootView(page: Page, width: number, state: State, id: string) {
   await page.evaluate((figureId) => {
     const el = document.getElementById(`${figureId}-figure`)
-    const header = document.querySelector('header')
-    const offset = header === null ? 0 : header.getBoundingClientRect().bottom
+    // Everything pinned to the top of the window: header and phone nav.
+    const offset = Math.max(
+      0,
+      ...Array.from(document.querySelectorAll('.sticky'))
+        .map((bar) => bar.getBoundingClientRect())
+        .filter((box) => box.height > 0 && box.top < 120)
+        .map((box) => box.bottom),
+    )
     if (el !== null) {
       window.scrollTo(
         0,
@@ -515,11 +548,13 @@ async function captureState(
     clip: { x: 0, y: 0, width, height: viewportHeight(width) },
     animations: 'disabled',
   })
+  await hideSticky(page, true)
   for (const id of ids) {
     if (id === 'exam-bank' || wanted(id)) {
       await shootSection(page, width, state, id)
     }
   }
+  await hideSticky(page, false)
   const first = ids.find((id) => id !== 'exam-bank' && wanted(id))
   if (first !== undefined) {
     await shootView(page, width, state, first)
@@ -555,6 +590,7 @@ async function captureState(
     textoSvg: state === 'inicial' ? await svgTextSizes(page) : undefined,
   }
   if (state === 'inicial') {
+    await hideSticky(page, true)
     await captureInteractions(page, ids, width)
   }
   await context.close()

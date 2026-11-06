@@ -6,6 +6,7 @@ import {
   Legend,
   Plot,
   ReadoutRow,
+  ReadoutNote,
 } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
 import { linspace } from '@/domain/math/distributions.ts'
@@ -152,9 +153,9 @@ function PredictorFigure() {
             label="Notch depth at $f_0$"
             value={`${formatNumber(notchDepth, 1)} dB`}
           />
-          <p className="text-xs leading-5 text-muted-foreground">
+          <ReadoutNote>
             <MathText text="$\xi_{\min} \to \sigma_w^2$ as SNR grows: the tone becomes perfectly predictable and only the memoryless noise refuses." />
-          </p>
+          </ReadoutNote>
         </>
       }
     >
@@ -191,7 +192,7 @@ function PredictorFigure() {
               x={26}
               y={yOf(db) + 3}
               textAnchor="end"
-              className="fill-muted-foreground font-mono text-[9px]"
+              className="fill-muted-foreground font-mono plot-text-xs"
             >
               {db}
             </text>
@@ -217,14 +218,18 @@ function PredictorFigure() {
           className="stroke-h0"
           strokeWidth={1.8}
         />
-        <text x={xOf(F0) + 6} y={22} className="fill-h1 font-mono text-[10px]">
+        <text
+          x={xOf(F0) + 6}
+          y={22}
+          className="fill-h1-ink font-mono plot-text-sm"
+        >
           f₀ (never disclosed to the filter)
         </text>
         <text
           x={W / 2}
           y={H - 10}
           textAnchor="middle"
-          className="fill-muted-foreground font-mono text-[10px]"
+          className="fill-muted-foreground font-mono plot-text-sm"
         >
           frequency f — response in dB
         </text>

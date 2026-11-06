@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button.tsx'
 function NotFoundPage() {
   return (
     <div className="mx-auto flex max-w-xl flex-col items-center px-4 py-28 text-center sm:px-6">
-      <p className="font-mono text-sm font-medium uppercase tracking-wide text-accent">
+      <p className="font-mono text-sm font-medium uppercase tracking-wide text-accent-ink">
         404
       </p>
       <h1 className="mt-3 font-serif text-4xl font-semibold leading-tight text-foreground">

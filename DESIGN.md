@@ -62,7 +62,10 @@ Uncertainty:
 Use translucent bands, noisy particle clouds, or density fills.
 
 Threshold:
-Use an amber vertical rule with a draggable handle.
+Use a dashed stone-ink vertical rule (`threshold`, #44403C) with a draggable handle. Amber already means H1 in the same view.
+
+What the student moves:
+A direction, a candidate frequency, a filter, a slice or a balance point the student drags is `cursor` (rose #BE185D), drawn solid.
 
 Estimator output:
 Use a blue marker.
@@ -148,7 +151,7 @@ Cards:
 Soft paper-white background, visible quiet border, `rounded-lg`, no heavy shadows.
 
 Buttons:
-Primary for continue or run simulation. Ghost for secondary reveal actions. Destructive only for explicit error or reset actions.
+The default button is solid ink (`foreground`) with paper text, for continue or run simulation; controls stay ink so that, inside a figure, color only ever means data. Ghost or outline for secondary reveal actions. Destructive only for explicit error or reset actions. Amber text uses `accent-ink` (#92400E); #D97706 is for strokes, fills and the wordmark.
 
 Sliders:
 Always label with variable, value, and plain-English meaning.
@@ -236,7 +239,7 @@ ESLint is strict and CI-blocking. Write code that already complies:
 Base tokens live in `:root` and are exposed as Tailwind utilities through `@theme inline`. Use the utility, not a raw hex.
 
 - Surfaces and UI: `background`, `foreground`, `card`, `muted`, `secondary`, `accent`, `border`, `ring`, `primary` (deep blue), `destructive`.
-- Semantic inference roles (utilities like `bg-h0`, `text-estimate`, `bg-truth`): `h0` blue, `h1` amber, `detection` green, `false-alarm` red, `threshold` amber, `estimate` blue, `truth` ink, `prior` indigo.
+- Semantic inference roles (utilities like `bg-h0`, `text-estimate`, `bg-truth`): `h0` blue, `h1` amber (`h1-ink` for text), `detection` green, `false-alarm` red, `threshold` dashed stone ink, `cursor` rose (what the student moves), `estimate` blue, `truth` ink, `prior` indigo. SVG text uses the `plot-text-xs`, `plot-text-sm` and `plot-text` utilities, which keep one apparent size (10, 11 and 12 px) whatever the viewBox.
 - One color, one role per view. `truth` (hidden cause / true parameter) and `estimate` (inference output) are both blue-adjacent in spirit but are distinct tokens; never let a single color stand for two meanings in the same figure. When two roles sit close, separate them further with a ring or shape, as the home figure does for the inference marker.
 - `--radius` is `0.5rem`; use `rounded-md` / `rounded-lg`, not ad hoc radii.
 

@@ -6,6 +6,7 @@ import {
   Legend,
   Plot,
   ReadoutRow,
+  ReadoutNote,
 } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
 import { linspace } from '@/domain/math/distributions.ts'
@@ -96,9 +97,7 @@ function AutocorrelationFigure() {
                 </Button>
               ))}
             </div>
-            <p className="text-xs leading-5 text-muted-foreground">
-              {KIND_MEANING[kind]}
-            </p>
+            <ReadoutNote>{KIND_MEANING[kind]}</ReadoutNote>
           </div>
           <SliderControl
             label="Lag"
@@ -216,7 +215,7 @@ function AutocorrelationFigure() {
                     y1={PANEL_H - 24}
                     x2={x}
                     y2={y}
-                    className={m === lag ? 'stroke-threshold' : 'stroke-h0'}
+                    className={m === lag ? 'stroke-cursor' : 'stroke-h0'}
                     strokeWidth={m === lag ? 3 : 1.6}
                     opacity={m === lag ? 1 : 0.7}
                   />
@@ -224,7 +223,7 @@ function AutocorrelationFigure() {
                     cx={x}
                     cy={y}
                     r={m === lag ? 3 : 2}
-                    className={m === lag ? 'fill-threshold' : 'fill-h0'}
+                    className={m === lag ? 'fill-cursor' : 'fill-h0'}
                   />
                 </g>
               )
@@ -233,7 +232,7 @@ function AutocorrelationFigure() {
               x={W / 4}
               y={PANEL_H - 8}
               textAnchor="middle"
-              className="fill-muted-foreground font-mono text-[9px]"
+              className="fill-muted-foreground font-mono plot-text-xs"
             >
               r̂(m) — drag to set the lag
             </text>
@@ -263,7 +262,7 @@ function AutocorrelationFigure() {
               x={W / 4}
               y={PANEL_H - 8}
               textAnchor="middle"
-              className="fill-muted-foreground font-mono text-[9px]"
+              className="fill-muted-foreground font-mono plot-text-xs"
             >
               Ŝ(f) — same information, by frequency
             </text>

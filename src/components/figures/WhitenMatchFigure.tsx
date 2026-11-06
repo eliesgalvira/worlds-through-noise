@@ -7,6 +7,7 @@ import {
   Legend,
   Plot,
   ReadoutRow,
+  ReadoutNote,
 } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
 import { gaussian, makeRng } from '@/domain/math/kernel.ts'
@@ -182,10 +183,10 @@ function WhitenMatchFigure() {
             label="Your fraction of optimal"
             value={`${formatNumber((d2 / Math.max(best.value, 1e-9)) * 100, 0)}%`}
           />
-          <p className="text-xs leading-5 text-muted-foreground">
+          <ReadoutNote>
             At 100% whitening the best direction is simply “toward the pulse” —
             and mapping it back gives h ∝ C⁻¹p.
-          </p>
+          </ReadoutNote>
         </>
       }
     >
@@ -196,7 +197,7 @@ function WhitenMatchFigure() {
             label: '$\\mathcal{H}_1$ cloud (pulse + noise)',
             swatchClass: 'stroke-h1',
           },
-          { label: 'your direction', swatchClass: 'stroke-threshold' },
+          { label: 'your direction', swatchClass: 'stroke-cursor' },
           {
             label: 'optimal direction',
             swatchClass: 'stroke-detection',
@@ -255,7 +256,7 @@ function WhitenMatchFigure() {
           y1={2 * CY - dirEnd.y}
           x2={dirEnd.x}
           y2={dirEnd.y}
-          className="stroke-threshold"
+          className="stroke-cursor"
           strokeWidth={2}
         />
         <circle
@@ -275,7 +276,7 @@ function WhitenMatchFigure() {
         <text
           x={meanPoint.x + 8}
           y={meanPoint.y - 6}
-          className="fill-h1 font-mono text-[10px]"
+          className="fill-h1-ink font-mono plot-text-sm"
         >
           Ap
         </text>

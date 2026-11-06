@@ -92,6 +92,7 @@ const wanted = (id: string) =>
   onlyFigures.length === 0 || onlyFigures.includes(id)
 
 const failures: Array<string> = []
+const parts: Array<string> = []
 
 async function freePort(): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -374,14 +375,19 @@ async function shootSection(
     failures.push(`section ${id} not found`)
     return
   }
+  // Which slice of the section each tile shows, for the bundle to pick from.
+  const kinds =
+    edges.length === 4 ? ['texto', 'figura', 'despues'] : ['completa']
   let part = 0
   for (let index = 0; index + 1 < edges.length; index += 1) {
     const from = edges[index] ?? 0
     const to = edges[index + 1] ?? 0
     for (const tile of tiles(from, to - from, tileHeight(width))) {
       part += 1
+      const name = lessonImage(width, state, sectionSlug(id), part)
+      parts.push(`${name}\t${kinds[index] ?? 'completa'}`)
       await page.screenshot({
-        path: join(out, lessonImage(width, state, sectionSlug(id), part)),
+        path: join(out, name),
         fullPage: true,
         clip: { x: 0, y: tile.y, width, height: tile.height },
         animations: 'disabled',
@@ -641,6 +647,7 @@ async function main(): Promise<void> {
     JSON.stringify(session.metrics, null, 2) + '\n',
   )
   await writeFile(join(out, 'fallos.txt'), failures.join('\n') + '\n')
+  await writeFile(join(out, 'partes.tsv'), parts.sort().join('\n') + '\n')
   if (failures.length > 0) {
     console.error(failures.join('\n'))
     process.exitCode = 1

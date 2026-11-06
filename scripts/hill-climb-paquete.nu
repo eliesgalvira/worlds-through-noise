@@ -10,6 +10,8 @@
 
 const PERMITIDO = '^(?:rubrica\.md|brief\.md|leccion-(?:1440|900|390)-(?:inicial|extremo|resuelto)-[a-z0-9]+-\d+\.png|interaccion-[a-z0-9]+-(?:1440|900|390)-\d+\.png|interaccion-[a-z0-9]+\.txt|producto-[a-z]\.png)$'
 
+def lista [texto: string] { $texto | split row "," | compact --empty }
+
 def main [
   capturas: path # la salida de hill-climb-captura.nu
   rubrica: path # la rúbrica de la pantalla, igual en todas sus rondas
@@ -22,11 +24,11 @@ def main [
   --figuras: string = "" # interacciones; vacío: todas
   --estados-por-seccion: string = "" # p. ej. "cuaderno=inicial+resuelto,vista=inicial"
 ] {
-  let anchos = $anchos | split row "," | where {|x| $x != "" }
-  let estados = $estados | split row "," | where {|x| $x != "" }
-  let secciones = $secciones | split row "," | where {|x| $x != "" }
-  let figuras = $figuras | split row "," | where {|x| $x != "" }
-  let por_seccion = $estados_por_seccion | split row "," | where {|x| $x != "" } | each {|par|
+  let anchos = lista $anchos
+  let estados = lista $estados
+  let secciones = lista $secciones
+  let figuras = lista $figuras
+  let por_seccion = lista $estados_por_seccion | each {|par|
     let p = $par | split row "="
     {seccion: $p.0, estados: ($p.1 | split row "+")}
   }
@@ -35,7 +37,7 @@ def main [
   if ($refs | is-empty) or not ($ajenas | is-empty) {
     error make {msg: $"($referencias) debe tener solo producto-a.png…: sobra ($ajenas)"}
   }
-  let dir = (^mktemp -d | str trim)
+  let dir = (mktemp --directory)
   if (do { ^git -C $dir rev-parse --git-dir } | complete).exit_code == 0 {
     error make {msg: $"($dir) está dentro de un repositorio git"}
   }

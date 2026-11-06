@@ -23,7 +23,7 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { parseArgs } from 'node:util'
 import { chromium } from 'playwright'
-import type { Page } from 'playwright'
+import type { Browser, BrowserContext, Page } from 'playwright'
 import { createServer } from 'vite'
 import { INTERACCIONES, describirInteraccion } from './interacciones.ts'
 import type { Paso } from './interacciones.ts'
@@ -33,6 +33,7 @@ import {
   lessonImage,
   sectionSlug,
   STATES,
+  WIDTHS,
   tileHeight,
   tiles,
   viewportHeight,
@@ -45,7 +46,7 @@ const { values } = parseArgs({
   options: {
     ruta: { type: 'string' },
     salida: { type: 'string' },
-    anchos: { type: 'string', default: '1440,900,390' },
+    anchos: { type: 'string', default: WIDTHS.join(',') },
     figuras: { type: 'string', default: '' },
   },
 })
@@ -64,6 +65,8 @@ const onlyFigures = values.figuras
   .split(',')
   .map((id) => id.trim())
   .filter(Boolean)
+const wanted = (id: string) =>
+  onlyFigures.length === 0 || onlyFigures.includes(id)
 
 const failures: Array<string> = []
 
@@ -87,9 +90,11 @@ async function freePort(): Promise<number> {
 async function settle(page: Page): Promise<void> {
   await page.evaluate(async () => {
     await document.fonts.ready
-    await new Promise((resolve) => {
-      requestAnimationFrame(() => requestAnimationFrame(resolve))
-    })
+    // Three frames: a scroll event lands in the next frame and the nav
+    // updates on the frame after it.
+    for (let frame = 0; frame < 3; frame += 1) {
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+    }
   })
 }
 
@@ -144,16 +149,12 @@ async function setSlider(
 async function runStep(page: Page, scope: string, paso: Paso): Promise<void> {
   if ('deslizar' in paso) {
     await setSlider(page, scope, paso.deslizar, paso.valor)
-  } else if ('pulsar' in paso) {
-    await page
-      .locator(`${scope} button`)
-      .filter({ hasText: paso.pulsar })
-      .first()
-      .click()
   } else {
+    const [tag, text] =
+      'pulsar' in paso ? ['button', paso.pulsar] : ['label', paso.marcar]
     await page
-      .locator(`${scope} label`)
-      .filter({ hasText: paso.marcar })
+      .locator(`${scope} ${tag}`)
+      .filter({ hasText: text })
       .first()
       .click()
   }
@@ -171,14 +172,23 @@ async function allSlidersToMax(page: Page): Promise<void> {
 }
 
 async function revealEverything(page: Page): Promise<void> {
-  for (let guard = 0; guard < 400; guard += 1) {
-    const button = page.locator('main [data-sonda="revelar"]').first()
-    if ((await button.count()) === 0) {
-      return
+  // One task per click: React commits the click's update before the loop
+  // looks for the next button.
+  const left = await page.evaluate(async () => {
+    for (let guard = 0; guard < 1000; guard += 1) {
+      const button = document.querySelector('main [data-sonda="revelar"]')
+      if (!(button instanceof HTMLElement)) {
+        return 0
+      }
+      button.click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
     }
-    await button.click()
+    return document.querySelectorAll('main [data-sonda="revelar"]').length
+  })
+  if (left > 0) {
+    failures.push('reveal buttons never ran out')
   }
-  failures.push('reveal buttons never ran out')
+  await settle(page)
 }
 
 type Measure = {
@@ -206,11 +216,11 @@ async function measure(page: Page): Promise<Measure> {
           node.nodeType === Node.TEXT_NODE &&
           (node.textContent ?? '').trim() !== '',
       )
-      const isMath = el.classList.contains('katex-display')
-      if (!ownText && !isMath) {
+      const style = getComputedStyle(el)
+      const scrolls = style.overflowX === 'auto' || style.overflowX === 'scroll'
+      if (!ownText && !scrolls) {
         continue
       }
-      const style = getComputedStyle(el)
       if (
         style.display === 'none' ||
         style.visibility === 'hidden' ||
@@ -219,12 +229,11 @@ async function measure(page: Page): Promise<Measure> {
         continue
       }
       if (el.scrollWidth > el.clientWidth + 1 && el.clientWidth > 0) {
-        const kind =
-          style.overflowX === 'auto' || style.overflowX === 'scroll'
-            ? 'desplaza'
-            : style.overflowX === 'visible'
-              ? 'desborda'
-              : 'corta'
+        const kind = scrolls
+          ? 'desplaza'
+          : style.overflowX === 'visible'
+            ? 'desborda'
+            : 'corta'
         cuts.push(`${kind}\t${describe(el)}`)
       }
       const clamp = style.getPropertyValue('-webkit-line-clamp')
@@ -234,13 +243,6 @@ async function measure(page: Page): Promise<Measure> {
         el.scrollHeight > el.clientHeight + 1
       ) {
         cuts.push(`recorta-lineas\t${describe(el)}`)
-      }
-    }
-    for (const scroller of Array.from(
-      document.querySelectorAll('.overflow-x-auto'),
-    )) {
-      if (scroller.scrollWidth > scroller.clientWidth + 1) {
-        cuts.push(`desplaza\t${describe(scroller)}`)
       }
     }
     const covered: Array<string> = []
@@ -361,6 +363,203 @@ async function shootSection(
   }
 }
 
+type Session = {
+  readonly base: string
+  readonly origin: string
+  readonly browser: Browser
+  readonly metrics: Record<string, unknown>
+}
+
+async function openPage(
+  session: Session,
+  width: number,
+  state: State,
+): Promise<{ readonly context: BrowserContext; readonly page: Page }> {
+  const context = await session.browser.newContext({
+    viewport: { width, height: viewportHeight(width) },
+    deviceScaleFactor: 1,
+    locale: 'en-US',
+    timezoneId: 'Europe/Madrid',
+    reducedMotion: 'reduce',
+  })
+  const page = await context.newPage()
+  await page.clock.setFixedTime(FIXED_TIME)
+  await page.route('**/*', async (request) => {
+    const url = request.request().url()
+    if (url.startsWith(session.origin) || url.startsWith('data:')) {
+      await request.continue()
+    } else {
+      failures.push(`network ${url}`)
+      await request.abort()
+    }
+  })
+  page.on('console', (message) => {
+    if (message.type() === 'error') {
+      failures.push(`console ${String(width)} ${state}: ${message.text()}`)
+    }
+  })
+  page.on('pageerror', (error) => {
+    failures.push(`pageerror ${String(width)} ${state}: ${error.message}`)
+  })
+  await page.addInitScript(() => {
+    // Layout shift during load, before any input from the bench.
+    Reflect.set(window, '__shift', 0)
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        const value = Reflect.get(entry, 'value')
+        if (
+          Reflect.get(entry, 'hadRecentInput') !== true &&
+          typeof value === 'number'
+        ) {
+          Reflect.set(
+            window,
+            '__shift',
+            Number(Reflect.get(window, '__shift')) + value,
+          )
+        }
+      }
+    }).observe({ type: 'layout-shift', buffered: true })
+  })
+  return { context, page }
+}
+
+async function shootView(page: Page, width: number, state: State, id: string) {
+  await page.evaluate((figureId) => {
+    const el = document.getElementById(`${figureId}-figure`)
+    const header = document.querySelector('header')
+    const offset = header === null ? 0 : header.getBoundingClientRect().bottom
+    if (el !== null) {
+      window.scrollTo(
+        0,
+        el.getBoundingClientRect().top + window.scrollY - offset - 16,
+      )
+    }
+  }, id)
+  await settle(page)
+  await page.screenshot({
+    path: join(out, lessonImage(width, state, 'vista', 1)),
+    animations: 'disabled',
+  })
+  await page.evaluate(() => {
+    window.scrollTo(0, 0)
+  })
+}
+
+async function captureInteractions(
+  page: Page,
+  ids: ReadonlyArray<string>,
+  width: number,
+): Promise<void> {
+  for (const id of ids.filter(wanted)) {
+    const interaccion = INTERACCIONES[id]
+    if (interaccion === undefined) {
+      continue
+    }
+    const scope = `[id="${id}-figure"]`
+    const slug = sectionSlug(id)
+    const shoot = async (frame: number) => {
+      await page.locator(scope).screenshot({
+        path: join(out, interactionImage(slug, width, frame)),
+        animations: 'disabled',
+      })
+    }
+    for (const paso of interaccion.antes) {
+      await runStep(page, scope, paso)
+    }
+    await shoot(1)
+    for (const [index, pasos] of interaccion.pasos.entries()) {
+      for (const paso of pasos) {
+        await runStep(page, scope, paso)
+      }
+      await shoot(index + 2)
+    }
+    await writeFile(
+      join(out, interactionText(slug)),
+      describirInteraccion(interaccion),
+    )
+  }
+}
+
+async function captureState(
+  session: Session,
+  width: number,
+  state: State,
+): Promise<void> {
+  const { context, page } = await openPage(session, width, state)
+  const started = Date.now()
+  await page.goto(new URL(route, session.base).toString(), {
+    waitUntil: 'networkidle',
+  })
+  await page.locator('main section[id]').first().waitFor()
+  await settle(page)
+  const startupMs = Date.now() - started
+  const fontsOk = await page.evaluate(() =>
+    Array.from(document.fonts).every((face) => face.status !== 'error'),
+  )
+  if (!fontsOk) {
+    failures.push(`fonts failed at ${String(width)}`)
+  }
+  const loadShift = await page.evaluate(() =>
+    Number(Reflect.get(window, '__shift')),
+  )
+  const ids = await sectionIds(page)
+  if (state === 'extremo') {
+    await allSlidersToMax(page)
+  }
+  if (state === 'resuelto') {
+    await revealEverything(page)
+  }
+
+  await page.screenshot({
+    path: join(out, lessonImage(width, state, 'cabecera', 1)),
+    clip: { x: 0, y: 0, width, height: viewportHeight(width) },
+    animations: 'disabled',
+  })
+  for (const id of ids) {
+    if (id === 'exam-bank' || wanted(id)) {
+      await shootSection(page, width, state, id)
+    }
+  }
+  const first = ids.find((id) => id !== 'exam-bank' && wanted(id))
+  if (first !== undefined) {
+    await shootView(page, width, state, first)
+  }
+
+  const measured = await measure(page)
+  await writeFile(
+    join(out, `textos-${String(width)}-${state}.tsv`),
+    measured.texts.map(([id, text]) => `${id}\t${text}`).join('\n') + '\n',
+  )
+  await writeFile(
+    join(out, `cortes-${String(width)}-${state}.txt`),
+    [
+      ...(measured.pageOverflow > 0
+        ? [`pagina\tdesborda ${String(measured.pageOverflow)} px en horizontal`]
+        : []),
+      ...measured.cuts,
+      ...measured.covered,
+    ].join('\n') + '\n',
+  )
+  const cdp = await context.newCDPSession(page)
+  await cdp.send('Performance.enable')
+  const perf = await cdp.send('Performance.getMetrics')
+  const pick = (name: string) =>
+    perf.metrics.find((metric) => metric.name === name)?.value ?? null
+  session.metrics[`${String(width)}-${state}`] = {
+    arranqueMs: startupMs,
+    nodosDom: pick('Nodes'),
+    heapMb: Math.round((pick('JSHeapUsedSize') ?? 0) / 1e5) / 10,
+    layoutShiftCarga: Math.round(loadShift * 1e4) / 1e4,
+    cortes: measured.cuts.length,
+    tapados: measured.covered.length,
+    textoSvg: state === 'inicial' ? await svgTextSizes(page) : undefined,
+  }
+  if (state === 'inicial') {
+    await captureInteractions(page, ids, width)
+  }
+  await context.close()
+}
+
 async function main(): Promise<void> {
   await mkdir(out, { recursive: true })
   const port = await freePort()
@@ -370,9 +569,10 @@ async function main(): Promise<void> {
     clearScreen: false,
   })
   await server.listen()
-  const base =
-    server.resolvedUrls?.local[0] ?? `http://127.0.0.1:${String(port)}/`
-  const origin = new URL(base).origin
+  const base = server.resolvedUrls?.local[0]
+  if (base === undefined) {
+    throw new Error('Vite did not report a local URL')
+  }
   const browser = await chromium.launch({
     args: [
       '--force-color-profile=srgb',
@@ -382,197 +582,18 @@ async function main(): Promise<void> {
       '--disable-partial-raster',
     ],
   })
-  const metrics: Record<string, unknown> = { ruta: route, origen: 'vite dev' }
-
+  const session: Session = {
+    base,
+    origin: new URL(base).origin,
+    browser,
+    metrics: { ruta: route, origen: 'vite dev' },
+  }
   try {
+    // The three states of a width are independent pages: run them together.
     for (const width of widths) {
-      for (const state of STATES) {
-        const context = await browser.newContext({
-          viewport: { width, height: viewportHeight(width) },
-          deviceScaleFactor: 1,
-          locale: 'en-US',
-          timezoneId: 'Europe/Madrid',
-          reducedMotion: 'reduce',
-        })
-        const page = await context.newPage()
-        await page.clock.setFixedTime(FIXED_TIME)
-        await page.route('**/*', async (request) => {
-          const url = request.request().url()
-          if (url.startsWith(origin) || url.startsWith('data:')) {
-            await request.continue()
-          } else {
-            failures.push(`network ${url}`)
-            await request.abort()
-          }
-        })
-        page.on('console', (message) => {
-          if (message.type() === 'error') {
-            failures.push(
-              `console ${String(width)} ${state}: ${message.text()}`,
-            )
-          }
-        })
-        page.on('pageerror', (error) => {
-          failures.push(`pageerror ${String(width)} ${state}: ${error.message}`)
-        })
-        await page.addInitScript(() => {
-          const shifts: Array<number> = []
-          Reflect.set(window, '__shifts', shifts)
-          new PerformanceObserver((list) => {
-            for (const entry of list.getEntries()) {
-              const value = Reflect.get(entry, 'value')
-              if (Reflect.get(entry, 'hadRecentInput') === true) {
-                continue
-              }
-              if (typeof value === 'number') {
-                shifts.push(value)
-              }
-            }
-          }).observe({ type: 'layout-shift', buffered: true })
-        })
-
-        const started = Date.now()
-        await page.goto(new URL(route, base).toString(), {
-          waitUntil: 'networkidle',
-        })
-        await page.locator('main section[id]').first().waitFor()
-        await settle(page)
-        const startupMs = Date.now() - started
-        const fontsOk = await page.evaluate(() =>
-          Array.from(document.fonts).every((face) => face.status !== 'error'),
-        )
-        if (!fontsOk) {
-          failures.push(`fonts failed at ${String(width)}`)
-        }
-
-        const loadShift = await page.evaluate(() => {
-          const list: unknown = Reflect.get(window, '__shifts')
-          return Array.isArray(list)
-            ? list.reduce(
-                (sum: number, v: unknown) =>
-                  sum + (typeof v === 'number' ? v : 0),
-                0,
-              )
-            : 0
-        })
-        const ids = await sectionIds(page)
-        if (state === 'extremo') {
-          await allSlidersToMax(page)
-        }
-        if (state === 'resuelto') {
-          await revealEverything(page)
-          await settle(page)
-        }
-
-        const viewH = viewportHeight(width)
-        await page.screenshot({
-          path: join(out, lessonImage(width, state, 'cabecera', 1)),
-          clip: { x: 0, y: 0, width, height: viewH },
-        })
-        for (const id of ids) {
-          if (
-            onlyFigures.length > 0 &&
-            id !== 'exam-bank' &&
-            !onlyFigures.includes(id)
-          ) {
-            continue
-          }
-          await shootSection(page, width, state, id)
-        }
-        const first = onlyFigures[0] ?? ids.find((id) => id !== 'exam-bank')
-        if (first !== undefined) {
-          await page.locator(`[id="${first}-figure"]`).scrollIntoViewIfNeeded()
-          await page.evaluate((id) => {
-            const el = document.getElementById(`${id}-figure`)
-            const header = document.querySelector('header')
-            const offset =
-              header === null ? 0 : header.getBoundingClientRect().bottom
-            if (el !== null) {
-              window.scrollTo(
-                0,
-                el.getBoundingClientRect().top + window.scrollY - offset - 16,
-              )
-            }
-          }, first)
-          // The nav's progress ring follows scroll events a frame late.
-          await page.waitForTimeout(250)
-          await settle(page)
-          await page.screenshot({
-            path: join(out, lessonImage(width, state, 'vista', 1)),
-          })
-          await page.evaluate(() => {
-            window.scrollTo(0, 0)
-          })
-        }
-
-        const measured = await measure(page)
-        await writeFile(
-          join(out, `textos-${String(width)}-${state}.tsv`),
-          measured.texts.map(([id, text]) => `${id}\t${text}`).join('\n') +
-            '\n',
-        )
-        await writeFile(
-          join(out, `cortes-${String(width)}-${state}.txt`),
-          [
-            ...(measured.pageOverflow > 0
-              ? [
-                  `pagina\tdesborda ${String(measured.pageOverflow)} px en horizontal`,
-                ]
-              : []),
-            ...measured.cuts,
-            ...measured.covered,
-          ].join('\n') + '\n',
-        )
-        const cdp = await context.newCDPSession(page)
-        await cdp.send('Performance.enable')
-        const perf = await cdp.send('Performance.getMetrics')
-        const pick = (name: string) =>
-          perf.metrics.find((metric) => metric.name === name)?.value ?? null
-        metrics[`${String(width)}-${state}`] = {
-          arranqueMs: startupMs,
-          nodosDom: pick('Nodes'),
-          heapMb: Math.round((pick('JSHeapUsedSize') ?? 0) / 1e5) / 10,
-          layoutShiftCarga: Math.round(loadShift * 1e4) / 1e4,
-          cortes: measured.cuts.length,
-          tapados: measured.covered.length,
-          textoSvg: state === 'inicial' ? await svgTextSizes(page) : undefined,
-        }
-
-        if (state === 'inicial') {
-          for (const id of ids) {
-            const interaccion = INTERACCIONES[id]
-            if (interaccion === undefined) {
-              continue
-            }
-            if (onlyFigures.length > 0 && !onlyFigures.includes(id)) {
-              continue
-            }
-            const scope = `[id="${id}-figure"]`
-            const slug = sectionSlug(id)
-            for (const paso of interaccion.antes) {
-              await runStep(page, scope, paso)
-            }
-            const shoot = async (frame: number) => {
-              await page.locator(scope).screenshot({
-                path: join(out, interactionImage(slug, width, frame)),
-                animations: 'disabled',
-              })
-            }
-            await shoot(1)
-            for (const [index, pasos] of interaccion.pasos.entries()) {
-              for (const paso of pasos) {
-                await runStep(page, scope, paso)
-              }
-              await shoot(index + 2)
-            }
-            await writeFile(
-              join(out, interactionText(slug)),
-              describirInteraccion(interaccion),
-            )
-          }
-        }
-        await context.close()
-      }
+      await Promise.all(
+        STATES.map((state) => captureState(session, width, state)),
+      )
     }
   } finally {
     await browser.close()
@@ -581,7 +602,7 @@ async function main(): Promise<void> {
 
   await writeFile(
     join(out, 'metricas.json'),
-    JSON.stringify(metrics, null, 2) + '\n',
+    JSON.stringify(session.metrics, null, 2) + '\n',
   )
   await writeFile(join(out, 'fallos.txt'), failures.join('\n') + '\n')
   if (failures.length > 0) {

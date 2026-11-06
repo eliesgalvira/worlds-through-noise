@@ -18,7 +18,8 @@ def main [
   let raiz = $env.FILE_PWD | path dirname
   mkdir $salida
   let log = $salida | path join captura.log
-  let r = (do { ^node ($raiz | path join scripts/hill-climb/captura.ts) --ruta $ruta --salida $salida --anchos $anchos --figuras $figuras } | complete)
+  let capturar = {|destino| do { ^node ($raiz | path join scripts/hill-climb/captura.ts) --ruta $ruta --salida $destino --anchos $anchos --figuras $figuras } | complete }
+  let r = do $capturar $salida
   $"($r.stdout)($r.stderr)" | save --force $log
   let hojas = $salida | path join hojas
   mkdir $hojas
@@ -62,7 +63,7 @@ def main [
   }
   let distintas = if not $verificar { [] } else {
     let bis = $"($salida)-bis"
-    let r2 = (do { ^node ($raiz | path join scripts/hill-climb/captura.ts) --ruta $ruta --salida $bis --anchos $anchos --figuras $figuras } | complete)
+    let r2 = do $capturar $bis
     if $r2.exit_code != 0 { error make {msg: $"La segunda captura falló: ($r2.stderr)"} }
     glob ($salida | path join "*.png") | where {|f|
       let otra = $bis | path join ($f | path basename)

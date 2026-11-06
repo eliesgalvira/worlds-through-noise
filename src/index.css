@@ -6,7 +6,8 @@
 /*
  * Self-hosted fonts (SIL OFL, from Fontsource 5.3.0; licenses in public/fonts).
  * `block` plus the preloads in index.html: the fallback face never paints, so
- * the wordmark never shifts and captures are deterministic.
+ * the wordmark never shifts and captures are deterministic. No script gates
+ * the first render on fonts any more.
  */
 @font-face {
   font-family: 'Inter';

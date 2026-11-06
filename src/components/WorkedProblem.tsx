@@ -85,6 +85,7 @@ function ProblemPart({ part }: { readonly part: ProblemPartRecord }) {
             {!done ? (
               <button
                 type="button"
+                data-sonda="revelar"
                 onClick={() => {
                   setRevealed((current) => current + 1)
                 }}

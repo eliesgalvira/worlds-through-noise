@@ -37,6 +37,7 @@ function EquationReveal({
         ) : (
           <button
             type="button"
+            data-sonda="revelar"
             onClick={() => {
               setRevealed(true)
             }}

@@ -8,11 +8,9 @@ const FIRST_PAINT_FONT_FACES: ReadonlyArray<string> = [
   '600 1em "IBM Plex Mono"',
 ]
 
-// Normal connections should paint with the web fonts already resolved. Slow or
-// failed font loads get a bounded delay, then `font-display: optional` prevents
-// a late fallback-to-webfont swap from creating layout shift. This assumes the
-// pre-React document has no visible text that would start an earlier optional
-// font-display window.
+// The fonts are self-hosted and preloaded, so React normally renders with them
+// already resolved. A failed load gets a bounded delay; `font-display: block`
+// in index.css keeps the fallback face from painting while it waits.
 const FIRST_PAINT_FONT_BUDGET_MS = 1000
 
 function loadInitialFonts(): Promise<void> {

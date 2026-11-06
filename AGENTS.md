@@ -16,7 +16,8 @@ Use `PRODUCT.md` for product intent and `DESIGN.md` for visual direction before 
 - `src/components/figures/` — one interactive figure per module, dispatched by module id in `src/components/LessonModule.tsx`. Shared frame in `figures/shared.tsx` (`FigureShell`, `Plot`, `ReadoutRow`, `Legend`); helpers in `figures/figure-utils.ts`.
 - `src/domain/math/` — pure numerics: distributions, Q/chi-squared tails and inverses, seeded RNG, autocorrelation, periodogram, binomial pmf, 2×2 eigen tools (`kernel.ts`).
 - `src/pages/LessonPage.tsx` renders any lesson; routes are generated from `src/content/lessons.ts`; nav/index derive from `src/lib/routes.ts`.
-- `scripts/render-smoke.tsx` server-renders every page: `TSX_TSCONFIG_PATH=tsconfig.app.json pnpm dlx tsx scripts/render-smoke.tsx`.
+- `src/pages/render-smoke.test.tsx` server-renders every page and checks each module has its figure; it runs with the other tests.
+- `scripts/hill-climb/` is the screenshot bench for UI review rounds (see `docs/hill-climb/`).
 
 ## Figure conventions
 
@@ -31,7 +32,10 @@ Use `PRODUCT.md` for product intent and `DESIGN.md` for visual direction before 
 - `pnpm run typecheck` runs `tsc -b`.
 - `pnpm run lint` runs ESLint.
 - `pnpm run format:check` checks formatting (`format` writes).
+- `pnpm run test` runs vitest once.
+- `pnpm run check` runs typecheck, lint, format:check and the tests. CI runs it and `build` on every PR.
 - `pnpm run build` runs typecheck and creates a production build.
+- `nu scripts/hill-climb-captura.nu /detection <dir>` captures a lesson with the bench (free port, fixed clock and fonts, no network). `hill-climb-paquete.nu` builds a blind reviewer folder from a capture and `hill-climb-auditoria.nu` checks a reviewer session saw nothing of the repo.
 
 ## Watch Commands and Visual Review
 
@@ -45,7 +49,7 @@ pnpm dlx playwright screenshot --viewport-size=1440,2400 \
   http://localhost:5199/processes /tmp/processes.png
 ```
 
-The `t3-code` browser MCP is an alternative when it is authorized. Everything else (typecheck, lint, build, render-smoke) must stay non-watch.
+The `t3-code` browser MCP is an alternative when it is authorized. Everything else (typecheck, lint, tests, build, the bench) must stay non-watch.
 
 ## TypeScript / ESLint gotchas
 

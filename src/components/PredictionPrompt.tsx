@@ -47,6 +47,7 @@ function PredictionPrompt({
           ) : (
             <button
               type="button"
+              data-sonda="revelar"
               onClick={() => {
                 setRevealed(true)
               }}

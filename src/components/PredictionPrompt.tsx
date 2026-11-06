@@ -25,11 +25,11 @@ function PredictionPrompt({
     >
       <div className="flex items-start gap-3">
         <Lightbulb
-          className="mt-0.5 h-5 w-5 shrink-0 text-accent"
+          className="mt-0.5 h-5 w-5 shrink-0 text-accent-ink"
           aria-hidden="true"
         />
         <div className="space-y-1">
-          <p className="text-xs font-medium uppercase tracking-wide text-accent">
+          <p className="text-xs font-medium uppercase tracking-wide text-accent-ink">
             Predict first
           </p>
           <p className="text-base leading-7 text-foreground">
@@ -51,7 +51,7 @@ function PredictionPrompt({
               onClick={() => {
                 setRevealed(true)
               }}
-              className="text-sm font-medium text-accent underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="text-sm font-medium text-accent-ink underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               I have a prediction. Show me.
             </button>

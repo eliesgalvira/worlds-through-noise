@@ -201,7 +201,7 @@ function PeriodogramFigure() {
           x={W / 2}
           y={H - 12}
           textAnchor="middle"
-          className="fill-muted-foreground font-mono text-[10px]"
+          className="fill-muted-foreground font-mono plot-text-sm"
         >
           candidate frequency f (drag anywhere)
         </text>

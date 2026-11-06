@@ -6,6 +6,7 @@ import {
   Legend,
   Plot,
   ReadoutRow,
+  ReadoutNote,
 } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
 import { gaussian, makeRng } from '@/domain/math/kernel.ts'
@@ -165,10 +166,10 @@ function EstimatorRaceFigure() {
             value={meanStats.sd < midStats.sd ? 'sample mean' : 'midrange'}
             tone="good"
           />
-          <p className="text-xs leading-5 text-muted-foreground">
+          <ReadoutNote>
             Both noises have variance 1. The ranking flips with the distribution
             — “best estimator” is a property of the pair.
-          </p>
+          </ReadoutNote>
         </>
       }
     >
@@ -228,7 +229,7 @@ function EstimatorRaceFigure() {
         <text
           x={xOf(TRUTH) + 6}
           y={20}
-          className="fill-truth font-mono text-[10px]"
+          className="fill-truth font-mono plot-text-sm"
         >
           θ = 0.5
         </text>

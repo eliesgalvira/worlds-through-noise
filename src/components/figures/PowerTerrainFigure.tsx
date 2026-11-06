@@ -222,7 +222,7 @@ function PowerTerrainFigure() {
           x={hPoint.x - 10}
           y={hPoint.y - 8}
           textAnchor="end"
-          className="fill-foreground font-mono text-[11px]"
+          className="fill-foreground font-mono plot-text"
         >
           h
         </text>
@@ -231,7 +231,7 @@ function PowerTerrainFigure() {
           y={toScreen(eig.u1[0] * 1.52, eig.u1[1] * 1.52).y}
           textAnchor="middle"
           dominantBaseline="middle"
-          className="fill-detection font-mono text-[10px]"
+          className="fill-detection font-mono plot-text-sm"
         >
           u_max
         </text>

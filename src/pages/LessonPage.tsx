@@ -28,7 +28,7 @@ function LessonPage({ lesson }: LessonPageProps) {
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             {labels.allLessons}
           </Link>
-          <p className="mt-10 font-mono text-xs uppercase tracking-[0.18em] text-accent">
+          <p className="mt-10 font-mono text-xs uppercase tracking-[0.18em] text-accent-ink">
             {labels.unit} {lesson.ordinal}
           </p>
           <h1 className="mt-3 font-serif text-5xl font-semibold leading-tight text-foreground md:text-6xl">

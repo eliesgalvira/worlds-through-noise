@@ -109,3 +109,45 @@ Las dos peticiones juntas piden una figura lo más grande posible y los controle
 3. El cuaderno de problemas paso a paso, que Elies considera lo más valioso.
 4. Texto que da contexto antes de cada símbolo y sigla. La reescritura de julio va en esa dirección y hay que comprobar que es correcta.
 5. Se conservan el logo, el índice, el inglés y el tema de papel.
+
+## Lo que pide a una explicación (hilo de estudio de TD, 1 al 6 de noviembre)
+
+Leído entero el 6 de noviembre: los 231 mensajes de Elies del hilo `5f9927f9`, donde estudió Transmisión de Datos con figuras hechas a medida. «H n» es la posición del mensaje en ese hilo. Es otra asignatura, pero dice cómo quiere que se le explique cualquier cosa. De aquí salen la sección 4 y la lista de la sección 5 de la rúbrica.
+
+**Motivada: primero el problema, después el objeto.**
+
+- «NO HAS MOTIVADO LA FORMULA DE LA ENTROPÍA CONJUNTA. … POR QUÉ ES "la altura media"? De donde sale?» (H 733).
+- «Oye, te estás pasando por el forro las explicaciones motivadas.» (H 1120).
+- «No entiendo esto grafica. VEo visualmente que la curva h(p) está siempre por encima de la recta, pero no me dice nada, no me has explicado ni motivado la razón de ser de esta curva» (H 1126).
+- Lo que más le gustó de 3Blue1Brown es que el objetivo va primero: «Qué estamos haciendo? Después de ver el video, me queda claro que lo que queremos hacer es asignar palabras código a cada instrucción.» (H 221).
+
+**El texto señala lo que explica, dentro de la figura.**
+
+- «TENGO QUE DEJAR DE MIRAR LA VISUALIZACION PARA MIRAR LA EXPLICACION, TENGO QUE BAJAR LA MIRADA FUERA DE LA VISUALIZACION PARA VER QUÉ ME ESTÁ DICIENDO LA VISUALIZACIÓN!!!!» (H 170).
+- «leer "Debajo, " y decir "debajo, qué???, por qué no me lo señalas con una flecha"» (H 170).
+- «Un ejemplo de lo de "nombrar cosas en 2 o 3 palabras sin motivarlas" eran los ejes de la grafica» (H 1229). «No entiendo los ejes. Qué es "copias por paso" y "copias en A antes del paso"» (H 1093).
+
+**Términos precisos y símbolos desambiguados.**
+
+- «No se dice "prefijo"? Por favor utiliza los términos correctos, si no podré aprender nada.» (H 221).
+- «N se utiliza para un millón de cosas, SIEMPRE me has de desanviguar estos casos, te lo ruego» (H 713).
+- «Quiero que también me enseñes a hablar con propiedad, porque la visualización es importante pero sin el lenguaje me costará anotar mis ideas.» (H 124).
+
+**Paso a paso, una idea por paso, sin texto de relleno.**
+
+- «me has de construir la visualización paso a paso. No sé donde mirar.» (H 197).
+- Sobre una figura que lo enseñaba todo de golpe: «quiero que veas por qué me cuesta tanto cuando me lo das así todo en un paso» (H 793).
+- «No quiero clutter en los playgrounds porque eres muy susceptible a poner texto por todos lados without rhyme or reason. El objetivo es que yo aprenda y sobre todo, entienda.» (H 14).
+- «NO PUEDES dejar intriga en un texto didactico.» (H 1310).
+
+**Cada fórmula con su imagen.**
+
+- «si no va asociado a una visualizacion son palabras desprovistas de esencia» (H 300).
+- «Estas "proof without words" me fascinan» (H 635), pero rígidas: una que no cabe en la cabeza «no es una intuición rigida» (H 690).
+- El ejemplo perfecto de intuición, en sus palabras: «Este es un ejemplo PERFECTO, donde el dibujo da paso a una intuición subyacente que se me ha revelado. Sin tu decirme nada.» (H 1002).
+
+**Problemas de examen.**
+
+- En vez de mandarle a buscar los problemas: «Esto es terriblemente ineficiente. Cuando me los puedes enseñar tú.» (H 599). En el cuaderno, el enunciado tiene que estar a la vista junto a cada paso.
+- Cuando se equivocó por leer mal un enunciado: «En estos casos es MUY IMPORTANTE que me vuelvas a enseñar el enunciado, o al menos la parte del enunciado que he leído mal.» (H 807).
+- Para el parcial de PSAVC no habrá calculadora y sí un formulario oficial (aviso del metacurs del 2 de noviembre): las soluciones tienen que derivar a mano.

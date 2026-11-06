@@ -7,6 +7,7 @@ import {
   Legend,
   Plot,
   ReadoutRow,
+  ReadoutNote,
 } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
 import { gaussian, makeRng } from '@/domain/math/kernel.ts'
@@ -182,10 +183,10 @@ function WhitenMatchFigure() {
             label="Your fraction of optimal"
             value={`${formatNumber((d2 / Math.max(best.value, 1e-9)) * 100, 0)}%`}
           />
-          <p className="text-xs leading-5 text-muted-foreground">
+          <ReadoutNote>
             At 100% whitening the best direction is simply “toward the pulse” —
             and mapping it back gives h ∝ C⁻¹p.
-          </p>
+          </ReadoutNote>
         </>
       }
     >
@@ -275,7 +276,7 @@ function WhitenMatchFigure() {
         <text
           x={meanPoint.x + 8}
           y={meanPoint.y - 6}
-          className="fill-h1 font-mono text-[10px]"
+          className="fill-h1 font-mono plot-text-sm"
         >
           Ap
         </text>

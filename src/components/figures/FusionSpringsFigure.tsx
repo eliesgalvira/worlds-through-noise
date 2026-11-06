@@ -6,6 +6,7 @@ import {
   Legend,
   Plot,
   ReadoutRow,
+  ReadoutNote,
 } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
 
@@ -110,9 +111,9 @@ function FusionSpringsFigure() {
               value={formatNumber(alpha, 2)}
             />
           ) : null}
-          <p className="text-xs leading-5 text-muted-foreground">
+          <ReadoutNote>
             <MathText text="Break a sensor completely ($\sigma \to 12$) and the fusion quietly ignores it: the defective-pixel exam problem in one gesture." />
-          </p>
+          </ReadoutNote>
         </>
       }
     >
@@ -153,7 +154,7 @@ function FusionSpringsFigure() {
               x={xOf(tick)}
               y={H - 44}
               textAnchor="middle"
-              className="fill-muted-foreground font-mono text-[9px]"
+              className="fill-muted-foreground font-mono plot-text-xs"
             >
               {tick}
             </text>
@@ -182,7 +183,7 @@ function FusionSpringsFigure() {
               <text
                 x={xOf(reading) + 9}
                 y={y + 4}
-                className="fill-h0 font-mono text-[10px]"
+                className="fill-h0 font-mono plot-text-sm"
               >
                 x{index + 1}={reading}
               </text>
@@ -210,7 +211,7 @@ function FusionSpringsFigure() {
             <text
               x={xOf(PRIOR_MEAN) + 9}
               y={H - 20}
-              className="fill-prior font-mono text-[10px]"
+              className="fill-prior font-mono plot-text-sm"
             >
               μ_θ={PRIOR_MEAN}
             </text>
@@ -238,7 +239,7 @@ function FusionSpringsFigure() {
           x={xOf(estimate)}
           y={H - 72}
           textAnchor="middle"
-          className="fill-foreground font-mono text-[11px]"
+          className="fill-foreground font-mono plot-text"
         >
           θ̂ = {formatNumber(estimate, 1)}
         </text>

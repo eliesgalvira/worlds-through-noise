@@ -6,6 +6,7 @@ import {
   Legend,
   Plot,
   ReadoutRow,
+  ReadoutNote,
 } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
 import { linspace } from '@/domain/math/distributions.ts'
@@ -120,11 +121,11 @@ function CurvatureFigure() {
               3,
             )}
           />
-          <p className="text-xs leading-5 text-muted-foreground">
+          <ReadoutNote>
             The measured wobble tracks the theoretical floor because this
             estimator is efficient: its score is a straight line through the
             peak.
-          </p>
+          </ReadoutNote>
         </>
       }
     >
@@ -210,14 +211,14 @@ function CurvatureFigure() {
         <text
           x={12}
           y={H - 48}
-          className="fill-muted-foreground font-mono text-[9px]"
+          className="fill-muted-foreground font-mono plot-text-xs"
         >
           samples
         </text>
         <text
           x={12}
           y={H - 16}
-          className="fill-muted-foreground font-mono text-[9px]"
+          className="fill-muted-foreground font-mono plot-text-xs"
         >
           peak positions over 40 re-runs
         </text>

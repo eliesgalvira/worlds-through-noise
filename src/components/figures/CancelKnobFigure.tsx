@@ -6,6 +6,7 @@ import {
   Legend,
   Plot,
   ReadoutRow,
+  ReadoutNote,
 } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
 import { makeRng, gaussian } from '@/domain/math/kernel.ts'
@@ -130,9 +131,9 @@ function CancelKnobFigure() {
                 : `${formatNumber(snrDb, 1)} dB`
             }
           />
-          <p className="text-xs leading-5 text-muted-foreground">
+          <ReadoutNote>
             <MathText text="$P_z$ is measured from the actual waveform; the parabola is the theory $(1-h\alpha)^2 + (1-h)^2$. They agree — that is the point." />
-          </p>
+          </ReadoutNote>
         </>
       }
     >
@@ -225,7 +226,7 @@ function CancelKnobFigure() {
         <text
           x={xOfH(hOpt) + 6}
           y={26}
-          className="fill-detection font-mono text-[10px]"
+          className="fill-detection font-mono plot-text-sm"
         >
           h_opt
         </text>
@@ -233,7 +234,7 @@ function CancelKnobFigure() {
           x={W / 2}
           y={CURVE_H - 8}
           textAnchor="middle"
-          className="fill-muted-foreground font-mono text-[10px]"
+          className="fill-muted-foreground font-mono plot-text-sm"
         >
           gain h — the 1-D slice of the Wiener bowl (drag)
         </text>

@@ -5,6 +5,7 @@ import {
   Legend,
   Plot,
   ReadoutRow,
+  ReadoutNote,
 } from '@/components/figures/shared.tsx'
 import { formatPercentValue } from '@/components/figures/figure-utils.ts'
 import { binomialPmf } from '@/domain/math/kernel.ts'
@@ -105,9 +106,9 @@ function BitVoteFigure() {
             label="Total error probability"
             value={formatPercentValue(pError)}
           />
-          <p className="text-xs leading-5 text-muted-foreground">
+          <ReadoutNote>
             <MathText text="With $\Pr(1) = 0.5$ and equal costs the boundary sits at majority vote — check it, then break it." />
-          </p>
+          </ReadoutNote>
         </>
       }
     >
@@ -154,7 +155,7 @@ function BitVoteFigure() {
               x={xOf(k)}
               y={H - 16}
               textAnchor="middle"
-              className="fill-muted-foreground font-mono text-[10px]"
+              className="fill-muted-foreground font-mono plot-text-sm"
             >
               k={k}
             </text>
@@ -164,8 +165,8 @@ function BitVoteFigure() {
               textAnchor="middle"
               className={
                 (decideOne[k] ?? false)
-                  ? 'fill-h1 font-mono text-[9px]'
-                  : 'fill-h0 font-mono text-[9px]'
+                  ? 'fill-h1 font-mono plot-text-xs'
+                  : 'fill-h0 font-mono plot-text-xs'
               }
             >
               {(decideOne[k] ?? false) ? '→1' : '→0'}

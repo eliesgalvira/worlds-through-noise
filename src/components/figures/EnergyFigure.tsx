@@ -6,6 +6,7 @@ import {
   Legend,
   Plot,
   ReadoutRow,
+  ReadoutNote,
 } from '@/components/figures/shared.tsx'
 import { formatPercentValue } from '@/components/figures/figure-utils.ts'
 import { linspace } from '@/domain/math/distributions.ts'
@@ -115,9 +116,9 @@ function EnergyFigure() {
             label="$P_{FA}$ (both)"
             value={formatPercentValue(alpha)}
           />
-          <p className="text-xs leading-5 text-muted-foreground">
-            <MathText text="When the jailer's $P_D \approx \alpha$, the transmission is statistically invisible: energy detection only gains $\sqrt{N}$, coherent detection gains $N$." />
-          </p>
+          <ReadoutNote>
+            <MathText text="When the jailer's $P_D \approx \alpha$, the transmission is statistically invisible. The energy detector notices powers only down to $P \propto 1/\sqrt{N}$, while the receiver that knows the waveform decodes down to $P \propto 1/N$." />
+          </ReadoutNote>
         </>
       }
     >
@@ -166,7 +167,7 @@ function EnergyFigure() {
           x={xOf(dof)}
           y={H - 12}
           textAnchor="middle"
-          className="fill-h0 font-mono text-[10px]"
+          className="fill-h0 font-mono plot-text-sm"
         >
           Nσ²
         </text>
@@ -174,7 +175,7 @@ function EnergyFigure() {
           x={xOf(dof * (1 + snr))}
           y={H - 12}
           textAnchor="middle"
-          className="fill-h1 font-mono text-[10px]"
+          className="fill-h1 font-mono plot-text-sm"
         >
           N(σ²+P)
         </text>

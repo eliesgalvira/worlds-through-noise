@@ -167,7 +167,7 @@ function BudgetRocFigure() {
             x={W / 2}
             y={H - 8}
             textAnchor="middle"
-            className="fill-muted-foreground font-mono text-[10px]"
+            className="fill-muted-foreground font-mono plot-text-sm"
           >
             test statistic y (σ_y = 1)
           </text>
@@ -224,7 +224,7 @@ function BudgetRocFigure() {
             x={(W + 16) / 2}
             y={H - 8}
             textAnchor="middle"
-            className="fill-muted-foreground font-mono text-[10px]"
+            className="fill-muted-foreground font-mono plot-text-sm"
           >
             P_FA →
           </text>
@@ -233,7 +233,7 @@ function BudgetRocFigure() {
             y={H / 2}
             textAnchor="middle"
             transform={`rotate(-90 14 ${H / 2})`}
-            className="fill-muted-foreground font-mono text-[10px]"
+            className="fill-muted-foreground font-mono plot-text-sm"
           >
             P_D →
           </text>

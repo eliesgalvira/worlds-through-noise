@@ -122,7 +122,7 @@ function ProgressCircle({
       aria-valuenow={value}
       aria-valuemin={0}
       aria-valuemax={total}
-      className="h-[18px] w-[18px] shrink-0 text-accent"
+      className="h-[18px] w-[18px] shrink-0 text-accent-ink"
     >
       <circle
         cx={size / 2}
@@ -266,10 +266,10 @@ function TocList({
                   'block py-1.5 pr-2 text-sm leading-6 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                   item.depth === 1 ? 'pl-4' : 'pl-8',
                   active
-                    ? 'text-accent'
+                    ? 'text-accent-ink'
                     : item.depth === 1
                       ? 'text-muted-foreground hover:text-foreground'
-                      : 'text-muted-foreground/70 hover:text-foreground',
+                      : 'text-muted-foreground hover:text-foreground',
                 )}
               >
                 {item.title}
@@ -313,7 +313,7 @@ function StickyLessonNav({ modules, problems, variant }: StickyLessonNavProps) {
           <ChevronDown
             className={cn(
               'h-4 w-4 shrink-0 transition-transform',
-              open ? 'rotate-180 text-accent' : '',
+              open ? 'rotate-180 text-accent-ink' : '',
             )}
             aria-hidden="true"
           />

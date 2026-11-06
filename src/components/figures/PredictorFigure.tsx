@@ -218,7 +218,11 @@ function PredictorFigure() {
           className="stroke-h0"
           strokeWidth={1.8}
         />
-        <text x={xOf(F0) + 6} y={22} className="fill-h1 font-mono plot-text-sm">
+        <text
+          x={xOf(F0) + 6}
+          y={22}
+          className="fill-h1-ink font-mono plot-text-sm"
+        >
           f₀ (never disclosed to the filter)
         </text>
         <text

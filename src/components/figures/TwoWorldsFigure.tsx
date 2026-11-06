@@ -229,7 +229,7 @@ function TwoWorldsFigure() {
           strokeWidth={2}
           strokeDasharray="5 3"
         />
-        <text x={14} y={22} className="fill-h1 font-mono plot-text-sm">
+        <text x={14} y={22} className="fill-h1-ink font-mono plot-text-sm">
           ← decide H1
         </text>
         <text
@@ -271,7 +271,7 @@ function TwoWorldsFigure() {
           x={xOf(M1)}
           y={yOf(normalPdf(M1, M1, sd)) - 8}
           textAnchor="middle"
-          className="fill-h1 font-mono plot-text"
+          className="fill-h1-ink font-mono plot-text"
         >
           H1
         </text>

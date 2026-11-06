@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import type { PointerEvent as ReactPointerEvent, ReactNode } from 'react'
 import { MathText } from '@/components/MathText.tsx'
 import { cn } from '@/lib/utils.ts'
@@ -35,7 +35,7 @@ function FigureShell({
         <MathText text={instruction} />
       </p>
       <div className="mt-4 min-w-0">{children}</div>
-      <div className="mt-5 grid items-start gap-x-8 gap-y-5 border-t border-border pt-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-5 grid items-start justify-items-start gap-x-8 gap-y-5 border-t border-border pt-5 sm:grid-cols-2 lg:grid-cols-3">
         {controls}
       </div>
       {readout !== undefined ? (
@@ -72,11 +72,13 @@ function Plot({
 }: PlotProps) {
   const svgRef = useRef<SVGSVGElement>(null)
 
-  useEffect(() => {
+  // Before paint, so the first frame already has the right text size.
+  useLayoutEffect(() => {
     const svg = svgRef.current
     if (svg === null) {
       return
     }
+    svg.style.setProperty('--plot-aspect', String(viewW / viewH))
     const publish = () => {
       const width = svg.getBoundingClientRect().width
       if (width > 0) {
@@ -89,7 +91,7 @@ function Plot({
     return () => {
       observer.disconnect()
     }
-  }, [viewW])
+  }, [viewW, viewH])
 
   const emit = (event: ReactPointerEvent<SVGSVGElement>) => {
     if (onDragPoint === undefined) {
@@ -107,9 +109,8 @@ function Plot({
       viewBox={`0 0 ${viewW} ${viewH}`}
       role="img"
       aria-label={ariaLabel}
-      style={{ maxWidth: `calc(55svh * ${String(viewW / viewH)})` }}
       className={cn(
-        'mx-auto block w-full select-none rounded-md border border-border bg-card',
+        'mx-auto block w-full max-w-[calc(55svh*var(--plot-aspect))] select-none rounded-md border border-border bg-card',
         onDragPoint !== undefined && 'cursor-crosshair touch-none',
         className,
       )}

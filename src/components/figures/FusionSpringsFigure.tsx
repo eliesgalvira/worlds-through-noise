@@ -123,7 +123,7 @@ function FusionSpringsFigure() {
           { label: 'prior anchor', swatchClass: 'stroke-prior' },
           {
             label: 'balance point $\\hat{\\theta}$',
-            swatchClass: 'stroke-threshold',
+            swatchClass: 'stroke-cursor',
           },
         ]}
       />
@@ -232,7 +232,7 @@ function FusionSpringsFigure() {
           cx={xOf(estimate)}
           cy={H - 60}
           r={7}
-          className="fill-threshold stroke-card"
+          className="fill-cursor stroke-card"
           strokeWidth={2}
         />
         <text

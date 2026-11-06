@@ -165,7 +165,7 @@ function BitVoteFigure() {
               textAnchor="middle"
               className={
                 (decideOne[k] ?? false)
-                  ? 'fill-h1 font-mono plot-text-xs'
+                  ? 'fill-h1-ink font-mono plot-text-xs'
                   : 'fill-h0 font-mono plot-text-xs'
               }
             >

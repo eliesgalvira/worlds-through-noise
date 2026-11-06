@@ -177,7 +177,7 @@ function DescentFigure() {
       <Legend
         items={[
           { label: 'iso-error contours', swatchClass: 'stroke-h0' },
-          { label: 'descent trajectory', swatchClass: 'stroke-threshold' },
+          { label: 'descent trajectory', swatchClass: 'stroke-cursor' },
           { label: 'optimum', swatchClass: 'stroke-detection' },
         ]}
       />
@@ -218,7 +218,7 @@ function DescentFigure() {
             )
             .join(' ')}
           fill="none"
-          className="stroke-threshold"
+          className="stroke-cursor"
           strokeWidth={1.6}
           opacity={0.9}
         />
@@ -231,8 +231,8 @@ function DescentFigure() {
               r={i === trajectory.length - 1 ? 5 : 2}
               className={
                 i === trajectory.length - 1
-                  ? 'fill-threshold stroke-card'
-                  : 'fill-threshold'
+                  ? 'fill-cursor stroke-card'
+                  : 'fill-cursor'
               }
               strokeWidth={1.5}
               opacity={i === trajectory.length - 1 ? 1 : 0.5}

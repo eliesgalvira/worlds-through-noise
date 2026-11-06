@@ -208,14 +208,14 @@ function PowerTerrainFigure() {
           y1={CY}
           x2={hPoint.x}
           y2={hPoint.y}
-          className="stroke-threshold"
+          className="stroke-cursor"
           strokeWidth={1.6}
         />
         <circle
           cx={hPoint.x}
           cy={hPoint.y}
           r={6}
-          className="fill-threshold stroke-card"
+          className="fill-cursor stroke-card"
           strokeWidth={1.5}
         />
         <text

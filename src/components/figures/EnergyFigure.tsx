@@ -117,7 +117,7 @@ function EnergyFigure() {
             value={formatPercentValue(alpha)}
           />
           <ReadoutNote>
-            <MathText text="When the jailer's $P_D \approx \alpha$, the transmission is statistically invisible. The energy detector notices powers only down to $P \propto 1/\sqrt{N}$, while the receiver that knows the waveform decodes down to $P \propto 1/N$." />
+            <MathText text="When the jailer's $P_D \approx \alpha$, the transmission is statistically invisible. The energy detector notices powers only down to $P \propto 1/\sqrt{N}$, while the receiver that knows the waveform detects it down to $P \propto 1/N$." />
           </ReadoutNote>
         </>
       }
@@ -175,7 +175,7 @@ function EnergyFigure() {
           x={xOf(dof * (1 + snr))}
           y={H - 12}
           textAnchor="middle"
-          className="fill-h1 font-mono plot-text-sm"
+          className="fill-h1-ink font-mono plot-text-sm"
         >
           N(σ²+P)
         </text>

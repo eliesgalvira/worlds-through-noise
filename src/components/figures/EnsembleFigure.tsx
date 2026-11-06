@@ -213,7 +213,7 @@ function EnsembleFigure() {
             y1={6}
             x2={xOf(slice)}
             y2={H - 6}
-            className="stroke-threshold"
+            className="stroke-cursor"
             strokeWidth={2}
           />
           {bookTrace.length > 0 ? (

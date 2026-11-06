@@ -115,7 +115,7 @@ function ErrorBowlFigure() {
           },
           {
             label: 'your filter $\\mathbf{h}$',
-            swatchClass: 'stroke-threshold',
+            swatchClass: 'stroke-cursor',
           },
         ]}
       />
@@ -185,7 +185,7 @@ function ErrorBowlFigure() {
           cx={toX(h.h0)}
           cy={toY(h.h1)}
           r={6.5}
-          className="fill-threshold stroke-card"
+          className="fill-cursor stroke-card"
           strokeWidth={1.5}
         />
         <text

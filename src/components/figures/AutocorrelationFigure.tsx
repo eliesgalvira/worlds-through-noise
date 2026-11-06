@@ -215,7 +215,7 @@ function AutocorrelationFigure() {
                     y1={PANEL_H - 24}
                     x2={x}
                     y2={y}
-                    className={m === lag ? 'stroke-threshold' : 'stroke-h0'}
+                    className={m === lag ? 'stroke-cursor' : 'stroke-h0'}
                     strokeWidth={m === lag ? 3 : 1.6}
                     opacity={m === lag ? 1 : 0.7}
                   />
@@ -223,7 +223,7 @@ function AutocorrelationFigure() {
                     cx={x}
                     cy={y}
                     r={m === lag ? 3 : 2}
-                    className={m === lag ? 'fill-threshold' : 'fill-h0'}
+                    className={m === lag ? 'fill-cursor' : 'fill-h0'}
                   />
                 </g>
               )

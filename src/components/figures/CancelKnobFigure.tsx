@@ -220,7 +220,7 @@ function CancelKnobFigure() {
           cx={xOfH(gain)}
           cy={yOfP(pzCurve(gain))}
           r={6}
-          className="fill-threshold stroke-card"
+          className="fill-cursor stroke-card"
           strokeWidth={1.5}
         />
         <text

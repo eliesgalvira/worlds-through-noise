@@ -125,7 +125,7 @@ function PeriodogramFigure() {
       <Legend
         items={[
           { label: 'periodogram $|X(f)|^2/N$', swatchClass: 'stroke-h0' },
-          { label: 'your candidate', swatchClass: 'stroke-threshold' },
+          { label: 'your candidate', swatchClass: 'stroke-cursor' },
           {
             label: 'true tone $\\pm$ CRB',
             swatchClass: 'stroke-truth',
@@ -187,14 +187,14 @@ function PeriodogramFigure() {
           y1={16}
           x2={xOf(candidate)}
           y2={H - 30}
-          className="stroke-threshold"
+          className="stroke-cursor"
           strokeWidth={2}
         />
         <circle
           cx={xOf(candidate)}
           cy={yOf(candidateScore)}
           r={5}
-          className="fill-threshold stroke-card"
+          className="fill-cursor stroke-card"
           strokeWidth={1.5}
         />
         <text

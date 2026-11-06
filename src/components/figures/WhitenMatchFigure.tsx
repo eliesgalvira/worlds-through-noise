@@ -197,7 +197,7 @@ function WhitenMatchFigure() {
             label: '$\\mathcal{H}_1$ cloud (pulse + noise)',
             swatchClass: 'stroke-h1',
           },
-          { label: 'your direction', swatchClass: 'stroke-threshold' },
+          { label: 'your direction', swatchClass: 'stroke-cursor' },
           {
             label: 'optimal direction',
             swatchClass: 'stroke-detection',
@@ -256,7 +256,7 @@ function WhitenMatchFigure() {
           y1={2 * CY - dirEnd.y}
           x2={dirEnd.x}
           y2={dirEnd.y}
-          className="stroke-threshold"
+          className="stroke-cursor"
           strokeWidth={2}
         />
         <circle
@@ -276,7 +276,7 @@ function WhitenMatchFigure() {
         <text
           x={meanPoint.x + 8}
           y={meanPoint.y - 6}
-          className="fill-h1 font-mono plot-text-sm"
+          className="fill-h1-ink font-mono plot-text-sm"
         >
           Ap
         </text>

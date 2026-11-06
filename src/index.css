@@ -147,8 +147,8 @@
   /* Ink, dashed in figures: amber already means H1 in the same view. */
   --threshold: #44403c;
   /* What the student moves in a figure: a direction, a candidate, a filter,
-     a slice. 6.2:1 on cards, and no other role is magenta. */
-  --cursor: #a21caf;
+     a slice. 5.9:1 on cards; rose, so it never sits near the prior's violet. */
+  --cursor: #be185d;
   --estimate: #1e3a8a;
   --truth: #151515;
   --prior: #6d28d9;

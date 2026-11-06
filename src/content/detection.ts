@@ -8,7 +8,7 @@ export const detectionLesson: LessonRecord = {
     'A detector never discovers the truth. It spends a false-alarm budget where the evidence is strongest, and every formula in Tema 2 is bookkeeping for that purchase.',
   intro: [
     'Radar, anemia screening, stored bits, covert transmissions: in every exam problem two machines could have dealt the trace you hold, and a rule must pick one while owning its mistakes. The likelihood ratio, the Q function, the matched filter and the chi-squared tail are all shadows of one picture — two overlapping clouds and a boundary you are free to move.',
-    'This lesson builds the picture first. Each module hands you the clouds and makes you move the boundary; the Neyman-Pearson lemma then reads like a description of what your hands already did.',
+    'This lesson builds the picture first. Each module hands you the clouds and makes you move the boundary. The Neyman-Pearson lemma then reads like a description of what your hands already did.',
   ],
   modules: [
     {
@@ -18,9 +18,9 @@ export const detectionLesson: LessonRecord = {
         'Why do even good detectors make mistakes — and why does averaging help?',
       trap: 'A binary detector chooses between two hypotheses — call them $\\mathcal{H}_0$ (nothing there) and $\\mathcal{H}_1$ (something there) — using a rule like “decide $\\mathcal{H}_1$ if $x > \\gamma$,” where $\\gamma$ is a threshold. Written that way, it sounds as if the detector knows something. It knows nothing about the trace in front of it: both hypotheses can produce every value of $x$. Worse, the reflex “large $x$ means signal present” is a trap the exams exploit deliberately — in the anemia screen below, the sick population has the LOWER blood-ferritin mean, so the correct rule points the other way.',
       object:
-        'Picture two dealing machines and the piles of numbers they produce. Under $\\mathcal{H}_0$ the machine deals from a Gaussian centered at $m_0$; under $\\mathcal{H}_1$, from one centered at $m_1$. Where the two piles overlap, a single number is honestly compatible with both machines, and that overlap region is where every false alarm and every miss is manufactured. A detector is nothing more than a boundary drawn through this picture.',
+        'Picture two dealing machines and the piles of numbers they produce. Under $\\mathcal{H}_0$ the machine deals from a Gaussian centered at $m_0$. Under $\\mathcal{H}_1$, from one centered at $m_1$. Where the two piles overlap, a single number is honestly compatible with both machines, and that overlap region is where every false alarm and every miss is manufactured. A detector is nothing more than a boundary drawn through this picture.',
       action:
-        'In the figure, draw a patient and see where their number lands: near a peak the call is easy; inside the overlap the number by itself cannot settle it. Then raise $N$, the count of daily samples averaged before deciding, and watch both piles tighten around their means by a factor $\\sqrt{N}$ — the overlap drains away. Notice what did NOT happen: no single sample became more informative. You stacked weak evidence until the piles separated.',
+        'In the figure, draw a patient and see where their number lands: near a peak the call is easy. Inside the overlap the number by itself cannot settle it. Then raise $N$, the count of daily samples averaged before deciding, and watch both piles tighten around their means by a factor $\\sqrt{N}$ — the overlap drains away. Notice what did NOT happen: no single sample became more informative. You stacked weak evidence until the piles separated.',
       payoff:
         'After playing, the standard machinery reads as a description of the picture. The test statistic $T(\\mathbf{x}) = \\frac{1}{N}\\sum_n x_n$ — the sample mean — is the coordinate along which the two piles separate fastest, and its two distributions, $N(m_0, \\sigma^2/N)$ and $N(m_1, \\sigma^2/N)$, are all you need to price any threshold. Even the direction of the inequality comes from the geometry rather than habit: when the $\\mathcal{H}_1$ pile sits to the left ($m_1 < m_0$), you decide $\\mathcal{H}_1$ for SMALL averages.',
       equations: [
@@ -48,10 +48,10 @@ export const detectionLesson: LessonRecord = {
           'Up, toward $m_0$: you call “anemic” on a wider range of low averages. Misses fall, false alarms rise — the overlap only lets you trade, never win.',
       },
       transfer:
-        'Parcial Abr 2025: ferritin screen with $m_0 > m_1$. Write the test, note the flipped inequality, and give $P_{FA}$ and $P_D$ as $Q$-functions of the threshold on the sample mean.',
+        'Midterm Apr 2025: ferritin screen with $m_0 > m_1$. Write the test, note the flipped inequality, and give $P_{FA}$ and $P_D$ as $Q$-functions of the threshold on the sample mean.',
       examRefs: [
-        'Parcial Abr 2025, Ex. 1: anemia screening, N-day average, flipped threshold',
-        'Teoría T2, Ejercicio 1: DC level in white Gaussian noise',
+        'Midterm Apr 2025, Ex. 1: anemia screening, N-day average, flipped threshold',
+        'Slides T2, Exercise 1: DC level in white Gaussian noise',
       ],
     },
     {
@@ -61,9 +61,9 @@ export const detectionLesson: LessonRecord = {
         'Neyman-Pearson says “fix $P_{FA}$, maximize $P_D$.” What is actually being spent?',
       trap: 'The exam formula for the threshold is $\\gamma = \\sigma_y\\,Q^{-1}(\\alpha)$, and it looks like an incantation. Name its parts first. $\\alpha$ is the false-alarm probability you are willing to tolerate — a number like 0.05 that someone in authority hands you. $\\sigma_y$ is the standard deviation of the test statistic under $\\mathcal{H}_0$, where this form assumes the statistic has zero mean (otherwise add that mean to $\\gamma$). And $Q(u)$ is the area under the standard Gaussian’s tail to the right of $u$, so $Q^{-1}(\\alpha)$ answers the question “how many standard deviations out must I stand for the tail beyond me to have area $\\alpha$?” Named, the formula is less magic — but it is still not a picture.',
       object:
-        'Here is the picture. The $\\mathcal{H}_0$ pile is a reservoir of probability, and $\\alpha$ is the fraction of it you are licensed to spill. The threshold is a dam: everything beyond the dam under $\\mathcal{H}_0$ is spilled budget — false alarms; everything beyond it under $\\mathcal{H}_1$ is caught signal — detections.',
+        'Here is the picture. The $\\mathcal{H}_0$ pile is a reservoir of probability, and $\\alpha$ is the fraction of it you are licensed to spill. The threshold is a dam: everything beyond the dam under $\\mathcal{H}_0$ is spilled budget — false alarms. Everything beyond it under $\\mathcal{H}_1$ is caught signal — detections.',
       action:
-        'In the figure, choose the budget $\\alpha$ and watch the dam slide until the spilled $\\mathcal{H}_0$ area equals it exactly; the dam’s resting position IS $Q^{-1}(\\alpha)$, no incantation involved. Then read the $\\mathcal{H}_1$ area beyond the dam: that is your detection probability $P_D$, one operating point. Sweep the budget from permissive to strict and the point traces out a curve — the ROC, the receiver operating characteristic. Finally raise the ENR, the energy-to-noise ratio (how much total signal energy you collect per unit of noise power), and watch the entire curve bow toward the perfect corner.',
+        'In the figure, choose the budget $\\alpha$ and watch the dam slide until the spilled $\\mathcal{H}_0$ area equals it exactly. The dam’s resting position IS $Q^{-1}(\\alpha)$, no incantation involved. Then read the $\\mathcal{H}_1$ area beyond the dam: that is your detection probability $P_D$, one operating point. Sweep the budget from permissive to strict and the point traces out a curve — the ROC, the receiver operating characteristic. Finally raise the ENR, the energy-to-noise ratio (how much total signal energy you collect per unit of noise power), and watch the entire curve bow toward the perfect corner.',
       payoff:
         'Seen this way, the ROC stops being a mysterious benchmark plot: it is the complete menu of budget-versus-catch deals this sensor offers, and no choice of threshold can move you off the menu — only more energy ($N$ up, $\\sigma^2$ down, means further apart) buys a better menu. The one-line summary $P_D = Q(Q^{-1}(\\alpha) - \\sqrt{ENR})$ now reads plainly: start where your budget puts you, get pushed toward certainty by the separation.',
       equations: [
@@ -86,7 +86,7 @@ export const detectionLesson: LessonRecord = {
         'Every NP exam question ends the same way: “obtain the threshold for $P_{FA} \\leq \\alpha$ and the resulting $P_D$.” Practice reading both areas before touching algebra — the algebra is just naming the two areas.',
       examRefs: [
         'Final Jun 2026, Ex. 3(f): Gaussian-approximated test, $P_D$ vs $P_{FA}$ under $\\sigma_w^2 \\gg P$',
-        'Teoría T2: ROC family parametrized by ENR (0–10 dB)',
+        'Slides T2: ROC family parametrized by ENR (0–10 dB)',
       ],
     },
     {
@@ -96,7 +96,7 @@ export const detectionLesson: LessonRecord = {
         'Where does the matched filter $\\mathbf{h} = \\mathbf{C}_w^{-1}\\mathbf{p}$ come from, and why does whitening keep appearing?',
       trap: 'When the signal is a known pulse — a fixed vector of samples $\\mathbf{p}$, scaled by an amplitude $A$ — and the noise is colored with covariance matrix $\\mathbf{C}_w$, the optimal detector is $\\operatorname{Re}\\{A^*\\mathbf{p}^H\\mathbf{C}_w^{-1}\\mathbf{x}\\} \\gtrless \\gamma$. Memorized as a formula, it is the output of a symbol-pushing machine, and it leaves you helpless the moment the exam changes the noise or asks you to design the pulse. The question worth answering is: where does that $\\mathbf{C}_w^{-1}$ come from?',
       object:
-        'Move to signal space, where the whole observation vector is one point. The noise turns that point into a cloud around each hypothesis center — around $\\mathbf{0}$ when there is no pulse, around $A\\mathbf{p}$ when there is. White noise makes a round cloud; colored noise makes a tilted ellipse, louder along some directions than others. And a linear detector is nothing but a direction to project onto: a shadow-line, to be chosen so that the shadows of the two clouds separate as cleanly as possible.',
+        'Move to signal space, where the whole observation vector is one point. The noise turns that point into a cloud around each hypothesis center — around $\\mathbf{0}$ when there is no pulse, around $A\\mathbf{p}$ when there is. White noise makes a round cloud. Colored noise makes a tilted ellipse, louder along some directions than others. And a linear detector is nothing but a direction to project onto: a shadow-line, to be chosen so that the shadows of the two clouds separate as cleanly as possible.',
       action:
         'Hunt for that direction in the figure. Start with colored noise and the naive choice — project straight onto the pulse direction $\\mathbf{p}$ — and watch the two shadow histograms overlap, because $\\mathbf{p}$ leans toward the loud axis of the ellipse. Then drag the whitening slider, which squeezes the space by $\\mathbf{C}_w^{-1/2}$ until the ellipse becomes a circle. In the squeezed world the best direction is trivially “toward the (squeezed) pulse.” Undo the change of variables, and the composite direction you built with your hands is exactly $\\mathbf{C}_w^{-1}\\mathbf{p}$.',
       payoff:
@@ -107,10 +107,12 @@ export const detectionLesson: LessonRecord = {
             'The NP detector for a known pulse in complex Gaussian noise $\\mathcal{CN}(\\mathbf{0}, \\mathbf{C}_w)$ projects the data onto the whitened-then-matched direction.',
           latex:
             'y = \\mathrm{Re}\\{A^*\\mathbf{p}^H\\mathbf{C}_w^{-1}\\mathbf{x}\\} \\;\\gtrless\\; \\gamma_y, \\qquad \\mathrm{SNR}_y = 2|A|^2\\,\\mathbf{p}^H\\mathbf{C}_w^{-1}\\mathbf{p}',
+          caption:
+            'The figure above is the real case, where the best separation is $d_M^2 = A^2\\mathbf{p}^T\\mathbf{C}_w^{-1}\\mathbf{p}$. With complex data, $\\mathrm{Re}\\{\\cdot\\}$ keeps half the noise power and the 2 appears.',
         },
         {
           sentence:
-            'If the phase of A is unknown, project and take the magnitude instead; the exponential tail replaces the Q function.',
+            'If the phase of A is unknown, project and take the magnitude instead. The exponential tail replaces the Q function.',
           latex:
             'y = |\\mathbf{p}^H\\mathbf{C}_w^{-1}\\mathbf{x}|^2, \\qquad \\gamma_{|\\cdot|} = -\\sigma_z^2 \\ln P_{FA}',
           caption:
@@ -124,11 +126,11 @@ export const detectionLesson: LessonRecord = {
           'No. Along $\\mathbf{p}$ the shadow still collects part of the loud noise. $\\mathbf{C}_w^{-1}\\mathbf{p}$ divides each eigen-component of $\\mathbf{p}$ by its noise power, so the projection swings toward the quiet axis and the separation grows. Only if $\\mathbf{p}$ lies exactly on an axis (an eigenvector of $\\mathbf{C}_w$) is $\\mathbf{C}_w^{-1}\\mathbf{p} \\parallel \\mathbf{p}$, and then $\\mathbf{p}$ itself is already optimal.',
       },
       transfer:
-        'Parcial Oct 2025: two codewords in colored noise. Whiten, reduce to a distance comparison, then argue where codewords should be placed. All three parts are the same squeeze.',
+        'Midterm Oct 2025: two codewords in colored noise. Whiten, reduce to a distance comparison, then argue where codewords should be placed. All three parts are the same squeeze.',
       examRefs: [
-        'Parcial Abr 2025, Ex. 2: radar amplitude with colored noise (same $\\mathbf{C}_w^{-1}$ machinery)',
-        'Parcial Oct 2025, Ex. 1: codeword detection and design in colored noise',
-        'Teoría T2, Ejercicios 2–3: radar detector, whitening interpretation, pulse design',
+        'Midterm Apr 2025, Ex. 2: radar amplitude with colored noise (same $\\mathbf{C}_w^{-1}$ machinery)',
+        'Midterm Oct 2025, Ex. 1: codeword detection and design in colored noise',
+        'Slides T2, Exercises 2–3: radar detector, whitening interpretation, pulse design',
       ],
     },
     {
@@ -136,9 +138,9 @@ export const detectionLesson: LessonRecord = {
       title: 'Detecting loudness',
       question:
         'What can a detector do when the signal itself is unknown — only its power distinguishes the hypotheses?',
-      trap: 'Sometimes the detector does not know the waveform at all — only that, if a transmission is happening, the received power rises from the noise floor $\\sigma_w^2$ to $\\sigma_w^2 + P$. The only thing left to measure is energy, $y = \\sum |x(n)|^2$, and its thresholds come from chi-squared tables, which look like a whole separate theory. On top of that sits the covert-communications result — the weakest power the eavesdropping jailer can notice shrinks only like $1/\\sqrt{N}$, while the weakest power the intended receiver can decode shrinks like $1/N$ — which looks like a paradox until you see where each factor comes from.',
+      trap: 'Sometimes the detector does not know the waveform at all — only that, if a transmission is happening, the received power rises from the noise floor $\\sigma_w^2$ to $\\sigma_w^2 + P$. The only thing left to measure is energy, $y = \\sum |x(n)|^2$, and its thresholds come from chi-squared tables, which look like a whole separate theory. On top of that sits the covert-communications result — the weakest power the jailer (an eavesdropper who only measures received power) can notice shrinks only like $1/\\sqrt{N}$, while the weakest power the intended receiver can decode shrinks like $1/N$ — which looks like a paradox until you see where each factor comes from.',
       object:
-        'Picture two loudness gauges. Under $\\mathcal{H}_0$ the measured average power settles near $\\sigma_w^2$; under $\\mathcal{H}_1$, near $\\sigma_w^2 + P$. Each gauge reading is a random bump — chi-squared is just the honest name for the distribution of a sum of squared Gaussians — skewed and wide when few samples have been summed, tightening like $\\sqrt{N}$ as samples accumulate.',
+        'Picture two loudness gauges. Under $\\mathcal{H}_0$ the measured average power settles near $\\sigma_w^2$. Under $\\mathcal{H}_1$, near $\\sigma_w^2 + P$. Each gauge reading is a random bump — chi-squared is just the honest name for the distribution of a sum of squared Gaussians — skewed and wide when few samples have been summed, tightening like $\\sqrt{N}$ as samples accumulate.',
       action:
         'Slide $N$ in the figure and watch the two bumps separate — slowly. Their centers stay a fixed distance $P$ apart while their widths shrink like $1/\\sqrt{N}$, so distinguishability grows only like $\\sqrt{N}\\,(P/\\sigma_w^2)$. Compare that with a known waveform (D1, D3), where distinguishability is $\\sqrt{N P/\\sigma_w^2}$: at low SNR $\\sqrt{P/\\sigma_w^2}$ is far larger than $P/\\sigma_w^2$. Then set $P$ below the $\\sigma_w^2 N^{-1/2}$ waterline and watch the bumps refuse to separate: the transmission has become statistically invisible.',
       payoff:
@@ -154,14 +156,14 @@ export const detectionLesson: LessonRecord = {
         },
         {
           sentence:
-            'For large $N$ the test statistic is approximately Gaussian, and the separation is $\\sqrt{N}$ in SNR units.',
+            'For large $N$ the test statistic is approximately Gaussian, and the separation is $\\sqrt{N/2}\\,P/\\sigma_w^2$ for real samples ($\\sqrt{N}\\,P/\\sigma_w^2$ for complex ones).',
           latex:
             'P_D \\approx Q\\!\\left(Q^{-1}(P_{FA}) - \\sqrt{\\tfrac{N}{2}}\\,\\frac{P}{\\sigma_w^2}\\right)',
         },
       ],
       prediction: {
         question:
-          '$\\sigma_1^2/\\sigma_0^2 = 2$ and $N = 2$ real samples. Roughly how good can the detector be?',
+          'The signal doubles the received power: $\\sigma_1^2/\\sigma_0^2 = (\\sigma_w^2 + P)/\\sigma_w^2 = 2$. With $N = 2$ real samples, roughly how good can the detector be?',
         answer:
           'Poor: with two real samples $y/\\sigma^2$ is $\\chi^2_2$, an exponential, so $P_D = P_{FA}^{\\sigma_0^2/\\sigma_1^2} = P_{FA}^{1/2}$: only 0.32 at $P_{FA} = 0.1$. Check it in the figure with $N = 2$, $P/\\sigma^2 = 1$ and $\\alpha = 10\\%$. Power detection is sample-hungry.',
       },
@@ -169,7 +171,7 @@ export const detectionLesson: LessonRecord = {
         'Final Jun 2026, Ex. 3: derive the jailer’s test, apply the Gaussian approximation, then show $P \\propto N^{-2/3}$ defeats the jailer but not the receiver. Every step is a picture from this module.',
       examRefs: [
         'Final Jun 2026, Ex. 3: covert communications, energy detector, square-root law',
-        'Teoría T2, Ej. 2.1: power-increase detection, chi-squared ROC $P_D = P_{FA}^{\\sigma_0^2/\\sigma_1^2}$',
+        'Slides T2, Ex. 2.1: power-increase detection, chi-squared ROC $P_D = P_{FA}^{\\sigma_0^2/\\sigma_1^2}$',
       ],
     },
     {
@@ -179,9 +181,9 @@ export const detectionLesson: LessonRecord = {
         'What changes when hypotheses have prior probabilities and mistakes have prices?',
       trap: 'So far the hypotheses were treated as equals. But often you know beforehand that one is more probable — the prior probabilities $P_0$ and $P_1$ — and that the two kinds of mistake carry different prices, written $C_{ij}$ for the cost of deciding $i$ when the truth was $j$. The resulting criteria, MAP (choose the hypothesis most probable AFTER seeing the data) and minimum Bayes risk, look like a second theory of detection with its own threshold formula to memorize: $\\gamma = \\frac{P_0(C_{10} - C_{00})}{P_1(C_{01} - C_{11})}$. It is the same theory with weights on the scale.',
       object:
-        'Make it concrete: a single bit is stored five times on an unreliable disk that flips each copy independently with probability $\\varepsilon$. The detector reads the five copies and counts the ones — the count $k$ is the entire evidence. The prior $\\Pr(\\text{bit} = 1)$ and the two mistake prices are weights placed on the two pans of a scale BEFORE the evidence arrives; the count then tips it.',
+        'Make it concrete: a single bit is stored five times on an unreliable disk that flips each copy independently with probability $\\varepsilon$. The detector reads the five copies and counts the ones — the count $k$ is the entire evidence. The prior $\\Pr(\\text{bit} = 1)$ and the two mistake prices are weights placed on the two pans of a scale BEFORE the evidence arrives. The count then tips it.',
       action:
-        'In the figure, move the prior and watch the decision threshold on the count slide: at $\\Pr(1) = 0.5$ the rule is a plain majority vote; make ones rare and suddenly three ones out of five is no longer convincing. Make missing a one expensive and the threshold slides back the other way. The error probability is computed exactly as you move — and the minimum-error rule is the one your hands settle on.',
+        'In the figure, move the prior and watch the decision threshold on the count slide: at $\\Pr(1) = 0.5$ the rule is a plain majority vote. Make ones rare and suddenly three ones out of five is no longer convincing. Make missing a one expensive and the threshold slides back the other way. The error probability is computed exactly as you move — and the minimum-error rule is the one your hands settle on.',
       payoff:
         'The unification is the payoff: Neyman–Pearson, MAP and minimum Bayes risk are one detector with three stories about where the threshold sits. NP fixes it by a false-alarm budget, MAP by the prior odds, Bayes risk by prior odds times the price ratio — and the likelihood-ratio side of the test never changes. On the exam, phrases like “equally likely bits” or “a miss costs ten times more” are nothing but instructions for where to put $\\gamma$.',
       equations: [
@@ -210,22 +212,23 @@ export const detectionLesson: LessonRecord = {
         'Final Jun 2025, Ex. 1: unreliable disk with repetition code. Derive the count test, then answer how the threshold moves when the read-error probability or the bit prior changes.',
       examRefs: [
         'Final Jun 2025, Ex. 1: repeated-bit storage, binomial test, MAP threshold',
-        'Teoría T2 §3: minimum Bayes risk and MAP detectors',
+        'Slides T2 §3: minimum Bayes risk and MAP detectors',
       ],
     },
   ],
   workedProblems: [
     {
       id: 'wp-anemia',
-      source: 'Parcial · 7 Abril 2025 · Ex. 1',
+      source: 'Midterm, April 7 2025, Ex. 1',
       title: 'The anemia screen: a threshold that points the other way',
       why: 'The gentlest complete NP problem in the recent bank — and it carries the D1 trap verbatim: the sick world has the LOWER mean, so every inequality flips. Parts f–h then run the D5 move on the same data: a prior of $p = 0.1$ drags the threshold, and you read NP and MAP as two points on one ROC.',
       statement: [
         {
           kind: 'text',
           content:
-            'A health campaign screens for anemia. Positive individuals ($\\mathcal{H}_1$) have blood ferritin modeled as Gaussian $N(m_1, \\sigma^2)$; negative individuals ($\\mathcal{H}_0$) as $N(m_0, \\sigma^2)$, with $m_0 > m_1$. Each decision uses $N$ i.i.d. samples $\\{x_1, \\dots, x_N\\}$ taken on $N$ consecutive days.',
+            'A health campaign screens for anemia. Positive individuals ($\\mathcal{H}_1$) have blood ferritin modeled as Gaussian $N(m_1, \\sigma^2)$. Negative individuals ($\\mathcal{H}_0$) as $N(m_0, \\sigma^2)$, with $m_0 > m_1$. Each decision uses $N$ i.i.d. samples $\\{x_1, \\dots, x_N\\}$ taken on $N$ consecutive days.',
         },
+        { kind: 'figure', key: 'anemia-roc' },
       ],
       parts: [
         {
@@ -235,7 +238,7 @@ export const detectionLesson: LessonRecord = {
           steps: [
             {
               title: 'Stack N independent Gaussians around each mean',
-              body: 'Same variance under both hypotheses; only the center moves. Independence multiplies the sample densities into one exponent of a squared norm.',
+              body: 'Same variance under both hypotheses. Only the center moves. Independence multiplies the sample densities into one exponent of a squared norm.',
               latex:
                 'f(\\mathbf{x}\\mid\\mathcal{H}_i) = \\frac{1}{(2\\pi\\sigma^2)^{N/2}} \\exp\\!\\left(-\\frac{1}{2\\sigma^2}\\,\\|\\mathbf{x} - m_i\\mathbf{1}\\|^2\\right), \\qquad i = 0, 1',
             },
@@ -313,7 +316,7 @@ export const detectionLesson: LessonRecord = {
           steps: [
             {
               title: 'Same tail, other bell',
-              body: 'Standardize the left tail under $\\mathcal{H}_1$ and substitute the threshold from part (d); the separation enters as $\\sqrt{N}d/\\sigma$.',
+              body: 'Standardize the left tail under $\\mathcal{H}_1$ and substitute the threshold from part (d). The separation enters as $\\sqrt{N}d/\\sigma$.',
               latex:
                 'P_D = \\Pr(y < \\gamma_y^{NP} \\mid \\mathcal{H}_1) = Q\\!\\left(Q^{-1}(\\alpha) - \\frac{\\sqrt{N}\\,d}{\\sigma}\\right)',
             },
@@ -358,7 +361,7 @@ export const detectionLesson: LessonRecord = {
         {
           label: 'g',
           prompt:
-            'The exam shows one ROC curve of $y$ ($P_{FA}$ from 0 to 0.3) with three marked points: + at about $(0.017, 0.60)$ and △ at $(0.05, 0.77)$, both on the curve, and o at $(0.05, 0.85)$, above it. Which corresponds to the NP detector of parts (b)–(e), and which to the MAP detector of part (f)?',
+            'The figure in the statement shows the ROC of $y$ with three marked points (+, o, △). Which corresponds to the NP detector of parts (b)–(e), and which to the MAP detector of part (f)?',
           steps: [
             {
               title: 'Use what each criterion pins down',
@@ -367,7 +370,7 @@ export const detectionLesson: LessonRecord = {
           ],
           answer: {
             sentence:
-              'NP is the point at the budgeted $P_{FA}$; MAP is elsewhere on the same curve; off-curve points are unreachable — the ROC is the whole menu, as D2 insists.',
+              'NP is the point at the budgeted $P_{FA}$. MAP is elsewhere on the same curve. Off-curve points are unreachable — the ROC is the whole menu, as D2 insists.',
           },
         },
         {
@@ -392,7 +395,7 @@ export const detectionLesson: LessonRecord = {
     },
     {
       id: 'wp-codewords',
-      source: 'Parcial · 30 Oct 2025 · Ex. 1 (60 %)',
+      source: 'Midterm, Oct 30 2025, Ex. 1 (60 %)',
       title: 'Codewords in colored noise',
       why: 'One problem that runs the whole tema in order: Neyman–Pearson (D1–D2), the whitening metric $\\mathbf{C}^{-1}$ (D3), and then the eigen-design move from the Tema 1 terrain — the last two parts are where the exam separates students.',
       statement: [
@@ -420,13 +423,13 @@ export const detectionLesson: LessonRecord = {
           steps: [
             {
               title: 'Write both likelihoods',
-              body: 'Same colored covariance $\\mathbf{C}$ under both hypotheses; only the mean moves.',
+              body: 'Same colored covariance $\\mathbf{C}$ under both hypotheses. Only the mean moves.',
               latex:
                 'f(\\mathbf{x}\\mid\\mathcal{H}_i) = \\frac{1}{\\sqrt{(2\\pi)^N \\det \\mathbf{C}}} \\exp\\!\\left(-\\tfrac{1}{2}(\\mathbf{x}-\\mathbf{c}_i)^T \\mathbf{C}^{-1} (\\mathbf{x}-\\mathbf{c}_i)\\right)',
             },
             {
               title: 'Take the log-likelihood ratio and cancel',
-              body: 'The quadratic term $\\mathbf{x}^T\\mathbf{C}^{-1}\\mathbf{x}$ is common to both hypotheses and cancels; what survives is linear in $\\mathbf{x}$, and everything constant gets swept into the threshold.',
+              body: 'The quadratic term $\\mathbf{x}^T\\mathbf{C}^{-1}\\mathbf{x}$ is common to both hypotheses and cancels. What survives is linear in $\\mathbf{x}$, and everything constant gets swept into the threshold.',
               latex:
                 '\\ln\\frac{f(\\mathbf{x}\\mid\\mathcal{H}_1)}{f(\\mathbf{x}\\mid\\mathcal{H}_0)} > \\ln\\gamma \\;\\Longrightarrow\\; \\mathbf{c}_1^T\\mathbf{C}^{-1}\\mathbf{x} - \\mathbf{c}_0^T\\mathbf{C}^{-1}\\mathbf{x} > \\ln\\gamma + \\tfrac{1}{2}\\mathbf{c}_1^T\\mathbf{C}^{-1}\\mathbf{c}_1 - \\tfrac{1}{2}\\mathbf{c}_0^T\\mathbf{C}^{-1}\\mathbf{c}_0',
             },
@@ -475,7 +478,7 @@ export const detectionLesson: LessonRecord = {
           steps: [
             {
               title: 'A linear function of a Gaussian is Gaussian',
-              body: 'Means come from part (b)’s deterministic term; the variance is $d_M^2$, also from part (b).',
+              body: 'Means come from part (b)’s deterministic term. The variance is $d_M^2$, also from part (b).',
               latex:
                 'y\\mid\\mathcal{H}_0 \\sim N\\!\\left(\\mathbf{a}^T\\mathbf{C}^{-1}\\mathbf{c}_0,\\; d_M^2\\right), \\qquad y\\mid\\mathcal{H}_1 \\sim N\\!\\left(\\mathbf{a}^T\\mathbf{C}^{-1}\\mathbf{c}_1,\\; d_M^2\\right)',
               note: 'Two equal-width Gaussians whose centers are $\\mathbf{a}^T\\mathbf{C}^{-1}\\mathbf{a} = d_M^2$ apart — exactly the D1 two-worlds picture.',
@@ -493,7 +496,7 @@ export const detectionLesson: LessonRecord = {
           steps: [
             {
               title: 'Spend the false-alarm budget exactly',
-              body: 'False alarm is the $\\mathcal{H}_0$ tail above the threshold; standardize and invert the $Q$ function.',
+              body: 'False alarm is the $\\mathcal{H}_0$ tail above the threshold. Standardize and invert the $Q$ function.',
               latex:
                 'P_{FA} = Q\\!\\left(\\frac{\\gamma_y - \\mathbf{a}^T\\mathbf{C}^{-1}\\mathbf{c}_0}{\\sigma_y}\\right) = \\alpha \\;\\Longrightarrow\\; \\gamma_y = \\sigma_y\\,Q^{-1}(\\alpha) + \\mathbf{a}^T\\mathbf{C}^{-1}\\mathbf{c}_0',
             },
@@ -530,7 +533,7 @@ export const detectionLesson: LessonRecord = {
           steps: [
             {
               title: 'Weigh both ways of being wrong',
-              body: 'Error happens as a false alarm under $\\mathcal{H}_0$ or a miss under $\\mathcal{H}_1$; use $1 - Q(u) = Q(-u)$ to fold the miss term.',
+              body: 'Error happens as a false alarm under $\\mathcal{H}_0$ or a miss under $\\mathcal{H}_1$. Use $1 - Q(u) = Q(-u)$ to fold the miss term.',
               latex:
                 'P_e = (1-p)\\,\\alpha + p\\,(1 - P_D) = (1-p)\\,\\alpha + p\\,Q\\!\\left(d_M - Q^{-1}(\\alpha)\\right)',
             },
@@ -555,19 +558,19 @@ export const detectionLesson: LessonRecord = {
               title: 'Write the constrained cost',
               body: 'Maximize the quadratic form on the unit sphere — this is walking the Tema 1 terrain along the circle $\\|\\mathbf{a}\\| = 1$.',
               latex:
-                'L(\\mathbf{a}, \\gamma) = \\mathbf{a}^T\\mathbf{C}^{-1}\\mathbf{a} - \\gamma\\,(\\mathbf{a}^T\\mathbf{a} - 1)',
+                'L(\\mathbf{a}, \\mu) = \\mathbf{a}^T\\mathbf{C}^{-1}\\mathbf{a} - \\mu\\,(\\mathbf{a}^T\\mathbf{a} - 1)',
             },
             {
               title: 'Differentiate and recognize an eigenproblem',
-              body: 'Setting the gradient to zero says the optimal $\\mathbf{a}$ is an eigenvector of $\\mathbf{C}^{-1}$ with eigenvalue $\\gamma$.',
+              body: 'Setting the gradient to zero says the optimal $\\mathbf{a}$ is an eigenvector of $\\mathbf{C}^{-1}$ with eigenvalue $\\mu$.',
               latex:
-                '\\frac{\\partial L}{\\partial \\mathbf{a}} = 2\\mathbf{C}^{-1}\\mathbf{a} - 2\\gamma\\mathbf{a} = \\mathbf{0} \\;\\Longrightarrow\\; \\mathbf{C}^{-1}\\mathbf{a}_{op} = \\gamma\\,\\mathbf{a}_{op}',
+                '\\frac{\\partial L}{\\partial \\mathbf{a}} = 2\\mathbf{C}^{-1}\\mathbf{a} - 2\\mu\\mathbf{a} = \\mathbf{0} \\;\\Longrightarrow\\; \\mathbf{C}^{-1}\\mathbf{a}_{op} = \\mu\\,\\mathbf{a}_{op}',
             },
             {
               title: 'Pick which eigenvector by evaluating the cost',
               body: 'At any candidate the achieved distance is the eigenvalue itself, so take the largest one.',
               latex:
-                'd_M^2 = \\mathbf{a}_{op}^T\\mathbf{C}^{-1}\\mathbf{a}_{op} = \\gamma\\,\\|\\mathbf{a}_{op}\\|^2 = \\gamma \\;\\Longrightarrow\\; \\gamma = \\lambda_{\\max}(\\mathbf{C}^{-1}),\\quad \\mathbf{a}_{op} = \\mathbf{u}_{\\max}(\\mathbf{C}^{-1})',
+                'd_M^2 = \\mathbf{a}_{op}^T\\mathbf{C}^{-1}\\mathbf{a}_{op} = \\mu\\,\\|\\mathbf{a}_{op}\\|^2 = \\mu \\;\\Longrightarrow\\; \\mu = \\lambda_{\\max}(\\mathbf{C}^{-1}),\\quad \\mathbf{a}_{op} = \\mathbf{u}_{\\max}(\\mathbf{C}^{-1})',
             },
           ],
           answer: {
@@ -590,12 +593,12 @@ export const detectionLesson: LessonRecord = {
             },
             {
               title: 'Say it in one sentence',
-              body: 'Separate the codewords along the direction where the noise is quietest; the detector $y = \\mathbf{a}^T\\mathbf{C}^{-1}\\mathbf{x}$ then listens only along that quiet axis. This is Tema 1’s “smallest eigenvalue is the noise floor” — cashed in for exam points.',
+              body: 'Separate the codewords along the direction where the noise is quietest. The detector $y = \\mathbf{a}^T\\mathbf{C}^{-1}\\mathbf{x}$ then listens only along that quiet axis. This is Tema 1’s “smallest eigenvalue is the noise floor” — cashed in for exam points.',
             },
           ],
           answer: {
             sentence:
-              'Point the codeword difference down the quietest eigen-direction of the noise; the payoff is one over the smallest noise eigenvalue.',
+              'Point the codeword difference down the quietest eigen-direction of the noise. The payoff is one over the smallest noise eigenvalue.',
             latex:
               '\\mathbf{a}_{op} = \\mathbf{u}_{\\min}(\\mathbf{C}), \\qquad d_M^2 = \\tfrac{1}{\\lambda_{\\min}(\\mathbf{C})}',
           },
@@ -604,14 +607,14 @@ export const detectionLesson: LessonRecord = {
     },
     {
       id: 'wp-covert',
-      source: 'Final · 19 Juny 2026 · Ex. 3 (33.3 %)',
+      source: 'Final, June 19 2026, Ex. 3 (33.3 %)',
       title: 'Covert communications: hiding under the noise floor',
       why: 'The energy detector of D4 taken seriously: unknown signal, chi-squared tails, then a central-limit shortcut — and a genuinely modern punchline, the square-root law that lets a transmission stay invisible to a warden yet readable by its intended receiver.',
       statement: [
         {
           kind: 'text',
           content:
-            'In covert communications the goal is to transmit without a third party detecting that any transmission is happening — two prisoners talking past a warden. We study the warden’s detector. Under $\\mathcal{H}_0$ there is no transmission and the warden hears real white Gaussian noise of variance $\\sigma_w^2$; under $\\mathcal{H}_1$ the transmitted signal $s(n)$ — unknown to the warden, modeled as white Gaussian of power $P$ — is added. The transmission lasts $N$ samples:',
+            'In covert communications the goal is to transmit without a third party detecting that any transmission is happening — two prisoners talking past a warden. We study the warden’s detector. Under $\\mathcal{H}_0$ there is no transmission and the warden hears real white Gaussian noise of variance $\\sigma_w^2$. Under $\\mathcal{H}_1$ the transmitted signal $s(n)$ — unknown to the warden, modeled as white Gaussian of power $P$ — is added. The transmission lasts $N$ samples:',
         },
         {
           kind: 'math',
@@ -671,7 +674,7 @@ export const detectionLesson: LessonRecord = {
             'Find the Neyman–Pearson test function $y = T(\\mathbf{x})$ and interpret it.',
           steps: [
             {
-              title: 'Take the log-ratio; only the energy survives',
+              title: 'Take the log-ratio. Only the energy survives',
               body: 'The likelihood ratio depends on the data through $\\mathbf{x}^T\\mathbf{x}$ with a positive coefficient (since $\\sigma_w^2 + P > \\sigma_w^2$), so the monotone simplification leaves the energy alone.',
               latex:
                 '\\left(\\frac{1}{2\\sigma_w^2} - \\frac{1}{2(\\sigma_w^2 + P)}\\right)\\mathbf{x}^T\\mathbf{x} \\gtrless \\gamma_1 \\;\\Longrightarrow\\; y = T(\\mathbf{x}) = \\mathbf{x}^T\\mathbf{x} \\gtrless \\gamma_y',
@@ -697,13 +700,13 @@ export const detectionLesson: LessonRecord = {
             },
             {
               title: 'Normalize each tail to unit variance',
-              body: 'Divide the statistic by the per-sample variance of the hypothesis at hand, so both tails use the same normalized function $Q_{\\chi^2_{N,1}}$; solve the false-alarm equation for the threshold.',
+              body: 'Divide the statistic by the per-sample variance of the hypothesis at hand, so both tails use the same normalized function $Q_{\\chi^2_{N,1}}$. Solve the false-alarm equation for the threshold.',
               latex:
                 'P_{FA} = Q_{\\chi^2_{N,1}}\\!\\left(\\frac{\\gamma_y}{\\sigma_w^2}\\right) \\Rightarrow \\gamma_y = \\sigma_w^2\\,Q^{-1}_{\\chi^2_{N,1}}(P_{FA}), \\qquad P_D = Q_{\\chi^2_{N,1}}\\!\\left(\\frac{\\gamma_y}{\\sigma_w^2 + P}\\right)',
             },
             {
               title: 'Read the ROC and its hiding condition',
-              body: 'The variance ratio compresses the threshold; as $SNR \\to 0$ the compression disappears and $P_D \\to P_{FA}$. Exactly $SNR = 0$ means not transmitting at all, so the prisoners can only approach invisibility.',
+              body: 'The variance ratio compresses the threshold. As $SNR \\to 0$ the compression disappears and $P_D \\to P_{FA}$. Exactly $SNR = 0$ means not transmitting at all, so the prisoners can only approach invisibility.',
               latex:
                 'P_D = Q_{\\chi^2_{N,1}}\\!\\left(\\frac{1}{1 + SNR}\\,Q^{-1}_{\\chi^2_{N,1}}(P_{FA})\\right) \\xrightarrow{\\;SNR \\to 0\\;} P_{FA}',
             },
@@ -791,7 +794,7 @@ export const detectionLesson: LessonRecord = {
     },
     {
       id: 'wp-pilot-detect',
-      source: 'Final · 7 Gener 2026 · Ex. 2, parts a–c (of a–k)',
+      source: 'Final, January 7 2026, Ex. 2, parts a–c (of a–k)',
       title: 'Pilot tone on a power line: the matched filter',
       why: 'The known-signal counterpart to the covert-comms problem: when you know the waveform you correlate against it instead of measuring energy, and the deflection grows like $\\sqrt{2N\\,SNR}$. Complex data, so this is also where the $\\mathcal{CN}$ bookkeeping gets rehearsed.',
       statement: [
@@ -823,7 +826,7 @@ export const detectionLesson: LessonRecord = {
           steps: [
             {
               title: 'Factor the tone into amplitude × steering vector',
-              body: 'The complex exponential across the window is a fixed direction in complex $N$-space; the time index only rotates the scalar in front.',
+              body: 'The complex exponential across the window is a fixed direction in complex $N$-space. The time index only rotates the scalar in front.',
               latex:
                 'A(n) = A_0\\,e^{j2\\pi f_0 n}, \\qquad \\mathbf{s} = [1, \\; e^{j2\\pi f_0}, \\; \\dots, \\; e^{j2\\pi f_0 (N-1)}]^T',
             },
@@ -846,7 +849,7 @@ export const detectionLesson: LessonRecord = {
           steps: [
             {
               title: 'Expand the log-ratio and keep the cross term',
-              body: 'The $\\|\\mathbf{x}\\|^2$ terms cancel; the real part of the inner product with the known signal survives, and the signal-energy term joins the threshold.',
+              body: 'The $\\|\\mathbf{x}\\|^2$ terms cancel. The real part of the inner product with the known signal survives, and the signal-energy term joins the threshold.',
               latex:
                 '\\ln\\frac{f(\\mathbf{x}\\mid\\mathcal{H}_1)}{f(\\mathbf{x}\\mid\\mathcal{H}_0)} = \\frac{2\\operatorname{Re}\\!\\left[A(n)^*\\,\\mathbf{s}^H\\mathbf{x}(n)\\right] - |A_0|^2 N}{\\sigma^2} \\gtrless \\ln\\gamma',
             },
@@ -867,32 +870,32 @@ export const detectionLesson: LessonRecord = {
         {
           label: 'c',
           prompt:
-            'Obtain $P_d$ as a function of $P_{fa}$, $N$ and $SNR = |A_0|^2/\\sigma^2$.',
+            'Obtain $P_D$ as a function of $P_{FA}$, $N$ and $SNR = |A_0|^2/\\sigma^2$.',
           steps: [
             {
               title: 'Characterize the statistic under each hypothesis',
-              body: 'The statistic is real and Gaussian. Under $\\mathcal{H}_1$ its mean is the tone power $|A_0|^2$, since $\\mathbf{s}^H\\mathbf{s} = N$; taking the real part halves the complex variance.',
+              body: 'The statistic is real and Gaussian. Under $\\mathcal{H}_1$ its mean is the tone power $|A_0|^2$, since $\\mathbf{s}^H\\mathbf{s} = N$. Taking the real part halves the complex variance.',
               latex:
                 'y\\mid\\mathcal{H}_0 \\sim N\\!\\left(0, \\tfrac{|A_0|^2\\sigma^2}{2N}\\right), \\qquad y\\mid\\mathcal{H}_1 \\sim N\\!\\left(|A_0|^2, \\tfrac{|A_0|^2\\sigma^2}{2N}\\right)',
             },
             {
               title: 'Spend the budget, then standardize under H₁',
-              body: 'Solve the false-alarm equation for the threshold and shift by the $\\mathcal{H}_1$ mean; the deflection is the mean over the standard deviation.',
+              body: 'Solve the false-alarm equation for the threshold and shift by the $\\mathcal{H}_1$ mean. The deflection is the mean over the standard deviation.',
               latex:
-                'P_d = Q\\!\\left(Q^{-1}(P_{fa}) - \\frac{|A_0|^2}{\\sqrt{|A_0|^2\\sigma^2/2N}}\\right) = Q\\!\\left(Q^{-1}(P_{fa}) - \\sqrt{2N \\cdot SNR}\\right)',
+                'P_D = Q\\!\\left(Q^{-1}(P_{FA}) - \\frac{|A_0|^2}{\\sqrt{|A_0|^2\\sigma^2/2N}}\\right) = Q\\!\\left(Q^{-1}(P_{FA}) - \\sqrt{2N \\cdot SNR}\\right)',
             },
           ],
           answer: {
             sentence:
               'Known waveform buys a deflection of $\\sqrt{2N\\,SNR}$ — compare the warden of the covert-comms problem, stuck at $\\sqrt{N/2}\\,SNR$: knowing what you listen for turns the SNR from a factor into a square root.',
-            latex: 'P_d = Q\\!\\left(Q^{-1}(P_{fa}) - \\sqrt{2N\\,SNR}\\right)',
+            latex: 'P_D = Q\\!\\left(Q^{-1}(P_{FA}) - \\sqrt{2N\\,SNR}\\right)',
           },
         },
       ],
     },
     {
       id: 'wp-repeated-bit',
-      source: 'Final · Juny 2025 · Ex. 1',
+      source: 'Final, June 2025, Ex. 1',
       title: 'A repeated bit on an unreliable disk',
       why: 'The only problem in the bank with discrete data — and the point is that nothing changes: likelihoods, log-ratio, MAP threshold, all the D5 machinery runs on Bernoulli products exactly as it did on Gaussians, and the optimal detector turns out to be something you already believed in: majority vote.',
       statement: [
@@ -920,7 +923,7 @@ export const detectionLesson: LessonRecord = {
           steps: [
             {
               title: 'Multiply independent Bernoulli factors',
-              body: 'Under $\\mathcal{H}_0$ every read one is an error (probability $\\varepsilon$) and every zero is correct; under $\\mathcal{H}_1$ the roles swap. The whole vector matters only through the count of ones, $\\mathbf{1}^T\\mathbf{y}$.',
+              body: 'Under $\\mathcal{H}_0$ every read one is an error (probability $\\varepsilon$) and every zero is correct. Under $\\mathcal{H}_1$ the roles swap. The whole vector matters only through the count of ones, $\\mathbf{1}^T\\mathbf{y}$.',
               latex:
                 '\\Pr(\\mathbf{y}\\mid\\mathcal{H}_0) = \\varepsilon^{\\mathbf{1}^T\\mathbf{y}}\\,(1-\\varepsilon)^{N - \\mathbf{1}^T\\mathbf{y}}, \\qquad \\Pr(\\mathbf{y}\\mid\\mathcal{H}_1) = (1-\\varepsilon)^{\\mathbf{1}^T\\mathbf{y}}\\,\\varepsilon^{N - \\mathbf{1}^T\\mathbf{y}}',
             },

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 import { MathText } from '@/components/MathText.tsx'
@@ -10,12 +11,14 @@ type LessonAssessmentSectionProps = {
   readonly lesson: LessonRecord
   readonly labels: CourseRecord['labels']
   readonly next?: LessonRecord
+  readonly renderFigure?: (key: string) => ReactNode
 }
 
 function LessonAssessmentSection({
   lesson,
   labels,
   next,
+  renderFigure,
 }: LessonAssessmentSectionProps) {
   return (
     <section
@@ -35,7 +38,11 @@ function LessonAssessmentSection({
       </div>
       <div className="mt-8 max-w-3xl">
         {lesson.workedProblems.map((problem) => (
-          <WorkedProblem key={problem.id} problem={problem} />
+          <WorkedProblem
+            key={problem.id}
+            problem={problem}
+            {...(renderFigure !== undefined ? { renderFigure } : {})}
+          />
         ))}
       </div>
       <div className="mt-10 flex flex-wrap gap-3">

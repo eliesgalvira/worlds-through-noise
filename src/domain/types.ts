@@ -36,6 +36,8 @@ export type LessonModuleRecord = {
 export type ProblemBlock =
   | { readonly kind: 'text'; readonly content: string }
   | { readonly kind: 'math'; readonly content: string }
+  /** A figure from the original statement, redrawn; looked up by key. */
+  | { readonly kind: 'figure'; readonly key: string }
 
 export type SolutionStepRecord = {
   /** The move being made, as a short imperative. */

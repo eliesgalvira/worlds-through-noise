@@ -159,3 +159,23 @@ Lanzados a las 23:26 y 23:28, informes a las 23:39 y 23:41. Auditorías limpias.
 | DET-15 | adivinar | El $P_D$ del carcelero pasa a rojo, el color de la falsa alarma                                                                                               | 1b                                         | abierto |
 | DET-16 | menor    | Mezcla de idiomas en las fuentes de examen («TEMA 02», «7 ABRIL 2025») y notación que cambia ($P_D$ y $P_d$)                                                  | 1a, 1b                                     | abierto |
 | DET-17 | menor    | Rótulos SVG con guion bajo («P_FA →»)                                                                                                                         | 1a                                         | abierto |
+
+## Detección: ronda 1
+
+Commits `b110bfc8` y `434339b4`. Los dos paquetes se arreglan en una sola ronda, porque casi todo vive en piezas compartidas. Un subagente Opus verificó contra el temario los tres hallazgos de contenido del paquete 1a (DET-01, DET-02 y DET-03). El revisor tenía razón en los tres, aunque en DET-03 solo a medias: el 2 es correcto en el modelo complejo.
+
+Qué cambió y qué defecto ataca:
+
+- DET-01: la predicción de D3 pregunta ahora por un **p** entre los dos ejes, y la respuesta explica por qué **p** solo es óptimo si es autovector.
+- DET-03: la nota separa el caso real ($NA^2/\sigma^2$ y $d_M^2$) del complejo ($SNR_y$ con su 2), y la figura de D3 usa los nombres del temario.
+- DET-08 y DET-09: D4 pasa a muestras reales, como el examen de junio de 2026. La predicción con $N = 2$ es ahora exacta ($\chi^2_2$ es exponencial).
+- DET-02: el enunciado de g) da los tres puntos leídos del ROC del examen.
+- DET-13 y DET-14: η para el umbral del cociente, $q_0$ y $q_1$ en la binomial, MRB desplegada, ENR con $m_1 - m_0$.
+- DET-06, DET-10, DET-11 y DET-17: piezas nuevas `AxisTicks` y `Sym` en la librería, áreas con su símbolo, rótulos de decisión junto al umbral, D2 apilada en el móvil, ROC en tinta con el punto en color cursor, D4 en eje fijo de potencia media.
+- DET-05: `MathBlock` reduce la ecuación hasta el 60 % para que quepa, y desvanece el borde si aún desborda. En el cuaderno a 390 px, de 47 ecuaciones con scroll se pasa a 29, y esas 29 llevan la señal.
+- DET-12: el índice pierde las dos subentradas genéricas de cada apartado, y la barra del móvil dice el apartado.
+- DET-15: el $P_D$ del carcelero ya no pasa a rojo.
+
+Regresión vista antes de lanzar: a 390 px, en D1, los rótulos de decisión, que ahora siguen al umbral, chocaban con «H1» y «H0». Se arregló en `434339b4` antes de lanzar.
+
+Lo que el banco enseñó sobre sí mismo: una captura de página entera agranda la ventana, y con ella cada unidad `svh`, así que la página se reorganizaba a mitad de captura (cuelgues de 30 s y teselas fuera de la página). `Plot` lee ahora su tope de alto de `--plot-max-h`, que el banco fija en píxeles. Además, un `ResizeObserver` por ecuación hacía que la captura del estado resuelto pasara de 37 s a más de 5 minutos; se cambió por una medida única al montar.

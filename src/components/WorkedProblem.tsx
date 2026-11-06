@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, ChevronDown, RotateCcw } from 'lucide-react'
 import { MathBlock, MathText } from '@/components/MathText.tsx'
@@ -121,9 +122,15 @@ function ProblemPart({ part }: { readonly part: ProblemPartRecord }) {
 type WorkedProblemProps = {
   readonly problem: WorkedProblemRecord
   readonly className?: string
+  /** Draws a figure the statement refers to, by its key. */
+  readonly renderFigure?: (key: string) => ReactNode
 }
 
-function WorkedProblem({ problem, className }: WorkedProblemProps) {
+function WorkedProblem({
+  problem,
+  className,
+  renderFigure,
+}: WorkedProblemProps) {
   return (
     <article
       id={problem.id}
@@ -150,7 +157,11 @@ function WorkedProblem({ problem, className }: WorkedProblemProps) {
         </p>
         <div className="mt-2 space-y-3">
           {problem.statement.map((block, index) =>
-            block.kind === 'math' ? (
+            block.kind === 'figure' ? (
+              <div key={`${String(index)}-${block.key}`}>
+                {renderFigure?.(block.key)}
+              </div>
+            ) : block.kind === 'math' ? (
               <MathBlock
                 key={`${String(index)}-${block.content.slice(0, 24)}`}
                 latex={block.content}

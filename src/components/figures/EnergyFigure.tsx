@@ -64,8 +64,8 @@ function EnergyFigure() {
   const centersClose = xOf(1 + snr) - xOf(1) < 90
   return (
     <FigureShell
-      title="Two loudness gauges, separating at $\sqrt{N}$"
-      instruction="Nobody knows the waveform, so the detector can only measure energy. The bumps are exact chi-squared densities of the measured power under each hypothesis. Slide $N$: the centers stay $P$ apart while the widths shrink like $1/\sqrt{N}$ — separation is slow. Compare the jailer with the receiver, who knows the waveform and gains the full $N$."
+      title="Energy detector: the waveform is unknown"
+      instruction="The detector does not know the waveform, so it measures the average power $y/N$. The curves are its exact $\chi^2$ densities under each hypothesis. Raise $N$: the centers stay at $\sigma^2$ and $\sigma^2 + P$ while the widths shrink like $1/\sqrt{N}$. Compare the jailer’s $P_D$ with that of the receiver, who knows the waveform."
       controls={
         <>
           <SliderControl
@@ -97,7 +97,7 @@ function EnergyFigure() {
             min={1}
             max={30}
             step={0.5}
-            meaning="The jailer's allowed rate of wrong accusations."
+            meaning="The jailer’s false-alarm probability."
             onValueChange={setAlphaPct}
             format={(v) => `${v.toFixed(1)}%`}
           />
@@ -196,7 +196,7 @@ function EnergyFigure() {
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        <MathText text="Densities and tails are exact $\chi^2_N$ computations. At $N = 2$ they are exponentials, and $P_D = P_{FA}^{\sigma_0^2/\sigma_1^2}$ exactly." />
+        <MathText text="Densities and tails are exact $\chi^2_N$ computations. At $N = 2$ they are exponentials, and $P_D = P_{FA}^{\sigma_0^2/\sigma_1^2}$ exactly, with $\sigma_0^2 = \sigma_w^2$ and $\sigma_1^2 = \sigma_w^2 + P$." />
       </p>
     </FigureShell>
   )

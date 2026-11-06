@@ -19,8 +19,10 @@ import { gaussianVector, makeRng } from '@/domain/math/kernel.ts'
 
 const W = 470
 const H = 260
-const X_MIN = 20
-const X_MAX = 80
+const X_MIN = 12
+const X_MAX = 88
+const GAMMA_MIN = 25
+const GAMMA_MAX = 75
 // Ferritin screen: the SICK world has the LOWER mean.
 const M0 = 58
 const M1 = 42
@@ -98,8 +100,8 @@ function TwoWorldsFigure() {
 
   return (
     <FigureShell
-      title="Two machines, one number — and a flipped threshold"
-      instruction="$\mathcal{H}_1$ (anemia) is the LEFT pile: sick patients have lower ferritin, so you call $\mathcal{H}_1$ below the threshold. Draw a patient, judge them, then raise $N$ and watch both piles tighten by $\sqrt{N}$ until the overlap drains."
+      title="Two Gaussian hypotheses, one threshold on the sample mean"
+      instruction="Under $\mathcal{H}_1$ (anemia) the sample mean of ferritin is centered at $m_1 = 42$, below the healthy $m_0 = 58$, so the detector decides $\mathcal{H}_1$ below $\gamma$. Draw a patient and judge it, then raise $N$: both densities narrow as $\sigma/\sqrt{N}$ and both error areas shrink."
       controls={
         <>
           <SliderControl
@@ -120,8 +122,8 @@ function TwoWorldsFigure() {
             label="Threshold"
             variable="γ"
             value={threshold}
-            min={X_MIN + 5}
-            max={X_MAX - 5}
+            min={GAMMA_MIN}
+            max={GAMMA_MAX}
             step={0.5}
             meaning="Below $\gamma$ you declare anemia."
             onValueChange={setThreshold}
@@ -140,7 +142,7 @@ function TwoWorldsFigure() {
                 setDraw((d) => (d === null ? null : { ...d, revealed: true }))
               }}
             >
-              Reveal the world
+              Show the true diagnosis
             </Button>
           </div>
         </>
@@ -199,7 +201,7 @@ function TwoWorldsFigure() {
         ariaLabel="Densities of the sample mean under both hypotheses with a movable threshold"
         onDragPoint={(x) => {
           const v = X_MIN + ((x - 10) / (W - 20)) * (X_MAX - X_MIN)
-          setThreshold(Math.min(X_MAX - 5, Math.max(X_MIN + 5, v)))
+          setThreshold(Math.min(GAMMA_MAX, Math.max(GAMMA_MIN, v)))
         }}
       >
         <line
@@ -263,18 +265,18 @@ function TwoWorldsFigure() {
           textAnchor="end"
           className="fill-false-alarm font-mono plot-text-sm"
         >
-          <Sym base="P" sub="FA" />
+          <Sym base="P" sub="FA" /> {formatPercentValue(pFalseAlarm)}
         </text>
         <text
           x={xOf(threshold) + 6}
           y={H - 42}
           className="fill-h1-ink font-mono plot-text-sm"
         >
-          <Sym base="P" sub="M" />
+          <Sym base="P" sub="M" /> {formatPercentValue(pMiss)}
         </text>
         <AxisTicks
           y={H - 34}
-          ticks={[30, 42, 50, 58, 70].map((v) => ({
+          ticks={[20, 30, 42, 50, 58, 70, 80].map((v) => ({
             x: xOf(v),
             label: String(v),
           }))}

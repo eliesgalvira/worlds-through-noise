@@ -31,7 +31,7 @@ function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
         <Link
           to="/"
           className="flex items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -86,7 +86,7 @@ function SiteHeader() {
           aria-label="Primary"
           className="border-t border-border bg-background/95 backdrop-blur md:hidden"
         >
-          <ul className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-3 sm:px-6">
+          <ul className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-3 sm:px-6">
             {siteRoutes.map((route) => (
               <li key={route.path}>
                 <NavLink

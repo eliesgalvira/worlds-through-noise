@@ -48,7 +48,7 @@ export const adaptiveLesson: LessonRecord = {
       transfer:
         'Final Jun 2025, Ex. 3: speech (highly correlated) makes the canceller crawl. Show that regularizing $\\mathbf{R}_x + \\alpha\\mathbf{I}$ shifts every eigenvalue up and shrinks the spread — the bowl becomes rounder.',
       examRefs: [
-        'Teoría T5 Ejemplos 2–3: spread 1.71 vs 13, trajectories and divergence at $\\mu = 0.2934$',
+        'Slides T5 Examples 2–3: spread 1.71 vs 13, trajectories and divergence at $\\mu = 0.2934$',
         'Final Jun 2025, Ex. 3: regularization to fix eigenvalue spread',
       ],
     },
@@ -92,14 +92,14 @@ export const adaptiveLesson: LessonRecord = {
         'Final Jun 2026, Ex. 2(e–g): write $c(n) = y(n)z(n)$ for the scalar canceller, use $\\operatorname{Cov}(h) = \\frac{\\mu}{2}\\xi_{\\min}$ to get $\\sigma_h^2$, and express the output SNR as a function of $\\mu$. The whole exercise is this module with $\\alpha = 0$.',
       examRefs: [
         'Final Jun 2026, Ex. 2(e–g): LMS on the scalar canceller, SNR vs $\\mu$',
-        'Teoría T5 §3: convergence in mean, coefficient covariance, misadjustment',
+        'Slides T5 §3: convergence in mean, coefficient covariance, misadjustment',
       ],
     },
   ],
   workedProblems: [
     {
       id: 'wp-echo-dga',
-      source: 'Final · Juny 2025 · Ex. 3',
+      source: 'Final, June 2025, Ex. 3',
       title: 'Echo cancellation: regularize the bowl, then descend it',
       why: 'A1’s referenced problem, worked in full: identifying an acoustic echo path gives $\\mathbf{h}_{opt} = \\mathbf{c}$ exactly, regularization $\\mathbf{R}_x + \\alpha\\mathbf{I}$ biases the bottom of the bowl by an amount you price per eigen-direction, and steepest descent is proven to converge to that biased bottom with the speed limit $2/(\\lambda_{\\max} + \\alpha)$ — the payoff being a rounder bowl that converges faster.',
       statement: [
@@ -210,7 +210,7 @@ export const adaptiveLesson: LessonRecord = {
     },
     {
       id: 'wp-two-mics-lms',
-      source: 'Final · 19 Juny 2026 · Ex. 2, parts e–g (of a–g)',
+      source: 'Final, June 19 2026, Ex. 2, parts e–g (of a–g)',
       title: 'LMS keeps the canceller honest — and charges for it',
       why: 'The fog tax of A2 computed exactly on the simplest possible filter: one coefficient. You get the LMS update from the general rule, the coefficient jitter $\\sigma_h^2 = \\mu/2$ from the covariance formula, and an output SNR that reads $2/\\mu$ — the step size is literally the price of the noise floor.',
       statement: [
@@ -306,7 +306,7 @@ export const adaptiveLesson: LessonRecord = {
     },
     {
       id: 'wp-ale-lms',
-      source: 'Final · 7 Gener 2026 · Ex. 2, parts h–k (of a–k)',
+      source: 'Final, January 7 2026, Ex. 2, parts h–k (of a–k)',
       title: 'The adaptive line enhancer: step size, patience, misadjustment',
       why: 'Every A1/A2 quantity asked in one chain, on the tone-plus-noise terrain from Tema 1: the stability bound from $\\lambda_{\\max}$, the convergence time from $\\lambda_{\\min}$, the misadjustment from the trace trick, and finally a single SNDR formula where $Q$ and $\\alpha$ fight each other.',
       statement: [

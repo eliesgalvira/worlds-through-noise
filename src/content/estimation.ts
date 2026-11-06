@@ -17,9 +17,9 @@ export const estimationLesson: LessonRecord = {
       question: 'What do bias, variance and MSE actually describe?',
       trap: 'An estimator is a formula $\\hat{\\theta}(\\mathbf{x})$ that turns observed data $\\mathbf{x}$ into a guess for an unknown parameter $\\theta$ — and its output looks like an answer. It is not. It is one draw from a random variable, because the data it ate were random, and a single lucky draw can make a terrible estimator look brilliant. Bias and variance stay abstract penalties until you see the cloud of outputs they actually measure.',
       object:
-        'So judge machines, not numbers. Take two competing estimators of the same hidden mean: the sample mean, and the “midrange,” $(\\max + \\min)/2$, which averages only the largest and smallest observations. Feed both the same experiment hundreds of times; each machine piles up a histogram of its outputs. Bias is where a pile is centered relative to the truth. Variance is the pile’s width. The mean squared error (MSE) charges for both at once.',
+        'So judge machines, not numbers. Take two competing estimators of the same hidden mean: the sample mean, and the “midrange,” $(\\max + \\min)/2$, which averages only the largest and smallest observations. Feed both the same experiment hundreds of times. Each machine piles up a histogram of its outputs. Bias is where a pile is centered relative to the truth. Variance is the pile’s width. The mean squared error (MSE) charges for both at once.',
       action:
-        'Press run in the figure and watch the piles grow under Gaussian noise: the sample mean wins and the midrange is a wide mess. Then switch the noise to uniform and run again. The ranking flips — the midrange pile becomes eerily narrow. Nothing about the two formulas changed; only the data model $f(\\mathbf{x}; \\theta)$, the density that describes how the data are generated, did.',
+        'Press run in the figure and watch the piles grow under Gaussian noise: the sample mean wins and the midrange is a wide mess. Then switch the noise to uniform and run again. The ranking flips — the midrange pile becomes eerily narrow. Nothing about the two formulas changed. Only the data model $f(\\mathbf{x}; \\theta)$, the density that describes how the data are generated, did.',
       payoff:
         'That flip is the lesson of the whole tema: “best estimator” is not a property of a formula, it is a property of the formula–distribution pair. It explains why the theory insists on writing down $f(\\mathbf{x}; \\theta)$ before doing anything else, and why a word like “efficient” is always relative to a model. Consistency also becomes something you can watch: raise $N$ and a good pile tightens onto the truth.',
       equations: [
@@ -36,13 +36,13 @@ export const estimationLesson: LessonRecord = {
         question:
           'An estimator lands exactly on $\\theta$ in one run. What did you learn about its bias?',
         answer:
-          'Almost nothing. Bias is the center of the pile over many runs; one draw cannot reveal it.',
+          'Almost nothing. Bias is the center of the pile over many runs. One draw cannot reveal it.',
       },
       transfer:
         'Classic collection exercise: for $\\hat{m}_2 = \\frac{1}{N+1}\\sum x_i$, find bias and variance and check consistency. Picture the pile: slightly off-center, slightly narrower — then confirm with algebra.',
       examRefs: [
-        'Teoría T3 §2: sample mean vs midrange under uniform and Gaussian noise',
-        'Parcial Abr 2026, Ex. 1(b–c): unbiasedness conditions for proposed estimators',
+        'Slides T3 §2: sample mean vs midrange under uniform and Gaussian noise',
+        'Midterm Apr 2026, Ex. 1(b–c): unbiasedness conditions for proposed estimators',
       ],
     },
     {
@@ -56,7 +56,7 @@ export const estimationLesson: LessonRecord = {
       action:
         'In the figure, draw fresh samples and watch the landscape rebuild — the peak wobbles from draw to draw, and the size of the wobble matches the flatness. Raise $N$: each new sample multiplies another factor into the likelihood, the landscape sharpens, and the wobble’s variance shrinks like $1/N$ (its width like $1/\\sqrt{N}$). Raise the noise $\\sigma$ and it flattens again. You are watching the bound $\\sigma^2_{CR}(\\theta) = \\sigma^2/N$ operate live, not as a formula.',
       payoff:
-        'With the landscape in mind, the existence condition stops being mystical. For the Gaussian-mean problem the score is $\\frac{N}{\\sigma^2}(\\bar{x} - \\theta)$ — a straight line through the peak whose slope never depends on the data. When the score has that rigid straight shape, the peak position $\\bar{x}$ carries all the information, and the estimator that reads it achieves the bound. When the score bends — as it does for phase, frequency, or power $P = A^2/2$ — no unbiased estimator reaches the floor; ML still finds the peak, and presses against the floor asymptotically.',
+        'With the landscape in mind, the existence condition stops being mystical. For the Gaussian-mean problem the score is $\\frac{N}{\\sigma^2}(\\bar{x} - \\theta)$ — a straight line through the peak whose slope never depends on the data. When the score has that rigid straight shape, the peak position $\\bar{x}$ carries all the information, and the estimator that reads it achieves the bound. When the score bends — as it does for phase, frequency, or power $P = A^2/2$ — no unbiased estimator reaches the floor. ML still finds the peak, and presses against the floor asymptotically.',
       equations: [
         {
           sentence:
@@ -88,11 +88,11 @@ export const estimationLesson: LessonRecord = {
           'The landscape flattens — each sample argues more weakly — and the CRB quadruples: information scales as $1/\\sigma^2$.',
       },
       transfer:
-        'Parcial Abr 2026, Ex. 1(d–e): compute the CRB for the amplifier gain (mean AND variance both carry $A$) and explain why the linear estimator, which ignores the variance channel, cannot be efficient.',
+        'Midterm Apr 2026, Ex. 1(d–e): compute the CRB for the amplifier gain (mean AND variance both carry $A$) and explain why the linear estimator, which ignores the variance channel, cannot be efficient.',
       examRefs: [
-        'Parcial Abr 2026, Ex. 1: CRB with information in both mean and variance',
-        'Parcial Oct 2025, Ex. 2: exponential inter-arrival times — CRB, efficient estimator',
-        'Final Ene 2026, Ex. 1: Poisson accidents — score factorization gives the sample mean',
+        'Midterm Apr 2026, Ex. 1: CRB with information in both mean and variance',
+        'Midterm Oct 2025, Ex. 2: exponential inter-arrival times — CRB, efficient estimator',
+        'Final Jan 2026, Ex. 1: Poisson accidents — score factorization gives the sample mean',
       ],
     },
     {
@@ -114,7 +114,7 @@ export const estimationLesson: LessonRecord = {
           latex:
             '\\hat\\theta = \\frac{\\sum_i x_i/\\sigma_i^2}{\\sum_i 1/\\sigma_i^2}, \\qquad \\mathrm{Var}(\\hat\\theta) = \\frac{1}{\\sum_i 1/\\sigma_i^2}',
           caption:
-            'BLUE form: $\\mathbf{h}_{opt} = \\mathbf{C}^{-1}\\mathbf{1}/(\\mathbf{1}^T\\mathbf{C}^{-1}\\mathbf{1})$; adding any sensor, however bad, never hurts.',
+            'BLUE form: $\\mathbf{h}_{opt} = \\mathbf{C}^{-1}\\mathbf{1}/(\\mathbf{1}^T\\mathbf{C}^{-1}\\mathbf{1})$. Adding any sensor, however bad, never hurts.',
         },
         {
           sentence:
@@ -136,7 +136,7 @@ export const estimationLesson: LessonRecord = {
       examRefs: [
         'Final Jun 2026, Ex. 1: defective pixel fusion + MAP',
         'Final Jun 2025, Ex. 2: greenhouse sensors of unequal quality',
-        'Parcial Abr 2026, Ex. 2: two-wire transmission — common noise makes $\\mathbf{C}$ non-diagonal, same machinery',
+        'Midterm Apr 2026, Ex. 2: two-wire transmission — common noise makes $\\mathbf{C}$ non-diagonal, same machinery',
       ],
     },
     {
@@ -154,7 +154,7 @@ export const estimationLesson: LessonRecord = {
       equations: [
         {
           sentence:
-            'Maximize over amplitude first; the survivor is a matched-filter score swept across frequency.',
+            'Maximize over amplitude first. The survivor is a matched-filter score swept across frequency.',
           latex:
             '\\hat f_{ML} = \\arg\\max_f \\left| \\sum_{n=0}^{N-1} x(n)\\, e^{-j2\\pi f n} \\right|^2, \\qquad \\hat A_{ML} = \\tfrac{1}{N} X(\\hat f_{ML})',
         },
@@ -174,18 +174,18 @@ export const estimationLesson: LessonRecord = {
           'Standard deviation shrinks by about $\\sqrt{8} \\approx 2.8$ — the $1/N^3$ law — versus only $\\sqrt{2}$ for an amplitude estimate.',
       },
       transfer:
-        'Teoría exercise: two ML frequency estimates from half-blocks, averaged, versus one full-block estimate. Show the variance ratio $\\approx 4$ and explain it with the $N^3$ law rather than algebra.',
+        'Slides exercise: two ML frequency estimates from half-blocks, averaged, versus one full-block estimate. Show the variance ratio $\\approx 4$ and explain it with the $N^3$ law rather than algebra.',
       examRefs: [
-        'Teoría T3 ML2/ML3: frequency estimation, known and unknown amplitude',
-        'Teoría T3: block-splitting frequency estimation exercise (variance ratio 4)',
-        'Final Ene 2025: joint amplitude/frequency estimation with compressed likelihood',
+        'Slides T3 ML2/ML3: frequency estimation, known and unknown amplitude',
+        'Slides T3: block-splitting frequency estimation exercise (variance ratio 4)',
+        'Final Jan 2025: joint amplitude/frequency estimation with compressed likelihood',
       ],
     },
   ],
   workedProblems: [
     {
       id: 'wp-amp-gain',
-      source: 'Parcial · 13 Abril 2026 · Ex. 1 (5 punts)',
+      source: 'Midterm, April 13 2026, Ex. 1 (5 points)',
       title: 'Amplifier gain: the mean and the variance both know A',
       why: 'The rare model where the parameter scales both moments at once. It exercises E1 (bias, variance), E2 (CRB and why an unbiased estimator can still waste information), and hands you an ML estimator built from power instead of mean.',
       statement: [
@@ -242,7 +242,7 @@ export const estimationLesson: LessonRecord = {
             },
             {
               title: 'Propagate the noise',
-              body: 'Substitute $\\mathbf{x} = \\alpha A \\mathbf{1} + A\\mathbf{w}$; only the noise term survives inside the variance.',
+              body: 'Substitute $\\mathbf{x} = \\alpha A \\mathbf{1} + A\\mathbf{w}$. Only the noise term survives inside the variance.',
               latex:
                 '\\operatorname{Var}(\\hat{A}) = E\\left\\{\\left(\\tfrac{A}{N\\alpha}\\mathbf{1}^T\\mathbf{w}\\right)^2\\right\\} = \\left(\\tfrac{A}{N\\alpha}\\right)^2 N\\sigma^2 = \\frac{A^2\\sigma^2}{N\\alpha^2}',
             },
@@ -334,7 +334,7 @@ export const estimationLesson: LessonRecord = {
           steps: [
             {
               title: 'Maximize the simplified log-likelihood',
-              body: 'With $\\alpha = 0$ the mean term disappears; set the derivative of the two remaining terms to zero.',
+              body: 'With $\\alpha = 0$ the mean term disappears. Set the derivative of the two remaining terms to zero.',
               latex:
                 '\\frac{\\partial \\ln f}{\\partial A} = -\\frac{N}{A} + \\frac{\\|\\mathbf{x}\\|^2}{A^3\\sigma^2} = 0 \\;\\Longrightarrow\\; \\hat{A}_{ML} = \\sqrt{\\frac{\\|\\mathbf{x}\\|^2}{N\\sigma^2}} = \\sqrt{\\hat{G}}',
             },
@@ -354,7 +354,7 @@ export const estimationLesson: LessonRecord = {
     },
     {
       id: 'wp-pixel',
-      source: 'Final · 19 Juny 2026 · Ex. 1 (33.3 %)',
+      source: 'Final, June 19 2026, Ex. 1 (33.3 %)',
       title: 'The defective pixel: classical fusion, then a prior',
       why: 'E3 as an exam problem: nine unequal springs pulling on one estimate, with the two sanity limits ($\\sigma_0^2 = \\sigma^2$, $\\sigma_0^2 \\gg \\sigma^2$) asked explicitly — then the same spring picture again with a prior attached (MAP), so you see classical and Bayesian fusion are one mechanism.',
       statement: [
@@ -382,7 +382,7 @@ export const estimationLesson: LessonRecord = {
           steps: [
             {
               title: 'Differentiate the single-sample log-likelihood',
-              body: 'One Gaussian observation centered on $\\theta$; the score is linear in $(x_0 - \\theta)$.',
+              body: 'One Gaussian observation centered on $\\theta$. The score is linear in $(x_0 - \\theta)$.',
               latex:
                 '\\frac{\\partial \\ln L(\\theta)}{\\partial \\theta} = \\frac{1}{\\sigma_0^2}(x_0 - \\theta) \\;\\Longrightarrow\\; \\hat{\\theta}_{ML} = x_0',
             },
@@ -439,7 +439,7 @@ export const estimationLesson: LessonRecord = {
             },
             {
               title: 'Broken sensor: the weight goes to zero by itself',
-              body: 'As $\\sigma_0^2 \\to \\infty$ the term $1/\\sigma_0^2$ vanishes and the estimator silently discards $x_0$ — nobody has to decide to ignore the bad pixel; the weighting does it.',
+              body: 'As $\\sigma_0^2 \\to \\infty$ the term $1/\\sigma_0^2$ vanishes and the estimator silently discards $x_0$ — nobody has to decide to ignore the bad pixel. The weighting does it.',
               latex:
                 '\\sigma_0^2 \\gg \\sigma^2: \\quad \\hat{\\theta}_{ML} \\approx \\frac{1}{8}\\sum_{i=1}^{8} x_i, \\qquad \\operatorname{Var} \\approx \\frac{\\sigma^2}{8}',
             },
@@ -505,7 +505,7 @@ export const estimationLesson: LessonRecord = {
     },
     {
       id: 'wp-exponential',
-      source: 'Parcial · 30 Oct 2025 · Ex. 2 (40 %)',
+      source: 'Midterm, Oct 30 2025, Ex. 2 (40 %)',
       title: 'Hospital arrivals: buy accuracy with bias',
       why: 'The cleanest recent example of the E1 lesson that unbiased is not sacred: after finding the efficient estimator, the exam asks you to deliberately shrink it — and the MSE goes down.',
       statement: [
@@ -533,13 +533,13 @@ export const estimationLesson: LessonRecord = {
           steps: [
             {
               title: 'Write the joint log-likelihood and its score',
-              body: 'Independence multiplies the densities; the score then factors into (information) × (sample mean minus parameter), which is the efficient-estimator signature.',
+              body: 'Independence multiplies the densities. The score then factors into (information) × (sample mean minus parameter), which is the efficient-estimator signature.',
               latex:
                 '\\frac{\\partial \\ln f(\\mathbf{x}; \\mu)}{\\partial \\mu} = -\\frac{N}{\\mu} + \\frac{\\mathbf{1}^T\\mathbf{x}}{\\mu^2} = \\frac{N}{\\mu^2}\\left(\\frac{\\mathbf{1}^T\\mathbf{x}}{N} - \\mu\\right)',
             },
             {
               title: 'Read both answers off the factorization',
-              body: 'The factor in front is the Fisher information; its inverse is the bound, and the pivot of the bracket is the efficient estimator.',
+              body: 'The factor in front is the Fisher information. Its inverse is the bound, and the pivot of the bracket is the efficient estimator.',
               latex:
                 'CRB_\\mu = \\frac{\\mu^2}{N}, \\qquad \\hat{\\mu}_{ef} = \\frac{\\mathbf{1}^T\\mathbf{x}}{N}',
             },
@@ -607,7 +607,7 @@ export const estimationLesson: LessonRecord = {
           ],
           answer: {
             sentence:
-              'The biased estimator beats the efficient one for every $N$ — as if a free extra observation appeared. The CRB only referees the unbiased league; step outside it and you can do better.',
+              'The biased estimator beats the efficient one for every $N$ — as if a free extra observation appeared. The CRB only referees the unbiased league. Step outside it and you can do better.',
             latex: '\\frac{\\mu^2}{N+1} < \\frac{\\mu^2}{N}',
           },
         },
@@ -615,7 +615,7 @@ export const estimationLesson: LessonRecord = {
     },
     {
       id: 'wp-poisson',
-      source: 'Final · 7 Gener 2026 · Ex. 1 (40 %)',
+      source: 'Final, January 7 2026, Ex. 1 (40 %)',
       title: 'Poisson accidents: ML, a transformed cost, and a prior',
       why: 'One problem covering the three ways an exam can dress up estimation: straight ML with efficiency and consistency, estimating a nonlinear transformation $c(\\lambda) = \\lambda^2 + \\lambda$ of the parameter, and a MAP estimator whose prior fades exactly as data accumulate.',
       statement: [
@@ -641,7 +641,7 @@ export const estimationLesson: LessonRecord = {
           steps: [
             {
               title: 'Multiply, log, differentiate',
-              body: 'Independence turns the product into a sum; the score again factors into information × (sample mean − parameter).',
+              body: 'Independence turns the product into a sum. The score again factors into information × (sample mean − parameter).',
               latex:
                 '\\frac{\\partial \\ln \\Pr(\\mathbf{k}; \\lambda)}{\\partial \\lambda} = -N + \\frac{\\mathbf{1}^T\\mathbf{k}}{\\lambda} = \\frac{N}{\\lambda}\\left(\\frac{\\mathbf{1}^T\\mathbf{k}}{N} - \\lambda\\right) = 0',
             },
@@ -660,7 +660,7 @@ export const estimationLesson: LessonRecord = {
           steps: [
             {
               title: 'Recognize the factorized score',
-              body: 'The score in part (a) already has the form $F(\\lambda)(\\hat{\\lambda} - \\lambda)$ with $F = N/\\lambda$; by the CR theorem that is exactly the certificate of efficiency.',
+              body: 'The score in part (a) already has the form $F(\\lambda)(\\hat{\\lambda} - \\lambda)$ with $F = N/\\lambda$. By the CR theorem that is exactly the certificate of efficiency.',
               latex:
                 '\\frac{\\partial \\ln \\Pr}{\\partial \\lambda} = \\underbrace{\\frac{N}{\\lambda}}_{F(\\lambda)}\\left(\\hat{\\lambda}_{ML} - \\lambda\\right) \\;\\Longrightarrow\\; \\text{efficient}',
             },
@@ -676,7 +676,7 @@ export const estimationLesson: LessonRecord = {
           steps: [
             {
               title: 'Let the MSE go to zero',
-              body: 'Efficiency gives unbiasedness plus variance equal to the bound $\\lambda/N$; the MSE is then $\\lambda/N \\to 0$ as $N \\to \\infty$.',
+              body: 'Efficiency gives unbiasedness plus variance equal to the bound $\\lambda/N$. The MSE is then $\\lambda/N \\to 0$ as $N \\to \\infty$.',
               latex:
                 'ECM\\{\\hat{\\lambda}_{ML}\\} = \\operatorname{var}\\{\\hat{\\lambda}_{ML}\\} = \\frac{\\lambda}{N} \\xrightarrow{N \\to \\infty} 0',
             },
@@ -804,7 +804,7 @@ export const estimationLesson: LessonRecord = {
     },
     {
       id: 'wp-radar-blue',
-      source: 'Parcial · 7 Abril 2025 · Ex. 2',
+      source: 'Midterm, April 7 2025, Ex. 2',
       title: 'Radar amplitude in colored noise: design the estimator yourself',
       why: 'The estimation twin of the Detection page’s whitening move: you build the best linear unbiased estimator with a Lagrange multiplier and the direction $\\mathbf{C}_w^{-1}\\mathbf{s}$ appears again. The closing subtlety is exam gold — the design of parts (b)–(c) is the best LINEAR estimator always, but efficient only because the noise turned out Gaussian.',
       statement: [
@@ -830,7 +830,7 @@ export const estimationLesson: LessonRecord = {
             'Detail the vectors $\\mathbf{x}$, $\\mathbf{s}$, $\\mathbf{w}$ in the model $\\mathbf{x} = \\mathbf{s}A + \\mathbf{w}$ and the content of the covariance matrix $\\mathbf{C}_w$.',
           steps: [
             {
-              title: 'Stack the samples; let the lags fill the matrix',
+              title: 'Stack the samples. Let the lags fill the matrix',
               body: 'The vectors stack the $N$ samples of each signal. Stationary colored noise makes $\\mathbf{C}_w$ Toeplitz: entry $(i, j)$ is the autocorrelation at lag $i - j$.',
               latex:
                 '\\mathbf{C}_w = \\begin{bmatrix} c_w(0) & c_w(-1) & \\cdots & c_w(-N{+}1) \\\\ c_w(1) & c_w(0) & & \\vdots \\\\ \\vdots & & \\ddots & \\\\ c_w(N{-}1) & \\cdots & & c_w(0) \\end{bmatrix}',
@@ -849,7 +849,7 @@ export const estimationLesson: LessonRecord = {
           steps: [
             {
               title: 'Push the linear map through the model',
-              body: 'The mean picks up the projection of $\\mathbf{h}$ onto the signal direction; the variance is the quadratic form of $\\mathbf{h}$ on the noise terrain.',
+              body: 'The mean picks up the projection of $\\mathbf{h}$ onto the signal direction. The variance is the quadratic form of $\\mathbf{h}$ on the noise terrain.',
               latex:
                 'E\\{\\hat{A}\\} = \\mathbf{h}^T\\mathbf{s}\\,A, \\qquad \\operatorname{Var}\\{\\hat{A}\\} = \\mathbf{h}^T\\mathbf{C}_w\\mathbf{h}',
             },
@@ -903,7 +903,7 @@ export const estimationLesson: LessonRecord = {
             },
             {
               title: 'Read the bound off the factor',
-              body: 'The Fisher information is the factor in front; a second derivative confirms it.',
+              body: 'The Fisher information is the factor in front. A second derivative confirms it.',
               latex:
                 '\\sigma^2_{CR}(A) = \\frac{-1}{E\\left\\{\\frac{\\partial^2 \\log f}{\\partial A^2}\\right\\}} = \\frac{1}{\\mathbf{s}^T\\mathbf{C}_w^{-1}\\mathbf{s}}',
             },
@@ -931,14 +931,14 @@ export const estimationLesson: LessonRecord = {
           ],
           answer: {
             sentence:
-              'Efficient under Gaussian noise, where BLUE and ML coincide; for other noise distributions the linear design is only the best of its class.',
+              'Efficient under Gaussian noise, where BLUE and ML coincide. For other noise distributions the linear design is only the best of its class.',
           },
         },
       ],
     },
     {
       id: 'wp-cable',
-      source: 'Parcial · 13 Abril 2026 · Ex. 2 (5 punts)',
+      source: 'Midterm, April 13 2026, Ex. 2 (5 points)',
       title: 'Two wires, one value: the ML estimator that cancels interference',
       why: 'A structured covariance you must assemble yourself — $\\sigma_w^2\\mathbf{q}\\mathbf{q}^T + \\sigma_v^2\\mathbf{I}$ — and an ML estimator that the algebra turns into a differential combiner: the common interference cancels exactly, whatever its power. This is why twisted-pair signaling works, derived rather than asserted.',
       statement: [
@@ -955,7 +955,7 @@ export const estimationLesson: LessonRecord = {
         {
           kind: 'text',
           content:
-            'The external noise $w(n) \\sim N(0, \\sigma_w^2)$ is common to both wires; the thermal noises $v_1(n), v_2(n) \\sim N(0, \\sigma_v^2)$ are not. All are white and mutually independent.',
+            'The external noise $w(n) \\sim N(0, \\sigma_w^2)$ is common to both wires. The thermal noises $v_1(n), v_2(n) \\sim N(0, \\sigma_v^2)$ are not. All are white and mutually independent.',
         },
       ],
       parts: [
@@ -966,7 +966,7 @@ export const estimationLesson: LessonRecord = {
           steps: [
             {
               title: 'Read the signs off the model',
-              body: 'The signal enters the wires with opposite signs; the interference enters both alike.',
+              body: 'The signal enters the wires with opposite signs. The interference enters both alike.',
               latex:
                 '\\mathbf{x}(n) = \\begin{bmatrix} x_1(n) \\\\ x_2(n) \\end{bmatrix}, \\quad \\mathbf{p} = \\begin{bmatrix} 1 \\\\ -1 \\end{bmatrix}, \\quad \\mathbf{q} = \\begin{bmatrix} 1 \\\\ 1 \\end{bmatrix}, \\quad \\mathbf{v}(n) = \\begin{bmatrix} v_1(n) \\\\ v_2(n) \\end{bmatrix}',
             },

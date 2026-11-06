@@ -60,8 +60,8 @@ function BudgetRocFigure() {
 
   return (
     <FigureShell
-      title="Spend the budget, read the catch"
-      instruction="Pick the false-alarm budget $\alpha$: the dam slides until the spilled $\mathcal{H}_0$ area equals it — that position is $Q^{-1}(\alpha)$. The $\mathcal{H}_1$ area beyond the dam is your detection probability, one point on the ROC. Sweep in your head; the curve is the full menu."
+      title="Neyman-Pearson: fix $P_{FA}$, read $P_D$"
+      instruction="Set the false-alarm probability $\alpha$. The threshold moves until the red area under $\mathcal{H}_0$ equals $\alpha$, which puts it at $\gamma = Q^{-1}(\alpha)$. The green area under $\mathcal{H}_1$ beyond $\gamma$ is $P_D$. Each $\alpha$ is one point of the ROC, and the energy-to-noise ratio moves the whole curve."
       controls={
         <>
           <SliderControl
@@ -71,7 +71,7 @@ function BudgetRocFigure() {
             min={0.5}
             max={40}
             step={0.5}
-            meaning="Fraction of $\mathcal{H}_0$ probability you are licensed to spill."
+            meaning="Probability of deciding $\mathcal{H}_1$ when $\mathcal{H}_0$ is true."
             onValueChange={setAlphaPct}
             format={(v) => `${v.toFixed(1)}%`}
           />
@@ -115,11 +115,11 @@ function BudgetRocFigure() {
             swatchClass: 'stroke-h1',
           },
           {
-            label: 'spilled budget $\\alpha$',
+            label: 'false alarm $\\alpha$',
             swatchClass: 'stroke-false-alarm',
           },
-          { label: 'caught signal $P_D$', swatchClass: 'stroke-detection' },
-          { label: 'ROC: every budget', swatchClass: 'stroke-foreground' },
+          { label: 'detection $P_D$', swatchClass: 'stroke-detection' },
+          { label: 'ROC: every threshold', swatchClass: 'stroke-foreground' },
         ]}
       />
       <div className="grid gap-2 sm:grid-cols-2">
@@ -172,8 +172,35 @@ function BudgetRocFigure() {
             y={20}
             className="fill-threshold font-mono plot-text-sm"
           >
-            γ
+            γ = {formatNumber(gamma, 2)}
           </text>
+          <text
+            x={xOf(0)}
+            y={yOf(peak) + 16}
+            textAnchor="middle"
+            className="fill-h0 stroke-card font-mono plot-text-sm"
+            strokeWidth={3}
+            paintOrder="stroke"
+          >
+            H0
+          </text>
+          <text
+            x={xOf(separation)}
+            y={yOf(peak) + 16}
+            textAnchor="middle"
+            className="fill-h1-ink stroke-card font-mono plot-text-sm"
+            strokeWidth={3}
+            paintOrder="stroke"
+          >
+            H1
+          </text>
+          <AxisTicks
+            y={H - 30}
+            ticks={[
+              { x: xOf(0), label: '0' },
+              { x: xOf(separation), label: '√ENR' },
+            ]}
+          />
           <text
             x={xOf(gamma) + 4}
             y={H - 36}
@@ -190,7 +217,7 @@ function BudgetRocFigure() {
           </text>
           <text
             x={W / 2}
-            y={H - 8}
+            y={H - 2}
             textAnchor="middle"
             className="fill-muted-foreground font-mono plot-text-sm"
           >
@@ -245,6 +272,15 @@ function BudgetRocFigure() {
             className="fill-cursor stroke-card"
             strokeWidth={1.5}
           />
+          <text
+            x={rocX(alpha) + 8}
+            y={rocY(pd) + 14}
+            className="fill-cursor stroke-card font-mono plot-text-sm"
+            strokeWidth={3}
+            paintOrder="stroke"
+          >
+            ({formatNumber(alpha, 2)}, {formatNumber(pd, 2)})
+          </text>
           <AxisTicks
             y={H - 30}
             ticks={[
@@ -262,7 +298,7 @@ function BudgetRocFigure() {
           </text>
           <text
             x={(W + 16) / 2}
-            y={H - 8}
+            y={H - 2}
             textAnchor="middle"
             className="fill-muted-foreground font-mono plot-text-sm"
           >

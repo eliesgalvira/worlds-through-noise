@@ -7,13 +7,16 @@ import {
   ReadoutRow,
   ReadoutNote,
 } from '@/components/figures/shared.tsx'
-import { formatPercentValue } from '@/components/figures/figure-utils.ts'
+import {
+  formatNumber,
+  formatPercentValue,
+} from '@/components/figures/figure-utils.ts'
 import { binomialPmf } from '@/domain/math/kernel.ts'
 import { useState } from 'react'
 
 const COPIES = 5
 const W = 470
-const H = 280
+const H = 230
 
 function BitVoteFigure() {
   const [epsilonPct, setEpsilonPct] = useState(20)
@@ -43,6 +46,14 @@ function BitVoteFigure() {
     0,
   )
   const pError = p0 * pFalseOne + p1 * pMissOne
+  // Bayes risk in units of the cost of a false one (C10 = 1, C01 = ratio),
+  // against plain majority vote, which ignores priors and costs.
+  const risk = p0 * pFalseOne + costRatio * p1 * pMissOne
+  const majority = Math.ceil((COPIES + 1) / 2)
+  const tail = (pmf: ReadonlyArray<number>, from: number) =>
+    pmf.reduce((acc, q, k) => acc + (k >= from ? q : 0), 0)
+  const majorityRisk =
+    p0 * tail(pmf0, majority) + costRatio * p1 * (1 - tail(pmf1, majority))
 
   const maxPmf = Math.max(...pmf0, ...pmf1, 1e-9)
   const slot = (W - 40) / (COPIES + 1)
@@ -51,8 +62,8 @@ function BitVoteFigure() {
 
   return (
     <FigureShell
-      title="Count the ones — then let the prior lean on the count"
-      instruction="A bit is written five times; each copy flips with probability $\varepsilon$. The bars show the exactly computed distribution of the count of ones under each stored bit. The tinted region is where the rule says “bit = 1.” Now make ones rare, or make missing them expensive, and watch the boundary walk."
+      title="MAP and minimum-risk decisions on a repeated bit"
+      instruction="A bit is stored five times and each copy flips with probability $\varepsilon$. The bars are the exact distribution of the number of ones $k$ under each stored bit, and the shaded region is where the rule decides bit = 1. Change the prior of a one or the cost of missing it and watch the boundary move."
       controls={
         <>
           <SliderControl
@@ -68,7 +79,7 @@ function BitVoteFigure() {
           />
           <SliderControl
             label="Prior of a one"
-            variable="P(1)"
+            variable="P₁"
             value={priorPct}
             min={2}
             max={98}
@@ -106,8 +117,17 @@ function BitVoteFigure() {
             label="Total error probability"
             value={formatPercentValue(pError)}
           />
+          <ReadoutRow
+            label="Bayes risk of this rule (a false 1 costs 1)"
+            value={formatNumber(risk, 3)}
+            tone="good"
+          />
+          <ReadoutRow
+            label="Bayes risk of majority vote"
+            value={formatNumber(majorityRisk, 3)}
+          />
           <ReadoutNote>
-            <MathText text="With $\Pr(1) = 0.5$ and equal costs the boundary sits at majority vote — check it, then break it." />
+            <MathText text="With $P_1 = 0.5$ and equal costs the boundary sits at majority vote, $k \geq 3$." />
           </ReadoutNote>
         </>
       }
@@ -131,8 +151,8 @@ function BitVoteFigure() {
                 y={12}
                 width={slot}
                 height={H - 44}
-                className="fill-h1"
-                opacity={0.09}
+                className="fill-foreground"
+                opacity={0.06}
               />
             ) : null}
             <rect
@@ -140,7 +160,12 @@ function BitVoteFigure() {
               y={H - 32 - barH(pmf0[k] ?? 0)}
               width={12}
               height={barH(pmf0[k] ?? 0)}
-              className="fill-h0"
+              className={
+                (decideOne[k] ?? false)
+                  ? 'fill-h0 stroke-false-alarm'
+                  : 'fill-h0'
+              }
+              strokeWidth={(decideOne[k] ?? false) ? 2.5 : 0}
               opacity={0.85}
             />
             <rect
@@ -148,7 +173,10 @@ function BitVoteFigure() {
               y={H - 32 - barH(pmf1[k] ?? 0)}
               width={12}
               height={barH(pmf1[k] ?? 0)}
-              className="fill-h1"
+              className={
+                (decideOne[k] ?? false) ? 'fill-h1' : 'fill-h1 stroke-h1-ink'
+              }
+              strokeWidth={(decideOne[k] ?? false) ? 0 : 2.5}
               opacity={0.85}
             />
             <text
@@ -183,8 +211,7 @@ function BitVoteFigure() {
         />
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        Error probabilities are exact binomial sums over the shaded region — the
-        minimum-risk rule is whichever shading you can’t improve.
+        <MathText text="Outlined bars are errors. $\Pr(\hat{b}{=}1 \mid b{=}0)$ adds the red-outlined blue bars inside the shaded region, and $\Pr(\hat{b}{=}0 \mid b{=}1)$ the outlined amber bars outside it. The minimum-risk rule is the shading with the lowest Bayes risk." />
       </p>
     </FigureShell>
   )

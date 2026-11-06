@@ -1,0 +1,4 @@
+- Nunca uses rm con rutas relativas, globs, variables o $(...), ni dentro de un comando compuesto: salta un aviso de aprobación que para el trabajo durante horas. Mejor no borres nada. Lo temporal va en tu carpeta.
+- Scripts en nushell, Nix o Python con -I, nunca bash. Lee ~/.agents/storage.md antes de usar Nix.
+- Los subagentes Claude son siempre Opus 5.5 (claude-opus-5-5, effort high). Los de Codex, gpt-6.1-sol con reasoningEffort high, puesto en cada llamada.
+- Los subagentes de apoyo van en segundo plano, y las capturas y los checks escriben a archivos de log.

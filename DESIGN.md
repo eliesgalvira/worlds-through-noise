@@ -219,7 +219,7 @@ This section records committed engineering decisions so future work matches the 
 ## Stack and conventions
 
 - React 19, Vite, TypeScript, Tailwind CSS v4 (CSS-first, configured through `@theme inline` in `src/index.css`, not a JS config), shadcn primitives in the new-york style, `react-router-dom` v7.
-- Fonts load from Google Fonts in `index.html`: Inter (`--font-sans`), Spectral (`--font-serif`), IBM Plex Mono (`--font-mono`). The serif is the brand voice for headings; the mono is for eyebrows, variables, and model summaries. Fonts use `display=optional`, with a small first-paint budget in `src/lib/initial-fonts.ts` so normal loads paint with web fonts and slow/error cases fall back without late swaps.
+- Fonts are self-hosted in `public/fonts` (Fontsource, OFL) and declared in `src/index.css`: Inter (`--font-sans`), Spectral (`--font-serif`), IBM Plex Mono (`--font-mono`). The serif is the brand voice for headings; the mono is for eyebrows, variables, and model summaries. Each face uses `font-display: block` and the Latin faces are preloaded in `index.html`, so the fallback face never paints and the wordmark never shifts.
 - The page background is warm paper plus a faint blue 24px grid (see `body` in `src/index.css`). Treat it as part of the field-notebook identity; do not paint full-bleed opaque backgrounds over it without reason.
 
 ### Lint rules that shape the code

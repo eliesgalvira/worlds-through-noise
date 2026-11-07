@@ -56,6 +56,9 @@ function CurvatureFigure() {
   const scoreTo = Math.min(sampleMean + scoreReach, T_MAX)
   const scoreY = (theta: number) =>
     SCORE_Y - ((information * (sampleMean - theta)) / SCORE_MAX) * 22
+  // Labels near the top go on opposite sides: the truth label away from the
+  // peak, the CRB label away from the truth.
+  const peakRight = sampleMean >= TRUTH
   const outside = {
     left: sample.filter((x) => x < T_MIN).length,
     right: sample.filter((x) => x > T_MAX).length,
@@ -155,7 +158,7 @@ function CurvatureFigure() {
             )}
           />
           <ReadoutRow
-            label="Score slope $-N/\sigma^2 = -I(\theta)$"
+            label="Score slope $-I(\theta)$"
             value={formatNumber(-information, 1)}
           />
           <ReadoutNote>
@@ -205,8 +208,9 @@ function CurvatureFigure() {
           opacity={0.7}
         />
         <text
-          x={xOf(TRUTH) + 4}
-          y={AXIS_Y - 6}
+          x={xOf(TRUTH) + (peakRight ? -4 : 4)}
+          y={20}
+          textAnchor={peakRight ? 'end' : 'start'}
           className="fill-truth font-mono plot-text-xs"
         >
           true θ = {TRUTH}
@@ -216,23 +220,15 @@ function CurvatureFigure() {
             ln f(x;θ) minus its peak
           </text>
           {[0, -5, -10].map((tick) => (
-            <g key={tick}>
-              <line
-                x1={10}
-                y1={yOf(tick)}
-                x2={16}
-                y2={yOf(tick)}
-                strokeWidth={1}
-              />
-              <text
-                x={19}
-                y={yOf(tick) + 3}
-                stroke="none"
-                className="font-mono plot-text-xs"
-              >
-                {tick === 0 ? '0' : `−${String(-tick)}`}
-              </text>
-            </g>
+            <text
+              key={tick}
+              x={12}
+              y={yOf(tick) + 3}
+              stroke="none"
+              className="font-mono plot-text-xs"
+            >
+              {tick === 0 ? '0' : `−${String(-tick)}`}
+            </text>
           ))}
         </g>
         <path
@@ -250,8 +246,13 @@ function CurvatureFigure() {
           strokeWidth={4}
         />
         <text
-          x={xOf(sampleMean + crbStd) + 5}
+          x={
+            peakRight
+              ? xOf(sampleMean + crbStd) + 5
+              : xOf(sampleMean - crbStd) - 5
+          }
           y={yOf(0) - 7}
+          textAnchor={peakRight ? 'start' : 'end'}
           className="plot-halo fill-estimate font-mono plot-text-xs"
         >
           ±<Sym base="σ" sub="CR" />

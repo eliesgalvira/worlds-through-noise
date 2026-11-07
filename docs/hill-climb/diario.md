@@ -387,7 +387,7 @@ Notas de la ronda 9 (ancho/móvil): 2a T1 2/2, T2 3/2, T3 3/2, T4 2/2, T5 2/2, T
 - Unos 20 subagentes nativos: simplify (cuatro ángulos, dos veces), los ejes de code-review y la búsqueda de referencias.
 - El archivo de sesión no trae línea `cost-state`, así que no hay cifra de coste.
 
-**Líneas.** Rama de estimación (#8, sin fusionar) contra `9d60ae15`: 30 archivos, +1448 −452 en el momento del cierre. Contenido de estimación (#9, fusionado): 3 archivos, +30 −24, más las precisiones del review. Contenido de procesos (#10): 4 archivos, +29 −29.
+**Líneas.** Rama de estimación (#8, sin fusionar) contra `9d60ae15`: 30 archivos, +1448 −452 en el momento del cierre. Contenido de estimación (#9, fusionado): 3 archivos, +30 −24, más las precisiones del review. Contenido de procesos (#10, fusionado): 5 archivos, con las precisiones del review. Tras cada fusión, `git pull --ff-only` en el checkout de main y `pnpm dev` con las seis rutas sin errores de consola.
 
 **PR.**
 
@@ -396,7 +396,7 @@ Notas de la ronda 9 (ancho/móvil): 2a T1 2/2, T2 3/2, T3 3/2, T4 2/2, T5 2/2, T
 | #5, #6, #7 | Banco y CI, catálogo, detección                  | fusionados el viernes                              |
 | #8         | Rediseño de estimación (rondas 1 a 10)           | borrador; se fusiona el lunes después de las 20:00 |
 | #9         | Errores de contenido de estimación, sin rediseño | fusionado el sábado por la mañana                  |
-| #10        | Errores de contenido de procesos, sin rediseño   | ver el mensaje final                               |
+| #10        | Errores de contenido de procesos, sin rediseño   | fusionado el sábado por la mañana                  |
 
 **Lo que no se hizo.** Procesos (P3, P2, P1) y la portada no tuvieron rondas de diseño, y el módulo bayesiano MAP/MMSE no se empezó: estimación consumió la noche porque cada ronda destapaba errores de contenido y la meta del 95 % no llegaba. A procesos sí le llegó una verificación de contenido completa, con nueve errores corregidos en #10.
 

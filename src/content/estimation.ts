@@ -5,7 +5,7 @@ export const estimationLesson: LessonRecord = {
   ordinal: '03',
   title: 'Estimation',
   thesis:
-    'An estimator is a machine you must judge by its cloud of outputs, never by one lucky number — and the Cramér-Rao bound says how tight that cloud can ever be.',
+    'An estimator is a machine you must judge by its cloud of outputs, never by one lucky number — and the Cramér-Rao bound says how tight that cloud can be for any unbiased estimator.',
   intro: [
     'Topic 3 has one skeleton: model the data $f(\\mathbf{x}; \\theta)$, ask how much the data even knows about $\\theta$ (the Cramér–Rao bound, CRB), try to build the estimator that extracts all of it (an efficient or maximum-likelihood, ML, estimator), and, when prior knowledge exists, add it as one more measurement.',
     'Exams walk this skeleton in order — “find the pdf, find the CRB, does the efficient estimator exist, find the ML, is it consistent” — so this lesson does too, with the objects made visible at each step.',
@@ -21,7 +21,7 @@ export const estimationLesson: LessonRecord = {
       action:
         'Press run in the figure and watch the piles grow under Gaussian noise. Which pile is narrower? Then predict what happens when the noise turns uniform with the same variance, switch it and run again. The two formulas never change. Only the data model $f(\\mathbf{x}; \\theta)$, the density that describes how the data are generated, does.',
       payoff:
-        'Under uniform noise the midrange wins: at $N = 256$ its spread is about 0.01, against 0.06 for the sample mean. That flip is the lesson of the whole topic: “best estimator” is not a property of a formula, it is a property of the formula–distribution pair. It explains why the theory insists on writing down $f(\\mathbf{x}; \\theta)$ before doing anything else, and why a word like “efficient” is always relative to a model. Consistency also becomes something you can watch: raise $N$ and a good pile tightens onto the truth.',
+        'The ranking depends on the noise model, and that is the lesson of the whole topic: “best estimator” is not a property of a formula, it is a property of the formula–distribution pair. It explains why the theory insists on writing down $f(\\mathbf{x}; \\theta)$ before doing anything else, and why a word like “efficient” is always relative to a model. Consistency also becomes something you can watch: raise $N$ and a good pile tightens onto the truth.',
       equations: [
         {
           sentence:
@@ -34,9 +34,9 @@ export const estimationLesson: LessonRecord = {
       ],
       prediction: {
         question:
-          'An estimator lands exactly on $\\theta$ in one run. What did you learn about its bias?',
+          'Same noise variance, but uniform instead of Gaussian. Which pile is narrower at $N = 256$?',
         answer:
-          'Almost nothing. Bias is the center of the pile over many runs. One draw cannot reveal it.',
+          'The midrange: its spread is about 0.01, against 0.06 for the sample mean. Bounded noise lets the largest and smallest samples pin the center down, so the ranking flips.',
       },
       transfer:
         'Classic collection exercise: for $\\hat{m}_2 = \\frac{1}{N+1}\\sum x_i$, find bias and variance and check consistency. Picture the pile: slightly off-center, slightly narrower — then confirm with algebra.',
@@ -108,7 +108,7 @@ export const estimationLesson: LessonRecord = {
       action:
         'In the figure, drag one sensor’s noise up and watch its spring slacken: the balance point slides away from it, while the combined variance grows, but never past what the other sensors achieve on their own. Raise $\\sigma_1$ to its maximum, a nearly broken sensor like the defective pixel of the June 2026 final (whose variance $\\sigma_0^2 \\to \\infty$), and watch what the estimate does with it. Then switch the prior spring on, feel it pull the estimate toward $\\mu_\\theta$, and stiffen the sensors (lower their $\\sigma$) to watch the data springs overpower it.',
       payoff:
-        'One picture now covers four exam staples: greenhouse-sensor fusion, the defective camera pixel, the BLUE (the best linear unbiased estimator — exactly this balance of springs, derived under a linearity constraint), and MAP shrinkage, $\\hat{\\theta}_{MAP} = \\alpha\\hat{\\theta}_{ML} + (1-\\alpha)\\mu_\\theta$, where $\\alpha$ is the data springs’ share of the total stiffness. It also explains why the prior fades as data accumulate: with $N$ equal data springs against one prior spring, the prior’s share $1 - \\alpha$ shrinks as $N$ grows.',
+        'One picture now covers four exam staples: greenhouse-sensor fusion, the defective camera pixel, the BLUE (the best linear unbiased estimator — exactly this balance of springs, derived under a linearity constraint), and MAP shrinkage, $\\hat{\\theta}_{MAP} = {\\alpha\\hat{\\theta}_{ML}} + {(1-\\alpha)\\mu_\\theta}$, where $\\alpha$ is the data springs’ share of the total stiffness. It also explains why the prior fades as data accumulate: with $N$ equal data springs against one prior spring, the prior’s share $1 - \\alpha$ shrinks as $N$ grows.',
       equations: [
         {
           sentence:
@@ -148,11 +148,11 @@ export const estimationLesson: LessonRecord = {
         'How does maximum likelihood find a frequency, and how precisely can it?',
       trap: 'A tone of unknown frequency $f$, amplitude $A$ and phase is buried in noise, and you have $N$ samples $x(n)$. Which frequency is it? Maximum likelihood (ML) answers by testing every candidate frequency against the data and keeping the best match. Once the amplitude is maximized out, the best match is the $f$ that maximizes $|X(f)|^2$, with $X(f)$ the Fourier transform of the samples, and the figure runs that search.',
       object:
-        'Think of it as a bank of candidate explanations. Each candidate frequency $f$ proposes a template, the vector $\\mathbf{s}(f)$ of samples a clean tone at $f$ would produce. The data rates every candidate by how much of $\\mathbf{x}$ lies along that template: $|\\mathbf{s}(f)^H\\mathbf{x}|^2 = |X(f)|^2$, a correlation computed from your samples. ML picks the candidate with the best match. This is the Fourier transform working as a detector, not as a change of representation.',
+        'Think of it as a bank of candidate explanations. Each candidate frequency $f$ proposes a template, the vector $\\mathbf{s}(f)$ of samples a clean tone at $f$ would produce. The data rates every candidate by how much of $\\mathbf{x}$ lies along that template: $|\\mathbf{s}(f)^H\\mathbf{x}|^2 = |X(f)|^2$, with $^H$ the conjugate transpose, a correlation computed from your samples. ML picks the candidate with the best match. This is the Fourier transform working as a detector, not as a change of representation.',
       action:
         'In the figure, slide the candidate $f$ across the band and watch the dot on the curve, whose height is the match $|X(f)|^2/N$: the landscape rises to a peak at the hidden tone. Add noise and watch spurious ripples start to compete. Then raise $N$ and watch the main peak narrow, and the CRB readout with it: a longer record makes the template more sensitive to small frequency errors.',
       payoff:
-        'Compressed likelihood explains the recipe: maximize over the easy parameter first ($\\hat{A}_{ML} = \\mathbf{s}(f)^H\\mathbf{x}/N$ for each candidate $f$), substitute it back, and the leftover function of $f$ alone is the periodogram. For frequency the score function $\\partial \\ln p(\\mathbf{x}; f)/\\partial f$ does not factor, so no efficient estimator exists for finite $N$: ML reaches the CRB only asymptotically, at high enough SNR.',
+        'Compressed likelihood explains the recipe: maximize over the easy parameter first, with $\\hat{A}_{ML} = \\mathbf{s}(f)^H\\mathbf{x}/N$ for each candidate $f$, substitute it back, and the leftover function of $f$ alone is the periodogram. For frequency the score function $\\partial \\ln p(\\mathbf{x}; f)/\\partial f$ does not factor, so no efficient estimator exists for finite $N$: ML reaches the CRB only asymptotically, at high enough SNR.',
       equations: [
         {
           sentence:
@@ -238,7 +238,7 @@ export const estimationLesson: LessonRecord = {
           steps: [
             {
               title: 'Force the mean to hit A',
-              body: 'This estimator only reads the sample mean, whose expectation is $\\beta \\alpha N A$.',
+              body: 'This estimator is a scaled sum, $\\beta\\mathbf{1}^T\\mathbf{x} = \\beta N\\bar{x}$, so its expectation is $\\beta \\alpha N A$.',
               latex:
                 'E\\{\\hat{A}\\} = \\beta\\,\\alpha N A = A \\;\\Longrightarrow\\; \\beta = \\frac{1}{N\\alpha}',
             },
@@ -368,7 +368,7 @@ export const estimationLesson: LessonRecord = {
         {
           kind: 'math',
           content:
-            'x_0 = \\theta + w_0, \\quad w_0 \\sim N(0, \\sigma_0^2) \\qquad\\quad x_i = \\theta + w_i, \\quad w_i \\sim N(0, \\sigma^2), \\;\\; i = 1, \\dots, 8',
+            'x_0 = \\theta + w_0, \\quad w_0 \\sim N(0, \\sigma_0^2) \\qquad\\quad x_i = \\theta + w_i, \\quad w_i \\sim N(0, \\sigma^2), \\;\\; {i = 1, \\dots, 8}',
         },
         {
           kind: 'text',

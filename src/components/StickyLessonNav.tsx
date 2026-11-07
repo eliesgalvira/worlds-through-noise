@@ -291,6 +291,9 @@ function StickyLessonNav({ modules, problems, variant }: StickyLessonNavProps) {
           }}
         >
           <ProgressCircle value={activeIndex + 1} total={items.length} />
+          <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
+            {activeIndex + 1}/{items.length}
+          </span>
           <span className="grid min-w-0 flex-1">
             <span className="truncate">
               {open ? 'On this page' : activeTitle}

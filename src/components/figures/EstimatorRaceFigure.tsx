@@ -147,7 +147,7 @@ function EstimatorRaceFigure() {
   return (
     <FigureShell
       title="Race two estimators over 500 repeated experiments"
-      instruction="Both machines estimate the same hidden mean (dashed line) from the same data. The piles are their outputs over 500 fresh experiments. The bracket above each pile marks its center and its spread $\pm\sigma_{\hat{\theta}}$: bias is how far the center sits from the truth. Now switch the noise from Gaussian to uniform and run again."
+      instruction="Both machines estimate the same hidden mean (dashed line) from the same data. The piles are their outputs over 500 fresh experiments. The bracket above each pile marks its center and its spread $\pm\sigma_{\hat{\theta}}$: the bias $b$ is how far the center sits from the truth $\theta$. Now switch the noise from Gaussian to uniform and run again."
       controls={
         <>
           <div className="flex flex-wrap gap-2">

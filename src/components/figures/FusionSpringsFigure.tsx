@@ -121,7 +121,7 @@ function FusionSpringsFigure() {
             label={
               priorOn
                 ? 'Posterior variance $\\sigma^2_{\\theta|\\mathbf{x}}$'
-                : 'Estimator variance $1/\\sum 1/\\sigma_i^2$'
+                : 'Estimator variance'
             }
             value={formatNumber(variance, 3)}
           />
@@ -147,7 +147,9 @@ function FusionSpringsFigure() {
             mark: 'dot',
           },
           {
-            label: '$\\hat{\\theta} \\pm$ its standard deviation',
+            label: priorOn
+              ? '$\\hat{\\theta}_{MAP} \\pm \\sigma_{\\theta|\\mathbf{x}}$'
+              : '$\\hat{\\theta} \\pm$ its standard deviation',
             swatchClass: 'stroke-estimate/40',
           },
         ]}
@@ -294,7 +296,8 @@ function FusionSpringsFigure() {
           textAnchor={labelLeft ? 'end' : 'start'}
           className="plot-halo fill-estimate font-mono plot-text"
         >
-          θ̂ = {formatNumber(estimate, 1)}
+          {priorOn ? <Sym base="θ̂" sub="MAP" /> : 'θ̂'} ={' '}
+          {formatNumber(estimate, 1)}
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">

@@ -106,7 +106,7 @@ export const INTERACCIONES: Readonly<Record<string, Interaccion>> = {
     pasos: [
       [deslizar('Candidate frequency', 50)],
       [deslizar('Candidate frequency', 70)],
-      [deslizar('Samples', 256)],
+      [deslizar('Samples', 256), pulsar('Show the answer')],
     ],
   },
 }

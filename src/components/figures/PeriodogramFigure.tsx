@@ -23,7 +23,7 @@ const TRUE_FREQ = 0.21
 const F_FROM = 0.005
 const F_TO = 0.495
 const AMPLITUDE = 1
-const W = 470
+const W = 560
 const H = 372
 /** Left edge of the plot, leaving room for the match ticks. */
 const LEFT = 40
@@ -43,6 +43,9 @@ function PeriodogramFigure() {
   const [sigma, setSigma] = useState(1.2)
   const [candidatePct, setCandidatePct] = useState(30)
   const [seed, setSeed] = useState(5)
+  // The tone, its band and the bank's peak stay hidden until the student
+  // has hunted with the candidate.
+  const [answerShown, setAnswerShown] = useState(false)
 
   const candidate = (candidatePct / 100) * 0.5
 
@@ -112,7 +115,7 @@ function PeriodogramFigure() {
   return (
     <FigureShell
       title="Sweep a detector bank across the band"
-      instruction="Each candidate frequency proposes a template. The strip on top lays that template over your first samples. The dot's height is their match $|X(f)|^2/N$, with $X(f) = \sum x(n)e^{-j2\pi f n}$. Slide the candidate to find the hidden tone, then raise $N$ and watch the peak narrow."
+      instruction="Each candidate frequency proposes a template. The strip on top lays that template over your first samples. The dot's height is their match $|X(f)|^2/N$, with $X(f) = \sum x(n)e^{-j2\pi f n}$. Slide the candidate to find the hidden tone, then show the answer and raise $N$ to watch the peak narrow."
       controls={
         <>
           <SliderControl
@@ -158,6 +161,17 @@ function PeriodogramFigure() {
           >
             New noise
           </Button>
+          <Button
+            type="button"
+            variant={answerShown ? 'secondary' : 'outline'}
+            size="sm"
+            aria-pressed={answerShown}
+            onClick={() => {
+              setAnswerShown((shown) => !shown)
+            }}
+          >
+            {answerShown ? 'Hide the answer' : 'Show the answer'}
+          </Button>
         </>
       }
       readout={
@@ -169,24 +183,26 @@ function PeriodogramFigure() {
           />
           <ReadoutRow
             label="Peak of the bank: $\hat{f}_{ML}$"
-            value={formatNumber(fMl, 3)}
+            value={answerShown ? formatNumber(fMl, 3) : '—'}
             tone="estimate"
           />
           <ReadoutRow
             label="Amplitude $|\hat{A}_{ML}|$"
-            value={formatNumber(Math.sqrt(peak.value / n), 2)}
+            value={
+              answerShown ? formatNumber(Math.sqrt(peak.value / n), 2) : '—'
+            }
             tone="estimate"
           />
           <ReadoutRow
-            label="True frequency"
-            value={formatNumber(TRUE_FREQ, 3)}
+            label="True frequency $f_0$"
+            value={answerShown ? formatNumber(TRUE_FREQ, 3) : '—'}
           />
           <ReadoutRow
             label="SNR $|A|^2/\sigma^2$ with $A = 1$"
             value={formatNumber(snr, 2)}
           />
           <ReadoutRow
-            label="CRB std of $\hat{f}$ (theory)"
+            label="CRB std $\sigma_{CR}(\hat{f})$ (theory)"
             value={crbStd.toPrecision(2)}
           />
         </>
@@ -292,41 +308,54 @@ function PeriodogramFigure() {
             match |X(f)|²/N
           </text>
         </g>
-        <rect
-          x={xOf(TRUE_FREQ) - bandW / 2}
-          y={TOP}
-          width={bandW}
-          height={AXIS_Y - TOP}
-          className="fill-truth/15"
-        />
-        <path
-          d={
-            bandTooNarrow
-              ? `M ${xOf(TRUE_FREQ)} ${CRB_Y - 4} v 8`
-              : `M ${xOf(TRUE_FREQ) - bandW / 2} ${CRB_Y - 4} v 8 M ${xOf(TRUE_FREQ) - bandW / 2} ${CRB_Y} H ${xOf(TRUE_FREQ) + bandW / 2} M ${xOf(TRUE_FREQ) + bandW / 2} ${CRB_Y - 4} v 8`
-          }
-          className="stroke-truth"
-          strokeWidth={1.4}
-          fill="none"
-        />
-        <text
-          x={xOf(TRUE_FREQ) + bandW / 2 + 5}
-          y={CRB_Y + 4}
-          className="fill-truth font-mono plot-text-xs"
-        >
-          true f ±<Sym base="σ" sub="CR" /> = {crbStd.toPrecision(2)}
-          {bandTooNarrow ? ', thinner than this tick' : ''}
-        </text>
-        <line
-          x1={xOf(TRUE_FREQ)}
-          y1={TOP}
-          x2={xOf(TRUE_FREQ)}
-          y2={AXIS_Y}
-          className="stroke-truth"
-          strokeWidth={1.2}
-          strokeDasharray="4 4"
-          opacity={0.7}
-        />
+        {answerShown ? (
+          <g>
+            <rect
+              x={xOf(TRUE_FREQ) - bandW / 2}
+              y={TOP}
+              width={bandW}
+              height={AXIS_Y - TOP}
+              className="fill-truth/15"
+            />
+            <path
+              d={
+                bandTooNarrow
+                  ? `M ${xOf(TRUE_FREQ)} ${CRB_Y - 4} v 8`
+                  : `M ${xOf(TRUE_FREQ) - bandW / 2} ${CRB_Y - 4} v 8 M ${xOf(TRUE_FREQ) - bandW / 2} ${CRB_Y} H ${xOf(TRUE_FREQ) + bandW / 2} M ${xOf(TRUE_FREQ) + bandW / 2} ${CRB_Y - 4} v 8`
+              }
+              className="stroke-truth"
+              strokeWidth={1.4}
+              fill="none"
+            />
+            <text
+              x={xOf(TRUE_FREQ) + bandW / 2 + 5}
+              y={CRB_Y + 4}
+              className="fill-truth font-mono plot-text-xs"
+            >
+              <Sym base="f" sub="0" /> ±<Sym base="σ" sub="CR" /> ={' '}
+              {crbStd.toPrecision(2)}
+            </text>
+            {bandTooNarrow ? (
+              <text
+                x={xOf(TRUE_FREQ) + 5}
+                y={CRB_Y + 17}
+                className="fill-truth font-mono plot-text-xs"
+              >
+                band thinner than the tick
+              </text>
+            ) : null}
+            <line
+              x1={xOf(TRUE_FREQ)}
+              y1={TOP}
+              x2={xOf(TRUE_FREQ)}
+              y2={AXIS_Y}
+              className="stroke-truth"
+              strokeWidth={1.2}
+              strokeDasharray="4 4"
+              opacity={0.7}
+            />
+          </g>
+        ) : null}
         <path
           d={frequencies
             .map(
@@ -338,18 +367,22 @@ function PeriodogramFigure() {
           className="stroke-muted-foreground"
           strokeWidth={1.6}
         />
-        <path
-          d={`M ${xOf(fMl)} ${yOf(maxSpec) - 3} l -5 -8 h 10 z`}
-          className="fill-estimate"
-        />
-        <text
-          x={xOf(fMl) + (peakLabelLeft ? -8 : 8)}
-          y={yOf(maxSpec) + 4}
-          textAnchor={peakLabelLeft ? 'end' : 'start'}
-          className="plot-halo fill-estimate font-mono plot-text-sm"
-        >
-          <Sym base="f̂" sub="ML" />
-        </text>
+        {answerShown ? (
+          <g>
+            <path
+              d={`M ${xOf(fMl)} ${yOf(maxSpec) - 3} l -5 -8 h 10 z`}
+              className="fill-estimate"
+            />
+            <text
+              x={xOf(fMl) + (peakLabelLeft ? -8 : 8)}
+              y={yOf(maxSpec) + 4}
+              textAnchor={peakLabelLeft ? 'end' : 'start'}
+              className="plot-halo fill-estimate font-mono plot-text-sm"
+            >
+              <Sym base="f̂" sub="ML" />
+            </text>
+          </g>
+        ) : null}
         <line
           x1={xOf(candidate)}
           y1={TOP}
@@ -368,6 +401,14 @@ function PeriodogramFigure() {
         <text
           x={xOf(candidate) + (matchLabelLeft ? -6 : 6)}
           y={TOP + 12}
+          textAnchor={matchLabelLeft ? 'end' : 'start'}
+          className="plot-halo fill-cursor font-mono plot-text-sm"
+        >
+          f = {candidate.toFixed(3)}
+        </text>
+        <text
+          x={xOf(candidate) + (matchLabelLeft ? -6 : 6)}
+          y={TOP + 26}
           textAnchor={matchLabelLeft ? 'end' : 'start'}
           className="plot-halo fill-cursor font-mono plot-text-sm"
         >

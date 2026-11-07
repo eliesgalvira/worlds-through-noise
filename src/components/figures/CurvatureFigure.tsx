@@ -22,7 +22,7 @@ const W = 640
 const LEFT = 40
 /** Hypothetical re-runs whose peaks fill the wobble strip. */
 const RERUNS = 40
-const H = 404
+const H = 414
 /** Bottom of the curve area, where the θ axis runs. */
 const AXIS_Y = 214
 const T_MIN = -1.5
@@ -153,7 +153,7 @@ function CurvatureFigure() {
             tone="estimate"
           />
           <ReadoutRow
-            label="CRB std $\sigma/\sqrt{N}$ (theory)"
+            label="CRB std $\sigma/\|\partial\mathbf{p}/\partial\theta\| = \sigma/\sqrt{N}$ (theory)"
             value={formatNumber(crbStd, 3)}
           />
           <ReadoutRow
@@ -357,21 +357,20 @@ function CurvatureFigure() {
           {RERUNS} re-run peaks: std {formatNumber(peakStd, 3)}
           {peaksBeyond > 0 ? `, ${String(peaksBeyond)} beyond the axis` : ''}
         </text>
-        <line
-          x1={xOf(TRUTH - crbStd)}
-          y1={AXIS_Y + 180}
-          x2={xOf(TRUTH + crbStd)}
-          y2={AXIS_Y + 180}
-          className="stroke-estimate/25"
-          strokeWidth={10}
+        {/* Hollow bracket around the truth, unlike the filled bar around the
+            peak above: the CRB predicts where the re-run peaks land. */}
+        <path
+          d={`M ${xOf(TRUTH - crbStd)} ${AXIS_Y + 173} v 14 M ${xOf(TRUTH - crbStd)} ${AXIS_Y + 187} H ${xOf(TRUTH + crbStd)} M ${xOf(TRUTH + crbStd)} ${AXIS_Y + 173} v 14`}
+          className="stroke-estimate"
+          strokeWidth={1.4}
+          fill="none"
         />
         <text
-          x={W - 10}
-          y={AXIS_Y + 168}
-          textAnchor="end"
-          className="fill-estimate font-mono plot-text-xs"
+          x={xOf(TRUTH + crbStd) + 6}
+          y={AXIS_Y + 184}
+          className="plot-halo fill-estimate font-mono plot-text-xs"
         >
-          shaded: θ ±<Sym base="σ" sub="CR" /> = {formatNumber(crbStd, 3)}
+          θ ±<Sym base="σ" sub="CR" />
         </text>
         {peaks
           .filter((p) => p >= T_MIN && p <= T_MAX)

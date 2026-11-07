@@ -50,7 +50,21 @@ function PeriodogramFigure() {
     (bestIdx, v, i) => (v > (spectrum[bestIdx] ?? 0) ? i : bestIdx),
     0,
   )
-  const fMl = frequencies[peakIndex] ?? 0
+  // The display grid is coarser than the main lobe at large N: refine the
+  // peak on a fine grid around the best grid point before reading it out.
+  const coarseStep = 0.49 / 219
+  const peak = linspace(
+    (frequencies[peakIndex] ?? 0) - coarseStep,
+    (frequencies[peakIndex] ?? 0) + coarseStep,
+    41,
+  ).reduce(
+    (best, f) => {
+      const score = complexPeriodogramAt(signal, f)
+      return score > best.score ? { f, score } : best
+    },
+    { f: frequencies[peakIndex] ?? 0, score: maxSpec },
+  )
+  const fMl = peak.f
   const candidateScore = complexPeriodogramAt(signal, candidate)
 
   // Complex tone with A and phase unknown: the bound of the slides (T3, p. 97).
@@ -67,7 +81,7 @@ function PeriodogramFigure() {
   return (
     <FigureShell
       title="Sweep a detector bank across the band"
-      instruction="Each candidate frequency proposes a template. The dot's height is the score $|\sum x(n)e^{-j2\pi f n}|^2/N$ of your noisy samples against that template. Slide the candidate to find the hidden tone, then raise $N$ and watch the peak narrow."
+      instruction="Each candidate frequency proposes a template. The dot's height is the score $|X(f)|^2/N$ of your noisy samples against that template, with $X(f) = \sum x(n)e^{-j2\pi f n}$. Slide the candidate to find the hidden tone, then raise $N$ and watch the peak narrow."
       controls={
         <>
           <SliderControl
@@ -88,7 +102,7 @@ function PeriodogramFigure() {
             min={16}
             max={256}
             step={8}
-            meaning="Frequency information grows like $N^3$."
+            meaning="Length of the record."
             onValueChange={setN}
             format={(v) => `N = ${v.toFixed(0)}`}
           />
@@ -125,6 +139,11 @@ function PeriodogramFigure() {
           <ReadoutRow
             label="Peak of the bank: $\hat{f}_{ML}$"
             value={formatNumber(fMl, 3)}
+            tone="estimate"
+          />
+          <ReadoutRow
+            label="Amplitude $|\hat{A}_{ML}| = |X(\hat{f}_{ML})|/N$"
+            value={formatNumber(Math.sqrt(peak.score / n), 2)}
             tone="estimate"
           />
           <ReadoutRow
@@ -209,7 +228,7 @@ function PeriodogramFigure() {
             </g>
           ))}
           <text
-            x={LEFT + 4}
+            x={LEFT + 8}
             y={TOP - 4}
             stroke="none"
             className="font-mono plot-text-xs"
@@ -224,6 +243,13 @@ function PeriodogramFigure() {
           height={AXIS_Y - TOP}
           className="fill-truth/15"
         />
+        <text
+          x={xOf(TRUE_FREQ) + bandW / 2 + 4}
+          y={AXIS_Y - 8}
+          className="plot-halo fill-truth font-mono plot-text-xs"
+        >
+          ±<Sym base="σ" sub="CR" /> {formatNumber(crbStd, 4)}
+        </text>
         <line
           x1={xOf(TRUE_FREQ)}
           y1={TOP}
@@ -278,7 +304,7 @@ function PeriodogramFigure() {
           textAnchor={candidate > 0.4 ? 'end' : 'start'}
           className="plot-halo fill-cursor font-mono plot-text-sm"
         >
-          {formatNumber(candidateScore, 2)}
+          score {formatNumber(candidateScore, 2)}
         </text>
         <text
           x={(LEFT + RIGHT) / 2}

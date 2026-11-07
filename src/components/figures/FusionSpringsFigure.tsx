@@ -7,7 +7,6 @@ import {
   Legend,
   Plot,
   ReadoutRow,
-  ReadoutNote,
   Sym,
 } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
@@ -59,50 +58,52 @@ function FusionSpringsFigure() {
       instruction="Three sensors read the same hidden humidity with different noise. Each pulls the estimate toward its reading with stiffness $1/\sigma^2$. Slacken a sensor and watch the balance slide away from it — then switch on the prior: one more spring, anchored at old knowledge."
       controls={
         <>
-          <div className="flex flex-col gap-4">
-            <Button
-              type="button"
-              variant={priorOn ? 'default' : 'outline'}
-              size="sm"
-              aria-pressed={priorOn}
-              onClick={() => {
-                setPriorOn((on) => !on)
-              }}
-            >
-              {priorOn ? 'Remove the prior spring' : 'Add the prior spring'}
-            </Button>
-            {priorOn ? (
-              <SliderControl
-                label="Prior spread (std of the prior)"
-                variable="σθ"
-                value={priorSigma}
-                min={1}
-                max={15}
-                step={0.5}
-                meaning="Small $\sigma_\theta$: a stubborn prior."
-                onValueChange={setPriorSigma}
-                format={(v) => v.toFixed(1)}
-              />
-            ) : null}
-          </div>
           {SENSOR_READINGS.map((reading, index) => (
             <SliderControl
               key={reading}
-              label={`Sensor ${index + 1} noise (reads ${reading})`}
-              variable={`σ${index + 1}`}
+              label={`Sensor ${String(index + 1)} noise (reads ${String(reading)})`}
+              variable={`σ${String(index + 1)}`}
               value={sigmas[index] ?? 1}
               min={0.8}
               max={12}
               step={0.1}
-              meaning={
-                index === 0 ? 'Stiff spring: small $\\sigma$ pulls hard.' : ''
-              }
+              {...(index === 0
+                ? { meaning: 'Stiff spring: small $\\sigma$ pulls hard.' }
+                : {})}
               onValueChange={(v) => {
                 setSigmas((prev) => prev.map((s, i) => (i === index ? v : s)))
               }}
               format={(v) => v.toFixed(1)}
             />
           ))}
+          {/* The prior row never moves: first on narrow screens, next to the
+              figure, and its slider stays in place, inert while the prior is off. */}
+          <div className="col-span-full flex w-full flex-wrap items-start gap-x-8 gap-y-4 max-lg:order-first">
+            <Button
+              type="button"
+              variant={priorOn ? 'secondary' : 'outline'}
+              size="sm"
+              aria-pressed={priorOn}
+              onClick={() => {
+                setPriorOn((on) => !on)
+              }}
+            >
+              {priorOn ? 'Prior spring: on' : 'Prior spring: off'}
+            </Button>
+            <SliderControl
+              className="sm:max-w-xs"
+              label="Prior spread"
+              variable="σθ"
+              value={priorSigma}
+              min={1}
+              max={15}
+              step={0.5}
+              disabled={!priorOn}
+              meaning="Std of the prior. Small $\sigma_\theta$: a stubborn prior."
+              onValueChange={setPriorSigma}
+              format={(v) => v.toFixed(1)}
+            />
+          </div>
         </>
       }
       readout={
@@ -126,16 +127,13 @@ function FusionSpringsFigure() {
               value={formatNumber(alpha, 2)}
             />
           ) : null}
-          <ReadoutNote>
-            <MathText text="Break a sensor completely ($\sigma \to 12$) and the fusion quietly ignores it: the defective-pixel exam problem in one gesture." />
-          </ReadoutNote>
         </>
       }
     >
       <Legend
         items={[
           {
-            label: 'sensor reading $x_i$',
+            label: 'reading $x_i$',
             swatchClass: 'fill-muted-foreground',
             mark: 'dot',
           },
@@ -145,6 +143,10 @@ function FusionSpringsFigure() {
             label: 'balance point $\\hat{\\theta}$',
             swatchClass: 'fill-estimate',
             mark: 'dot',
+          },
+          {
+            label: '$\\hat{\\theta} \\pm$ its standard deviation',
+            swatchClass: 'stroke-estimate/40',
           },
         ]}
       />
@@ -269,6 +271,14 @@ function FusionSpringsFigure() {
             </text>
           </g>
         ) : null}
+        <line
+          x1={xOf(estimate - Math.sqrt(variance))}
+          y1={H - 60}
+          x2={xOf(estimate + Math.sqrt(variance))}
+          y2={H - 60}
+          className="stroke-estimate/40"
+          strokeWidth={8}
+        />
         <circle
           cx={xOf(estimate)}
           cy={H - 60}

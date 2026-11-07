@@ -25,7 +25,9 @@ const T_MIN = -1.5
 const T_MAX = 3.5
 /** Centre line of the score strip, and the score that fills half its height. */
 const SCORE_Y = AXIS_Y + 80
-const SCORE_MAX = 50
+const SCORE_MAX = 20
+/** Half height of the score strip. */
+const SCORE_HALF = 26
 
 function CurvatureFigure() {
   const [n, setN] = useState(5)
@@ -57,7 +59,7 @@ function CurvatureFigure() {
   const scoreFrom = Math.max(sampleMean - scoreReach, T_MIN)
   const scoreTo = Math.min(sampleMean + scoreReach, T_MAX)
   const scoreY = (theta: number) =>
-    SCORE_Y - ((information * (sampleMean - theta)) / SCORE_MAX) * 22
+    SCORE_Y - ((information * (sampleMean - theta)) / SCORE_MAX) * SCORE_HALF
   // The truth label and the CRB label each sit on the side away from the
   // other mark, so neither crosses the other's line.
   const peakRight = sampleMean >= TRUTH
@@ -145,7 +147,7 @@ function CurvatureFigure() {
             value={formatNumber(crbStd, 3)}
           />
           <ReadoutRow
-            label="Std of the 40 peak positions (blue dots)"
+            label="Std of the 40 peaks (blue dots)"
             value={formatNumber(
               Math.sqrt(
                 peaks.reduce((a, p) => {
@@ -293,6 +295,14 @@ function CurvatureFigure() {
         >
           score ∂ln f/∂θ, zero at the peak
         </text>
+        <text
+          x={LEFT - 6}
+          y={SCORE_Y + 3}
+          textAnchor="end"
+          className="fill-muted-foreground font-mono plot-text-xs"
+        >
+          0
+        </text>
         <line
           x1={LEFT}
           y1={SCORE_Y}
@@ -317,7 +327,7 @@ function CurvatureFigure() {
         />
         <text
           x={W - 10}
-          y={SCORE_Y - 26}
+          y={SCORE_Y - 20}
           textAnchor="end"
           className="fill-muted-foreground font-mono plot-text-xs"
         >

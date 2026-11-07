@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useMemo, useRef } from 'react'
 import {
   parseInlineMath,
   renderDisplayMath,
@@ -53,9 +53,12 @@ const MIN_EQUATION_SCALE = 0.6
  */
 function MathBlock({ latex, className }: MathBlockProps) {
   const boxRef = useRef<HTMLDivElement>(null)
+  // One object per equation: React 19 rewrites innerHTML whenever this prop
+  // is a new object, which would undo the fit below on every re-render.
+  const html = useMemo(() => ({ __html: renderDisplayMath(latex) }), [latex])
 
-  // Measured before paint and again once KaTeX's fonts arrive (their metrics
-  // change the width). No ResizeObserver: one on each of the hundreds of
+  // Measured before paint and again once fonts arrive (their metrics change
+  // the width). No ResizeObserver: one on each of the hundreds of
   // equations of a resolved lesson made every relayout crawl.
   useLayoutEffect(() => {
     const box = boxRef.current
@@ -79,7 +82,9 @@ function MathBlock({ latex, className }: MathBlockProps) {
     const fit = () => {
       box.innerHTML = renderDisplayMath(latex)
       shrink(WRAP_SCALE)
-      if (box.scrollWidth > box.clientWidth + 1) {
+      const wrap = box.scrollWidth > box.clientWidth + 1
+      box.toggleAttribute('data-wrapped', wrap)
+      if (wrap) {
         box.innerHTML = renderWrappedMath(latex)
         shrink(MIN_EQUATION_SCALE)
       }
@@ -100,8 +105,12 @@ function MathBlock({ latex, className }: MathBlockProps) {
       },
       () => undefined,
     )
+    // KaTeX's fonts often start loading only after the first layout, when
+    // fonts.ready has already resolved: refit when a font load finishes.
+    document.fonts.addEventListener('loadingdone', fit)
     return () => {
       live = false
+      document.fonts.removeEventListener('loadingdone', fit)
     }
   }, [latex])
 
@@ -109,11 +118,11 @@ function MathBlock({ latex, className }: MathBlockProps) {
     <div
       ref={boxRef}
       className={cn(
-        'overflow-x-auto py-1 text-foreground data-overflow:mask-r-from-85%',
+        'overflow-x-auto py-1 text-foreground data-overflow:mask-r-from-85% data-wrapped:leading-loose',
         className,
       )}
       aria-label={latex}
-      dangerouslySetInnerHTML={{ __html: renderDisplayMath(latex) }}
+      dangerouslySetInnerHTML={html}
     />
   )
 }

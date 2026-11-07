@@ -63,7 +63,7 @@ function EquationReveal({
       ) : null}
 
       {revealed && caption !== undefined ? (
-        <figcaption className="mt-3 text-xs leading-5 text-muted-foreground">
+        <figcaption className="mt-3 text-sm leading-6 text-muted-foreground">
           <MathText text={caption} />
         </figcaption>
       ) : null}

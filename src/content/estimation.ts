@@ -21,7 +21,7 @@ export const estimationLesson: LessonRecord = {
       action:
         'Press run in the figure and watch the piles grow under Gaussian noise. Which pile is narrower? Then predict what happens when the noise turns uniform with the same variance, switch it and run again. The two formulas never change. Only the data model $f(\\mathbf{x}; \\theta)$, the density that describes how the data are generated, does.',
       payoff:
-        'That flip is the lesson of the whole topic: “best estimator” is not a property of a formula, it is a property of the formula–distribution pair. It explains why the theory insists on writing down $f(\\mathbf{x}; \\theta)$ before doing anything else, and why a word like “efficient” is always relative to a model. Consistency also becomes something you can watch: raise $N$ and a good pile tightens onto the truth.',
+        'Under uniform noise the midrange wins: at $N = 256$ its spread is about 0.01, against 0.06 for the sample mean. That flip is the lesson of the whole topic: “best estimator” is not a property of a formula, it is a property of the formula–distribution pair. It explains why the theory insists on writing down $f(\\mathbf{x}; \\theta)$ before doing anything else, and why a word like “efficient” is always relative to a model. Consistency also becomes something you can watch: raise $N$ and a good pile tightens onto the truth.',
       equations: [
         {
           sentence:
@@ -52,7 +52,7 @@ export const estimationLesson: LessonRecord = {
         'What limits every unbiased estimator, and when does the perfect one exist?',
       trap: 'Every estimate built from noisy data wobbles from one experiment to the next. The Cramér–Rao bound (CRB) is a floor on that wobble: no unbiased estimator can have a variance below it. Its formula, an expectation of a squared derivative of a logarithm, then inverted, is hard to picture. So is the test for an efficient estimator, one whose variance actually touches the floor. Both are read off one curve.',
       object:
-        'That curve is the likelihood $f(\\mathbf{x}; \\theta)$, drawn as a function of $\\theta$ for the data you actually observed: how plausible each candidate value of $\\theta$ makes them. The peak of this landscape is the maximum-likelihood (ML) estimate. The sharpness near the peak is how confidently the data votes: a knife-edge peak pins $\\theta$ down, a broad hill leaves it loose. Fisher information is the average curvature of this landscape drawn on a log scale, and the CRB is its inverse: flat landscape, poor floor.',
+        'That curve is the likelihood $f(\\mathbf{x}; \\theta)$, drawn as a function of $\\theta$ for the data you actually observed: how plausible each candidate value of $\\theta$ makes them. The peak of this landscape is the maximum-likelihood (ML) estimate. The sharpness near the peak is how confidently the data votes: a knife-edge peak pins $\\theta$ down, a broad hill leaves it loose. The strip under the landscape draws its slope, the score $\\partial \\ln f/\\partial\\theta$: zero at the peak, and steeper the sharper the peak. Fisher information is the average curvature of this landscape drawn on a log scale, and the CRB is its inverse: flat landscape, poor floor.',
       action:
         'In the figure, draw fresh samples and watch the landscape rebuild — the peak wobbles from draw to draw, and the size of the wobble matches the flatness. Raise $N$: each new sample multiplies another factor into the likelihood, the landscape sharpens, and the wobble’s variance shrinks like $1/N$ (its width like $1/\\sqrt{N}$). Raise the noise $\\sigma$ and it flattens again. You are watching the Cramér–Rao bound operate live.',
       payoff:
@@ -62,7 +62,9 @@ export const estimationLesson: LessonRecord = {
           sentence:
             'No unbiased estimator can beat the inverse of the average curvature of the log-likelihood.',
           latex:
-            '\\sigma^2_{\\hat\\theta} \\;\\ge\\; \\frac{1}{-E\\left[\\dfrac{\\partial^2 \\ln f(\\mathbf{x};\\theta)}{\\partial\\theta^2}\\right]} = \\sigma^2_{CR(\\theta)}',
+            '\\sigma^2_{\\hat\\theta} \\;\\ge\\; \\frac{1}{-E\\left[\\dfrac{\\partial^2 \\ln f(\\mathbf{x};\\theta)}{\\partial\\theta^2}\\right]} = \\frac{1}{I(\\theta)} = \\sigma^2_{CR(\\theta)}',
+          caption:
+            "The denominator is the Fisher information $I(\\theta)$. The second derivative of $\\ln f$ is the slope of the score, so for the Gaussian mean the score strip's slope is exactly $-I(\\theta) = -N/\\sigma^2$.",
         },
         {
           sentence:
@@ -99,10 +101,10 @@ export const estimationLesson: LessonRecord = {
       id: 'E3',
       title: 'Weighted fusion and the prior',
       question:
-        'How should unequal-quality measurements be combined — and what is a prior, really?',
+        'How should unequal-quality measurements be combined, and where does a prior fit in?',
       trap: 'Three sensors of unequal quality measure the same humidity $\\theta$, each with independent Gaussian noise of its own standard deviation $\\sigma_i$. Averaging them equally wastes the good ones. Separately, old knowledge may say $\\theta$ is usually near $\\mu_\\theta$, with spread $\\sigma_\\theta$. Students memorize the best fusion of the sensors and the MAP estimate (maximum a posteriori: the most probable value once data and prior are combined) as two different results. Both are one weighted average.',
       object:
-        'The picture is springs. Each measurement $x_i$ is an anchor pulling the estimate toward itself with stiffness $1/\\sigma_i^2$: precise sensors are stiff springs, noisy sensors are slack ones. The estimate is where all the pulls balance. And a Gaussian prior is nothing special — it is one more spring, anchored at $\\mu_\\theta$, with stiffness $1/\\sigma_\\theta^2$.',
+        'Each measurement acts as a spring: $x_i$ is an anchor pulling the estimate toward itself with stiffness $1/\\sigma_i^2$: precise sensors are stiff springs, noisy sensors are slack ones. The estimate is where all the pulls balance. And a Gaussian prior is nothing special — it is one more spring, anchored at $\\mu_\\theta$, with stiffness $1/\\sigma_\\theta^2$.',
       action:
         'In the figure, drag one sensor’s noise up and watch its spring slacken: the balance point slides away from it, while the combined variance $1/\\sum(1/\\sigma_i^2)$ grows, but never past what the other sensors achieve on their own. Raise $\\sigma_1$ to its maximum, a nearly broken sensor like the defective pixel of the June 2026 final (whose variance $\\sigma_0^2 \\to \\infty$), and watch the estimate quietly ignore it: nobody had to decide to discard the data. Then switch the prior spring on, feel it pull the estimate toward $\\mu_\\theta$, and stiffen the sensors (lower their $\\sigma$) to watch the data springs overpower it.',
       payoff:
@@ -122,7 +124,7 @@ export const estimationLesson: LessonRecord = {
           latex:
             '\\hat\\theta_{MAP} = \\frac{\\sum_i x_i/\\sigma_i^2 + \\mu_\\theta/\\sigma_\\theta^2}{\\sum_i 1/\\sigma_i^2 + 1/\\sigma_\\theta^2}, \\qquad \\sigma^2_{\\theta|\\mathbf{x}} = \\frac{1}{\\sum_i 1/\\sigma_i^2 + 1/\\sigma_\\theta^2}',
           caption:
-            'The second fraction is the posterior variance the figure reads out. The June-2026 final has one pixel $x_0$ of variance $\\sigma_0^2$: $\\sigma_\\theta^2 \\gg \\sigma_0^2$ trusts the data, $\\sigma_0^2 \\gg \\sigma_\\theta^2$ trusts the prior.',
+            "The second fraction is the posterior variance the figure reads out. The June-2026 final has one pixel $x_0$ with noise variance $\\sigma_0^2$: $\\sigma_\\theta^2 \\gg \\sigma_0^2$ trusts the data, $\\sigma_0^2 \\gg \\sigma_\\theta^2$ trusts the prior. It writes $x_0/\\alpha + \\mu_\\theta/\\beta$ with $\\alpha = 1 + \\sigma_0^2/\\sigma_\\theta^2$, the inverse of the figure's data share.",
         },
       ],
       prediction: {
@@ -143,20 +145,20 @@ export const estimationLesson: LessonRecord = {
       id: 'E4',
       title: 'ML frequency: a detector bank',
       question:
-        'What does maximum likelihood do when no efficient estimator exists — and what does it cost to transform parameters?',
-      trap: 'A tone of unknown frequency $f$, amplitude $A$ and phase is buried in noise, and you have $N$ samples $x(n)$. Which frequency is it? Maximum likelihood (ML) answers by testing every candidate frequency against the data and keeping the best match. The figure runs that search, and the search turns out to be a Fourier transform.',
+        'How does maximum likelihood find a frequency, and how precisely can it?',
+      trap: 'A tone of unknown frequency $f$, amplitude $A$ and phase is buried in noise, and you have $N$ samples $x(n)$. Which frequency is it? Maximum likelihood (ML) answers by testing every candidate frequency against the data and keeping the best match. Maximizing over $f$ amounts to computing $|X(f)|^2$, with $X(f)$ the Fourier transform of the samples, and the figure runs that search.',
       object:
-        'Think of it as a bank of candidate explanations. Each candidate frequency $f$ proposes a template, the vector $\\mathbf{s}(f)$ of samples a clean tone at $f$ would produce. The data scores every candidate by how much of $\\mathbf{x}$ lies along that template — $|\\mathbf{s}(f)^H\\mathbf{x}|^2$, a genuine correlation computed against your actual samples. ML picks the candidate with the top score. This is the Fourier transform working as a detector, not as a change of representation.',
+        'Think of it as a bank of candidate explanations. Each candidate frequency $f$ proposes a template, the vector $\\mathbf{s}(f)$ of samples a clean tone at $f$ would produce. The data scores every candidate by how much of $\\mathbf{x}$ lies along that template: $|\\mathbf{s}(f)^H\\mathbf{x}|^2 = |X(f)|^2$, a correlation computed from your samples. ML picks the candidate with the top score. This is the Fourier transform working as a detector, not as a change of representation.',
       action:
         'In the figure, slide the candidate $f$ across the band and watch the dot on the curve, whose height is the score: the landscape $|X(f)|^2$ rises to a peak at the hidden tone. Add noise and watch spurious ripples start to compete. Then raise $N$ and watch the main peak narrow. Frequency’s CRB shrinks like $1/N^3$, not $1/N$, because a longer record makes the template far more sensitive to small frequency errors.',
       payoff:
-        'Two abstract tools become concrete. Compressed likelihood: maximize over the easy parameter first ($\\hat{A}_{ML} = \\mathbf{s}(f)^H\\mathbf{x}/N$ for each candidate $f$), substitute it back, and the leftover function of $f$ alone is exactly the periodogram — the recipe was a derivation all along. And invariance is a gift with a price tag: $g(\\hat{\\theta}_{ML})$ is the ML estimate of $g(\\theta)$, but when $g$ bends — squaring an amplitude to get a power — the transformed estimator picks up a bias of order $1/N$: asymptotically forgiven, never free.',
+        'Compressed likelihood explains the recipe: maximize over the easy parameter first ($\\hat{A}_{ML} = \\mathbf{s}(f)^H\\mathbf{x}/N$ for each candidate $f$), substitute it back, and the leftover function of $f$ alone is the periodogram. Frequency enters the model nonlinearly, so the score does not factor and no efficient estimator exists for finite $N$: ML reaches the CRB only asymptotically, at high enough SNR.',
       equations: [
         {
           sentence:
             'Maximize over amplitude first. The survivor is a matched-filter score swept across frequency.',
           latex:
-            '\\hat f_{ML} = \\arg\\max_f \\left| \\sum_{n=0}^{N-1} x(n)\\, e^{-j2\\pi f n} \\right|^2, \\qquad \\hat A_{ML} = \\tfrac{1}{N} X(\\hat f_{ML})',
+            '\\hat f_{ML} = \\arg\\max_f \\frac{|X(f)|^2}{N}, \\quad X(f) = \\sum_{n=0}^{N-1} x(n)\\, e^{-j2\\pi f n} = \\mathbf{s}(f)^H\\mathbf{x}, \\qquad \\hat A_{ML} = \\tfrac{1}{N} X(\\hat f_{ML})',
         },
         {
           sentence:

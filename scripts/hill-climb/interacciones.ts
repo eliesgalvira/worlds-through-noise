@@ -97,7 +97,7 @@ export const INTERACCIONES: Readonly<Record<string, Interaccion>> = {
     antes: [],
     pasos: [
       [deslizar('Sensor 1 noise', 12)],
-      [pulsar('Add the prior spring')],
+      [pulsar('Prior spring')],
       [deslizar('Prior spread', 1)],
     ],
   },

@@ -30,7 +30,7 @@ function SolutionStep({
           <MathBlock latex={step.latex} className="mt-2" />
         ) : null}
         {step.note !== undefined ? (
-          <p className="mt-2 text-xs leading-5 text-muted-foreground">
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
             <MathText text={step.note} />
           </p>
         ) : null}

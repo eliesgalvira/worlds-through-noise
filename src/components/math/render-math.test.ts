@@ -23,9 +23,9 @@ describe('parseInlineMath', () => {
 })
 
 describe('renderWrappedMath', () => {
-  it('renders inline so the line can break, at display size', () => {
+  it('renders inline so the line can break, one formula per line', () => {
     const html = renderWrappedMath('a = b \\qquad c = d')
     expect(html).not.toContain('katex-display')
-    expect(html).toContain('mspace')
+    expect(html).toContain('newline')
   })
 })

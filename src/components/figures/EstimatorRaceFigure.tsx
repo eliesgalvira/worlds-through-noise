@@ -18,6 +18,8 @@ const W = 470
 const H = 280
 /** The estimate axis; piles grow up from it. */
 const AXIS_Y = H - 40
+/** Generous width of one monospace label character, in viewBox units. */
+const LABEL_CHAR_W = 8.5
 const X_MIN = -0.3
 const X_MAX = 1.3
 
@@ -80,27 +82,59 @@ function EstimatorRaceFigure() {
   const [kind, setKind] = useState<NoiseKind>('gaussian')
   const [n, setN] = useState(64)
   const [seed, setSeed] = useState(1)
-  const [result, setResult] = useState<RaceResult>(() =>
-    runRace('gaussian', 64, 1),
-  )
+  // Empty until the first run: the student predicts before seeing a pile.
+  const [result, setResult] = useState<RaceResult | null>(null)
 
   const bins = 46
-  const meanHist = histogramOf(result.means, bins)
-  const midHist = histogramOf(result.midranges, bins)
+  const meanHist = histogramOf(result?.means ?? [], bins)
+  const midHist = histogramOf(result?.midranges ?? [], bins)
   // One fixed count scale for every N and noise, so a pile only changes
   // when its estimator does. A pile taller than the frame is clipped and
   // prints the count of its tallest bar.
-  const maxCount = RUNS * 0.3
+  const maxCount = RUNS * 0.2
   const barH = (count: number) => Math.min(count / maxCount, 1) * (AXIS_Y - 104)
   const clippedPeak = (hist: ReadonlyArray<number>) => {
     const peak = Math.max(...hist)
     return peak > maxCount ? [{ count: peak, i: hist.indexOf(peak) }] : []
   }
-  const meanStats = stats(result.means)
-  const midStats = stats(result.midranges)
+  const meanStats = stats(result?.means ?? [])
+  const midStats = stats(result?.midranges ?? [])
+  const readout = (stat: { mean: number; sd: number }) =>
+    result === null
+      ? '—'
+      : `${formatNumber(stat.mean - TRUTH, 3)}, ${formatNumber(stat.sd, 3)}`
 
   const xOf = (v: number) => 10 + ((v - X_MIN) / (X_MAX - X_MIN)) * (W - 20)
   const slotW = (W - 20) / bins
+
+  // Each bracket sits just above its own pile, at least one row apart.
+  const pileTop = (hist: ReadonlyArray<number>) =>
+    AXIS_Y - barH(Math.max(...hist))
+  let meanY = Math.max(pileTop(meanHist) - 14, 44)
+  let midY = Math.max(pileTop(midHist) - 14, 44)
+  if (Math.abs(meanY - midY) < 22) {
+    if (meanY <= midY) {
+      meanY = midY - 22
+    } else {
+      midY = meanY - 22
+    }
+  }
+  const bracketRows = [
+    {
+      name: 'sample mean',
+      stat: meanStats,
+      y: meanY,
+      stroke: 'stroke-estimate',
+      fill: 'fill-estimate',
+    },
+    {
+      name: 'midrange',
+      stat: midStats,
+      y: midY,
+      stroke: 'stroke-muted-foreground',
+      fill: 'fill-muted-foreground',
+    },
+  ]
 
   const rerun = (nextKind: NoiseKind, nextN: number) => {
     const nextSeed = seed + 1
@@ -167,17 +201,23 @@ function EstimatorRaceFigure() {
       readout={
         <>
           <ReadoutRow
-            label="Sample mean: bias $b$, spread $\sigma$"
-            value={`${formatNumber(meanStats.mean - TRUTH, 3)}, ${formatNumber(meanStats.sd, 3)}`}
+            label="Sample mean: measured bias $b$, spread $\sigma$"
+            value={readout(meanStats)}
             tone="estimate"
           />
           <ReadoutRow
-            label="Midrange: bias $b$, spread $\sigma$"
-            value={`${formatNumber(midStats.mean - TRUTH, 3)}, ${formatNumber(midStats.sd, 3)}`}
+            label="Midrange: measured bias $b$, spread $\sigma$"
+            value={readout(midStats)}
           />
           <ReadoutRow
             label="Lower MSE $= \sigma^2 + b^2$"
-            value={mse(meanStats) < mse(midStats) ? 'sample mean' : 'midrange'}
+            value={
+              result === null
+                ? '—'
+                : mse(meanStats) < mse(midStats)
+                  ? 'sample mean'
+                  : 'midrange'
+            }
           />
           <ReadoutNote>
             {kind === 'uniform'
@@ -246,43 +286,6 @@ function EstimatorRaceFigure() {
             </text>
           )),
         )}
-        {[
-          {
-            name: 'sample mean',
-            stat: meanStats,
-            y: 52,
-            stroke: 'stroke-estimate',
-            fill: 'fill-estimate',
-          },
-          {
-            name: 'midrange',
-            stat: midStats,
-            y: 88,
-            stroke: 'stroke-muted-foreground',
-            fill: 'fill-muted-foreground',
-          },
-        ].map(({ name, stat, y, stroke, fill }) => {
-          const left = xOf(Math.max(stat.mean - stat.sd, X_MIN))
-          const right = xOf(Math.min(stat.mean + stat.sd, X_MAX))
-          const center = xOf(stat.mean)
-          return (
-            <g key={stroke}>
-              <path
-                d={`M ${left} ${y - 4} V ${y + 4} M ${left} ${y} H ${right} M ${right} ${y - 4} V ${y + 4} M ${center} ${y - 6} V ${y + 6}`}
-                className={stroke}
-                strokeWidth={1.6}
-                fill="none"
-              />
-              <text
-                x={12}
-                y={y - 9}
-                className={`plot-halo font-mono plot-text-xs ${fill}`}
-              >
-                {name}: center and ±σ = {formatNumber(stat.sd, 3)}
-              </text>
-            </g>
-          )
-        })}
         <line
           x1={xOf(TRUTH)}
           y1={24}
@@ -292,6 +295,49 @@ function EstimatorRaceFigure() {
           strokeWidth={1.6}
           strokeDasharray="4 4"
         />
+        {result === null ? (
+          <text
+            x={W / 2}
+            y={AXIS_Y - 60}
+            textAnchor="middle"
+            className="fill-muted-foreground font-mono plot-text-sm"
+          >
+            Predict, then run the experiments
+          </text>
+        ) : (
+          bracketRows.map(({ name, stat, y, stroke, fill }) => {
+            const left = xOf(Math.max(stat.mean - stat.sd, X_MIN))
+            const right = xOf(Math.min(stat.mean + stat.sd, X_MAX))
+            const center = xOf(stat.mean)
+            const label = `${name} ±σ = ${formatNumber(stat.sd, 3)}`
+            // Beside the bracket when there is room, else above it.
+            const labelW = label.length * LABEL_CHAR_W
+            const place: { x: number; y: number; anchor: 'start' | 'end' } =
+              left - labelW - 6 >= 10
+                ? { x: left - 6, y: y + 4, anchor: 'end' }
+                : right + labelW + 6 <= W - 10
+                  ? { x: right + 6, y: y + 4, anchor: 'start' }
+                  : { x: 12, y: y - 9, anchor: 'start' }
+            return (
+              <g key={stroke}>
+                <path
+                  d={`M ${left} ${y - 4} V ${y + 4} M ${left} ${y} H ${right} M ${right} ${y - 4} V ${y + 4} M ${center} ${y - 6} V ${y + 6}`}
+                  className={stroke}
+                  strokeWidth={1.6}
+                  fill="none"
+                />
+                <text
+                  x={place.x}
+                  y={place.y}
+                  textAnchor={place.anchor}
+                  className={`plot-halo font-mono plot-text-xs ${fill}`}
+                >
+                  {label}
+                </text>
+              </g>
+            )
+          })
+        )}
         <line
           x1={10}
           y1={AXIS_Y}

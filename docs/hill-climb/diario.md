@@ -179,3 +179,22 @@ Qué cambió y qué defecto ataca:
 Regresión vista antes de lanzar: a 390 px, en D1, los rótulos de decisión, que ahora siguen al umbral, chocaban con «H1» y «H0». Se arregló en `434339b4` antes de lanzar.
 
 Lo que el banco enseñó sobre sí mismo: una captura de página entera agranda la ventana, y con ella cada unidad `svh`, así que la página se reorganizaba a mitad de captura (cuelgues de 30 s y teselas fuera de la página). `Plot` lee ahora su tope de alto de `--plot-max-h`, que el banco fija en píxeles. Además, un `ResizeObserver` por ecuación hacía que la captura del estado resuelto pasara de 37 s a más de 5 minutos; se cambió por una medida única al montar.
+
+Notas tras la ronda 1 (informes a las 00:46 y 00:47, auditorías limpias):
+
+| Tarea | 1a ancho          | 1a móvil | 1b ancho            | 1b móvil       |
+| ----- | ----------------- | -------- | ------------------- | -------------- |
+| T1    | 2                 | 2        | 1                   | 1              |
+| T2    | 1                 | 1        | 0 (pie de D5 falso) | 0              |
+| T3    | 0 (sombras de D3) | 0        | 1                   | 1              |
+| T4    | 1                 | 1        | 0 (frase √N en D4)  | 0              |
+| T5    | 2                 | 2        | no verificable      | no verificable |
+| T6    | **4**             | **4**    | **4**               | 3              |
+
+Cerrados en la ronda 1: DET-01, DET-03 (a medias, falta la línea que une la figura con la ecuación compleja), DET-08, DET-09, DET-10 (en parte), DET-12, DET-13 (en parte), DET-14 y DET-15. Abiertos nuevos: DET-18 (`bloquea`, el pie de D5 decía que las dos probabilidades suman las barras sombreadas), DET-19 (`bloquea`, «la separación es √N» contra √(N/2) en la ecuación de D4), DET-20 (cuerpo de la lección desalineado con la cabecera a 1440) y DET-21 (las lecturas lejos de su marca).
+
+## Detección: ronda 2
+
+Commits `0c3a9ac0` y el siguiente (marcas del ROC). Ataca DET-04 (la sombra de D3: las dos densidades proyectadas, con la SNR entre los centros), DET-18 y DET-19 (verificados a mano contra la propia ecuación), DET-03 (línea bajo la ecuación de D3), DET-02 (el ROC del examen redibujado en el enunciado, con el + calculado con el umbral MAP), DET-20 (un solo contenedor de 80 rem), DET-21 (valores junto a $P_{FA}$, $P_M$, γ y el punto del ROC), DET-16 (fuentes en inglés y sin «·»), DET-07 en las tarjetas (títulos con los términos del examen), D5 (barras de error con contorno y riesgo de Bayes) y la notación (μ, $P_D$). El brief prohíbe «;» como separador en la UI: los 67 «;» de la prosa de detección, estimación y procesos pasaron a punto.
+
+Un fallo mío visto antes de lanzar: el significado del control de D3 mostraba «mathbfh» porque escapé dos veces una barra en un atributo JSX. Quedó arreglado, y el test de guarda lo detecta desde ahora.

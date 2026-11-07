@@ -46,6 +46,7 @@ function BitVoteFigure() {
     0,
   )
   const pError = p0 * pFalseOne + p1 * pMissOne
+  const firstOne = decideOne.findIndex(Boolean)
   // Bayes risk in units of the cost of a false one (C10 = 1, C01 = ratio),
   // against plain majority vote, which ignores priors and costs.
   const risk = p0 * pFalseOne + costRatio * p1 * pMissOne
@@ -55,7 +56,11 @@ function BitVoteFigure() {
   const majorityRisk =
     p0 * tail(pmf0, majority) + costRatio * p1 * (1 - tail(pmf1, majority))
 
-  const maxPmf = Math.max(...pmf0, ...pmf1, 1e-9)
+  // Bars are weighted by prior and cost, so the rule decides 1 exactly
+  // where the amber bar is taller than the blue one.
+  const weight0 = pmf0.map((q) => p0 * q)
+  const weight1 = pmf1.map((q) => costRatio * p1 * q)
+  const maxPmf = Math.max(...weight0, ...weight1, 1e-9)
   const slot = (W - 40) / (COPIES + 1)
   const xOf = (k: number) => 20 + k * slot + slot / 2
   const barH = (p: number) => (p / maxPmf) * (H - 70)
@@ -134,8 +139,14 @@ function BitVoteFigure() {
     >
       <Legend
         items={[
-          { label: 'count of ones if bit = 0', swatchClass: 'stroke-h0' },
-          { label: 'count of ones if bit = 1', swatchClass: 'stroke-h1' },
+          {
+            label: '$P_0 \\Pr(k \\mid b{=}0)$',
+            swatchClass: 'stroke-h0',
+          },
+          {
+            label: '$P_1 C_{01} \\Pr(k \\mid b{=}1)$, with $C_{10} = 1$',
+            swatchClass: 'stroke-h1',
+          },
         ]}
       />
       <Plot
@@ -157,9 +168,9 @@ function BitVoteFigure() {
             ) : null}
             <rect
               x={xOf(k) - 14}
-              y={H - 32 - barH(pmf0[k] ?? 0)}
+              y={H - 32 - barH(weight0[k] ?? 0)}
               width={12}
-              height={barH(pmf0[k] ?? 0)}
+              height={barH(weight0[k] ?? 0)}
               className={
                 (decideOne[k] ?? false)
                   ? 'fill-h0 stroke-false-alarm'
@@ -170,9 +181,9 @@ function BitVoteFigure() {
             />
             <rect
               x={xOf(k) + 2}
-              y={H - 32 - barH(pmf1[k] ?? 0)}
+              y={H - 32 - barH(weight1[k] ?? 0)}
               width={12}
-              height={barH(pmf1[k] ?? 0)}
+              height={barH(weight1[k] ?? 0)}
               className={
                 (decideOne[k] ?? false) ? 'fill-h1' : 'fill-h1 stroke-h1-ink'
               }
@@ -187,20 +198,26 @@ function BitVoteFigure() {
             >
               k={k}
             </text>
-            <text
-              x={xOf(k)}
-              y={26}
-              textAnchor="middle"
-              className={
-                (decideOne[k] ?? false)
-                  ? 'fill-h1-ink font-mono plot-text-xs'
-                  : 'fill-h0 font-mono plot-text-xs'
-              }
-            >
-              {(decideOne[k] ?? false) ? '→1' : '→0'}
-            </text>
           </g>
         ))}
+        {firstOne >= 0 ? (
+          <text
+            x={20 + firstOne * slot + 6}
+            y={24}
+            className="fill-foreground font-mono plot-text-sm"
+          >
+            decide 1 →
+          </text>
+        ) : null}
+        {firstOne !== 0 ? (
+          <text
+            x={26}
+            y={24}
+            className="fill-muted-foreground font-mono plot-text-sm"
+          >
+            decide 0
+          </text>
+        ) : null}
         <line
           x1={16}
           y1={H - 32}
@@ -211,7 +228,7 @@ function BitVoteFigure() {
         />
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        <MathText text="Outlined bars are errors. $\Pr(\hat{b}{=}1 \mid b{=}0)$ adds the red-outlined blue bars inside the shaded region, and $\Pr(\hat{b}{=}0 \mid b{=}1)$ the outlined amber bars outside it. The minimum-risk rule is the shading with the lowest Bayes risk." />
+        <MathText text="Outlined bars are the errors: a blue bar in the shaded region (a 0 read as 1) or an amber bar outside it (a 1 read as 0). Their heights add up to the Bayes risk of the rule, and the rule keeps the shorter bar of each pair, so no other shading adds up to less." />
       </p>
     </FigureShell>
   )

@@ -101,7 +101,7 @@ function TwoWorldsFigure() {
   return (
     <FigureShell
       title="Two Gaussian hypotheses, one threshold on the sample mean"
-      instruction="Under $\mathcal{H}_1$ (anemia) the sample mean of ferritin is centered at $m_1 = 42$, below the healthy $m_0 = 58$, so the detector decides $\mathcal{H}_1$ below $\gamma$. Draw a patient and judge it, then raise $N$: both densities narrow as $\sigma/\sqrt{N}$ and both error areas shrink."
+      instruction="Under $\mathcal{H}_1$ (anemia) the sample mean of ferritin is centered at $m_1 = 42$, below the healthy $m_0 = 58$, so the detector decides $\mathcal{H}_1$ below $\gamma$. One measurement has standard deviation $\sigma = 11$. Draw a patient and judge it, then raise $N$: both densities narrow as $\sigma/\sqrt{N}$ and both error areas shrink."
       controls={
         <>
           <SliderControl
@@ -309,17 +309,17 @@ function TwoWorldsFigure() {
           sample mean of ferritin (drag to move γ)
         </text>
         <text
-          x={xOf(footOf(M1, -1))}
+          x={xOf(footOf(M1, -1)) - 4}
           y={Math.min(yOf(normalPdf(footOf(M1, -1), M1, sd)) - 6, H - 52)}
-          textAnchor="middle"
+          textAnchor="end"
           className="fill-h1-ink font-mono plot-text"
         >
           H1
         </text>
         <text
-          x={xOf(footOf(M0, +1))}
+          x={xOf(footOf(M0, +1)) + 4}
           y={Math.min(yOf(normalPdf(footOf(M0, +1), M0, sd)) - 6, H - 52)}
-          textAnchor="middle"
+          textAnchor="start"
           className="fill-h0 font-mono plot-text"
         >
           H0

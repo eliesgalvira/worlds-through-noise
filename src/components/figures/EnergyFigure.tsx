@@ -8,6 +8,7 @@ import {
   ReadoutRow,
   ReadoutNote,
   AxisTicks,
+  Sym,
 } from '@/components/figures/shared.tsx'
 import { formatPercentValue } from '@/components/figures/figure-utils.ts'
 import { linspace } from '@/domain/math/distributions.ts'
@@ -56,12 +57,20 @@ function EnergyFigure() {
           `${i === 0 ? 'M' : 'L'} ${xOf(p).toFixed(1)} ${yOf(density(p)).toFixed(1)}`,
       )
       .join(' ')
+  const tailOf = (density: (p: number) => number, from: number) => {
+    const grid = linspace(Math.min(from, X_MAX), X_MAX, 120)
+    const top = grid
+      .map(
+        (p, i) =>
+          `${i === 0 ? 'M' : 'L'} ${xOf(p).toFixed(1)} ${yOf(density(p)).toFixed(1)}`,
+      )
+      .join(' ')
+    return `${top} L ${xOf(X_MAX).toFixed(1)} ${H - 40} L ${xOf(from).toFixed(1)} ${H - 40} Z`
+  }
   const h0Path = pathOf(h0Density)
   const h1Path = pathOf(h1Density)
   const threshold = gamma / dof
 
-  // Two centre labels that would overlap split to either side of the gap.
-  const centersClose = xOf(1 + snr) - xOf(1) < 90
   return (
     <FigureShell
       title="Energy detector: the waveform is unknown"
@@ -155,6 +164,16 @@ function EnergyFigure() {
           className="stroke-muted-foreground"
           strokeWidth={1}
         />
+        <path
+          d={tailOf(h1Density, threshold)}
+          className="fill-detection"
+          opacity={0.2}
+        />
+        <path
+          d={tailOf(h0Density, threshold)}
+          className="fill-false-alarm"
+          opacity={0.5}
+        />
         <path d={h0Path} fill="none" className="stroke-h0" strokeWidth={2} />
         <path d={h1Path} fill="none" className="stroke-h1" strokeWidth={2} />
         <line
@@ -168,8 +187,17 @@ function EnergyFigure() {
         />
         <AxisTicks
           y={H - 40}
-          ticks={[0, 2, 3, 4].map((v) => ({ x: xOf(v), label: String(v) }))}
+          ticks={[0, 1, 2, 3, 4].map((v) => ({ x: xOf(v), label: String(v) }))}
         />
+        <text
+          x={xOf(threshold) + 4}
+          y={24}
+          className="fill-threshold stroke-card font-mono plot-text-sm"
+          strokeWidth={3}
+          paintOrder="stroke"
+        >
+          γ, jailer <Sym base="P" sub="D" /> {formatPercentValue(pdJailer)}
+        </text>
         <text
           x={W / 2}
           y={H - 4}
@@ -178,19 +206,20 @@ function EnergyFigure() {
         >
           average power y/N, in units of σ²
         </text>
+        <line
+          x1={xOf(1 + snr)}
+          y1={H - 40}
+          x2={xOf(1 + snr)}
+          y2={H - 48}
+          className="stroke-h1-ink"
+          strokeWidth={1.5}
+        />
         <text
-          x={xOf(1) - (centersClose ? 3 : 0)}
-          y={H - 46}
-          textAnchor={centersClose ? 'end' : 'middle'}
-          className="fill-h0 font-mono plot-text-sm"
-        >
-          σ²
-        </text>
-        <text
-          x={xOf(1 + snr) + (centersClose ? 3 : 0)}
-          y={H - 46}
-          textAnchor={centersClose ? 'start' : 'middle'}
-          className="fill-h1-ink font-mono plot-text-sm"
+          x={xOf(1 + snr) + 4}
+          y={H - 50}
+          className="fill-h1-ink stroke-card font-mono plot-text-sm"
+          strokeWidth={3}
+          paintOrder="stroke"
         >
           σ²+P
         </text>

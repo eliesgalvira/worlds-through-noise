@@ -38,7 +38,7 @@ export const detectionLesson: LessonRecord = {
           latex:
             'T(\\mathbf{x}) = \\tfrac{1}{N}\\mathbf{1}^T\\mathbf{x} \\sim \\mathcal{N}\\!\\left(m_i,\\ \\tfrac{\\sigma^2}{N}\\right) \\text{ under } \\mathcal{H}_i',
           caption:
-            'The $\\sqrt{N}$ tightening is the processing gain: $ENR = N(m_1 - m_0)^2/\\sigma^2$ grows linearly with $N$.',
+            'The $\\sqrt{N}$ tightening is the processing gain: the energy-to-noise ratio $ENR = N(m_1 - m_0)^2/\\sigma^2$ grows linearly with $N$.',
         },
       ],
       prediction: {
@@ -98,7 +98,7 @@ export const detectionLesson: LessonRecord = {
       object:
         'Move to signal space, where the whole observation vector is one point. The noise turns that point into a cloud around each hypothesis center — around $\\mathbf{0}$ when there is no pulse, around $A\\mathbf{p}$ when there is. White noise makes a round cloud. Colored noise makes a tilted ellipse, louder along some directions than others. And a linear detector is nothing but a direction to project onto: a shadow-line, to be chosen so that the shadows of the two clouds separate as cleanly as possible.',
       action:
-        'Hunt for that direction in the figure. Start with colored noise and the naive choice — project straight onto the pulse direction $\\mathbf{p}$ — and watch the two shadow histograms overlap, because $\\mathbf{p}$ leans toward the loud axis of the ellipse. Then drag the whitening slider, which squeezes the space by $\\mathbf{C}_w^{-1/2}$ until the ellipse becomes a circle. In the squeezed world the best direction is trivially “toward the (squeezed) pulse.” Undo the change of variables, and the composite direction you built with your hands is exactly $\\mathbf{C}_w^{-1}\\mathbf{p}$.',
+        'Hunt for that direction in the figure. Start with colored noise and the naive choice — project straight onto the pulse direction $\\mathbf{p}$ — and watch the two shadow curves overlap, because $\\mathbf{p}$ sits halfway between the loud and the quiet axis, so its shadow still collects loud noise. Then drag the whitening slider, which squeezes the space by $\\mathbf{C}_w^{-1/2}$ until the ellipse becomes a circle. In the squeezed world the best direction is trivially “toward the (squeezed) pulse.” Undo the change of variables, and the composite direction you built with your hands is exactly $\\mathbf{C}_w^{-1}\\mathbf{p}$.',
       payoff:
         'That one mental move — make the noise round first, then match — generates the whole family of results, and none of them needs to be memorized separately. The matched filter is the already-white case ($\\mathbf{h} \\propto \\mathbf{p}$). The generalized matched filter is the colored case ($\\mathbf{h} \\propto \\mathbf{C}_w^{-1}\\mathbf{p}$). The Mahalanobis distance is simply length measured after whitening. And pulse design becomes obvious: put your transmit energy along the eigen-direction where the noise is quietest, which gives $SNR_{opt} = 2|A|^2 E_p/\\lambda_{\\min}$.',
       equations: [
@@ -116,7 +116,7 @@ export const detectionLesson: LessonRecord = {
           latex:
             'y = |\\mathbf{p}^H\\mathbf{C}_w^{-1}\\mathbf{x}|^2, \\qquad \\gamma_{|\\cdot|} = -\\sigma_z^2 \\ln P_{FA}',
           caption:
-            '$|z|^2$ of a complex Gaussian is exponential — a chi-squared with 2 degrees of freedom.',
+            'Here $z = \\mathbf{p}^H\\mathbf{C}_w^{-1}\\mathbf{x}$ and $\\sigma_z^2 = \\mathbf{p}^H\\mathbf{C}_w^{-1}\\mathbf{p}$. $|z|^2$ of a complex Gaussian is exponential, a chi-squared with 2 degrees of freedom.',
         },
       ],
       prediction: {
@@ -142,7 +142,7 @@ export const detectionLesson: LessonRecord = {
       object:
         'Picture two loudness gauges. Under $\\mathcal{H}_0$ the measured average power settles near $\\sigma_w^2$. Under $\\mathcal{H}_1$, near $\\sigma_w^2 + P$. Each gauge reading is a random bump — chi-squared is just the honest name for the distribution of a sum of squared Gaussians — skewed and wide when few samples have been summed, tightening like $\\sqrt{N}$ as samples accumulate.',
       action:
-        'Slide $N$ in the figure and watch the two bumps separate — slowly. Their centers stay a fixed distance $P$ apart while their widths shrink like $1/\\sqrt{N}$, so distinguishability grows only like $\\sqrt{N}\\,(P/\\sigma_w^2)$. Compare that with a known waveform (D1, D3), where distinguishability is $\\sqrt{N P/\\sigma_w^2}$: at low SNR $\\sqrt{P/\\sigma_w^2}$ is far larger than $P/\\sigma_w^2$. Then set $P$ below the $\\sigma_w^2 N^{-1/2}$ waterline and watch the bumps refuse to separate: the transmission has become statistically invisible.',
+        'Slide $N$ in the figure and watch the two bumps separate — slowly. Their centers stay a fixed distance $P$ apart while their widths shrink like $1/\\sqrt{N}$, so distinguishability grows only like $\\sqrt{N/2}\\,(P/\\sigma_w^2)$. Compare that with a known waveform (D1, D3), where distinguishability is $\\sqrt{N P/\\sigma_w^2}$: at low SNR $\\sqrt{P/\\sigma_w^2}$ is far larger than $P/\\sigma_w^2$. Then set $P$ below the $\\sigma_w^2 N^{-1/2}$ waterline and watch the bumps refuse to separate: the transmission has become statistically invisible.',
       payoff:
         'Now the square-root law is not a paradox but a picture: the jailer, who must detect an unknown signal, works with $\\sqrt{N/2}\\,P/\\sigma_w^2$, while the intended receiver, who knows the waveform and can correlate against it, works with $\\sqrt{N P/\\sigma_w^2}$ — power for one, the square root of power for the other. Choose the transmit power to decay like $P \\propto N^{-2/3}$ and, as $N$ grows, the jailer’s detection probability collapses onto his false-alarm rate while the receiver’s climbs to 1. The chi-squared tables were never exotic — they are the shape a sum of squares must have.',
       equations: [
@@ -150,7 +150,7 @@ export const detectionLesson: LessonRecord = {
           sentence:
             'With only power to go on, the NP test is the measured energy against a chi-squared tail.',
           latex:
-            'y = \\sum_{n=0}^{N-1} x^2(n), \\qquad P_D = Q_{\\chi_N}\\!\\left(\\frac{Q_{\\chi_N}^{-1}(P_{FA})}{1 + \\mathrm{SNR}}\\right)',
+            'y = \\sum_{n=0}^{N-1} x^2(n), \\qquad P_D = Q_{\\chi^2_N}\\!\\left(\\frac{Q_{\\chi^2_N}^{-1}(P_{FA})}{1 + \\mathrm{SNR}}\\right)',
           caption:
             '$SNR = P/\\sigma_w^2$. For complex data the degrees of freedom double.',
         },
@@ -183,7 +183,7 @@ export const detectionLesson: LessonRecord = {
       object:
         'Make it concrete: a single bit is stored five times on an unreliable disk that flips each copy independently with probability $\\varepsilon$. The detector reads the five copies and counts the ones — the count $k$ is the entire evidence. The prior $\\Pr(\\text{bit} = 1)$ and the two mistake prices are weights placed on the two pans of a scale BEFORE the evidence arrives. The count then tips it.',
       action:
-        'In the figure, move the prior and watch the decision threshold on the count slide: at $\\Pr(1) = 0.5$ the rule is a plain majority vote. Make ones rare and suddenly three ones out of five is no longer convincing. Make missing a one expensive and the threshold slides back the other way. The error probability is computed exactly as you move — and the minimum-error rule is the one your hands settle on.',
+        'In the figure, move the prior and watch the decision threshold on the count slide: at $P_1 = 0.5$ the rule is a plain majority vote. Make ones rare and suddenly three ones out of five is no longer convincing. Make missing a one expensive and the threshold slides back the other way. The error probability is computed exactly as you move — and the minimum-error rule is the one your hands settle on.',
       payoff:
         'The unification is the payoff: Neyman–Pearson, MAP and minimum Bayes risk are one detector with three stories about where the threshold sits. NP fixes it by a false-alarm budget, MAP by the prior odds, Bayes risk by prior odds times the price ratio — and the likelihood-ratio side of the test never changes. On the exam, phrases like “equally likely bits” or “a miss costs ten times more” are nothing but instructions for where to put $\\gamma$.',
       equations: [
@@ -191,7 +191,7 @@ export const detectionLesson: LessonRecord = {
           sentence:
             'Same likelihood ratio, threshold set by priors and prices rather than by a budget.',
           latex:
-            '\\frac{f(\\mathbf{x}\\mid\\mathcal{H}_1)}{f(\\mathbf{x}\\mid\\mathcal{H}_0)} \\;\\gtrless\\; \\frac{P_0\\,(C_{10}-C_{00})}{P_1\\,(C_{01}-C_{11})} = \\gamma_{MRB}',
+            '\\frac{f(\\mathbf{x}\\mid\\mathcal{H}_1)}{f(\\mathbf{x}\\mid\\mathcal{H}_0)} \\;\\underset{\\mathcal{H}_0}{\\overset{\\mathcal{H}_1}{\\gtrless}}\\; \\frac{P_0\\,(C_{10}-C_{00})}{P_1\\,(C_{01}-C_{11})} = \\eta_{MRB}',
           caption:
             'Minimum Bayes risk (MRB, the course’s acronym): with equal costs it reduces to MAP, and MAP with equal priors reduces to maximum likelihood.',
         },
@@ -562,7 +562,7 @@ export const detectionLesson: LessonRecord = {
             },
             {
               title: 'Differentiate and recognize an eigenproblem',
-              body: 'Setting the gradient to zero says the optimal $\\mathbf{a}$ is an eigenvector of $\\mathbf{C}^{-1}$ with eigenvalue $\\mu$.',
+              body: 'Setting the gradient to zero says the optimal $\\mathbf{a}$ is an eigenvector of $\\mathbf{C}^{-1}$ with eigenvalue $\\mu$. The printed solution calls this multiplier $\\gamma$, the same letter as the threshold.',
               latex:
                 '\\frac{\\partial L}{\\partial \\mathbf{a}} = 2\\mathbf{C}^{-1}\\mathbf{a} - 2\\mu\\mathbf{a} = \\mathbf{0} \\;\\Longrightarrow\\; \\mathbf{C}^{-1}\\mathbf{a}_{op} = \\mu\\,\\mathbf{a}_{op}',
             },

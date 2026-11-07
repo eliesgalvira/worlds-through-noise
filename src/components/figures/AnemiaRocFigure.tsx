@@ -68,7 +68,7 @@ function AnemiaRocFigure() {
           return (
             <g
               key={mark.label}
-              className="fill-none stroke-false-alarm"
+              className="fill-none stroke-foreground"
               strokeWidth={2}
             >
               {mark.label === '+' ? (
@@ -112,13 +112,11 @@ function AnemiaRocFigure() {
           false-alarm probability <Sym base="P" sub="FA" />
         </text>
         <text
-          x={12}
-          y={(H - 40) / 2}
-          textAnchor="middle"
-          transform={`rotate(-90 12 ${String((H - 40) / 2)})`}
+          x={48}
+          y={14}
           className="fill-muted-foreground font-mono plot-text-sm"
         >
-          detection probability <Sym base="P" sub="D" />
+          ↑ detection probability <Sym base="P" sub="D" />
         </text>
       </Plot>
       <figcaption className="mt-2 text-center text-xs leading-5 text-muted-foreground">

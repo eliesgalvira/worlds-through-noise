@@ -23,7 +23,7 @@ const CY = H / 2
 const NOISE_ANGLE = Math.PI / 6
 const S_LOUD = 2.1
 const S_QUIET = 0.65
-// Pulse direction: 75° — deliberately leaning into the loud axis.
+// Pulse direction: 75°, halfway between the loud (30°) and quiet (120°) axes.
 const PULSE_ANGLE = (75 * Math.PI) / 180
 const PULSE_LEN = 2.6
 
@@ -76,7 +76,8 @@ function deflection(theta: number, t: number): number {
   return (mean * mean) / Math.max(sd * sd, 1e-9)
 }
 
-const SHADOW_H = 120
+const SHADOW_W = 300
+const SHADOW_H = 220
 
 function WhitenMatchFigure() {
   const [whiten, setWhiten] = useState(0)
@@ -120,7 +121,7 @@ function WhitenMatchFigure() {
   // their exact Gaussian densities on an axis wide enough for any θ.
   const proj = shadow(theta, t)
   const span = Math.max(Math.abs(proj.mean) + 3.5 * proj.sd, 4)
-  const sx = (v: number) => 20 + ((v + span) / (2 * span)) * (W - 40)
+  const sx = (v: number) => 20 + ((v + span) / (2 * span)) * (SHADOW_W - 40)
   const shadowPath = (center: number) =>
     linspace(-span, span, 160)
       .map(
@@ -138,6 +139,7 @@ function WhitenMatchFigure() {
     },
     t,
   )
+  const whitened = t > 0
   const loudNow = S_LOUD ** (1 - t)
   const quietNow = S_QUIET ** (1 - t)
   const extent =
@@ -156,7 +158,7 @@ function WhitenMatchFigure() {
 
   return (
     <FigureShell
-      title="Whitening and the matched filter $\mathbf{h} \propto \mathbf{C}_w^{-1}\mathbf{p}$"
+      title="Whitening, then the matched filter"
       instruction="Blue: noise-only observations. Amber: pulse plus noise. Rotate the projection direction $\mathbf{h}$ and read the shadow below: with colored noise the best $\mathbf{h}$ is not $\mathbf{p}$. Then whiten the noise and look for the best direction again."
       controls={
         <>
@@ -199,12 +201,10 @@ function WhitenMatchFigure() {
           <ReadoutRow
             label="$SNR_y$ along $\theta$"
             value={formatNumber(d2, 2)}
-            tone="h1"
           />
           <ReadoutRow
             label="Best possible: $d_M^2 = \Delta\boldsymbol{\mu}^T\mathbf{C}^{-1}\Delta\boldsymbol{\mu}$"
             value={formatNumber(best.value, 2)}
-            tone="good"
           />
           <ReadoutRow
             label="Your fraction of optimal"
@@ -228,235 +228,237 @@ function WhitenMatchFigure() {
             swatchClass: 'stroke-cursor',
           },
           {
-            label:
-              'optimal $\\mathbf{h} \\propto \\mathbf{C}_w^{-1}\\mathbf{p}$',
+            label: 'optimal $\\mathbf{h}$ for this picture',
             swatchClass: 'stroke-foreground',
             dash: true,
           },
         ]}
       />
-      <Plot
-        viewW={W}
-        viewH={H}
-        ariaLabel="Two observation clouds under colored noise with a rotatable projection direction"
-        onDragPoint={(x, y) => {
-          const angle = Math.atan2(CY - y, x - CX)
-          const deg = ((angle * 180) / Math.PI + 360) % 180
-          setThetaDeg(Math.round(deg))
-        }}
-      >
-        <line
-          x1={8}
-          y1={CY}
-          x2={W - 8}
-          y2={CY}
-          className="stroke-border"
-          strokeWidth={1}
-        />
-        <line
-          x1={CX}
-          y1={8}
-          x2={CX}
-          y2={H - 8}
-          className="stroke-border"
-          strokeWidth={1}
-        />
-        <text
-          x={W - 10}
-          y={CY - 6}
-          textAnchor="end"
-          className="fill-muted-foreground font-mono plot-text-xs"
+      <div className="grid items-center gap-3 sm:grid-cols-[1.4fr_1fr]">
+        <Plot
+          viewW={W}
+          viewH={H}
+          ariaLabel="Two observation clouds under colored noise with a rotatable projection direction"
+          onDragPoint={(x, y) => {
+            const angle = Math.atan2(CY - y, x - CX)
+            const deg = ((angle * 180) / Math.PI + 360) % 180
+            setThetaDeg(Math.round(deg))
+          }}
         >
-          x[0]
-        </text>
-        <text
-          x={CX + 6}
-          y={18}
-          className="fill-muted-foreground font-mono plot-text-xs"
+          <line
+            x1={8}
+            y1={CY}
+            x2={W - 8}
+            y2={CY}
+            className="stroke-border"
+            strokeWidth={1}
+          />
+          <line
+            x1={CX}
+            y1={8}
+            x2={CX}
+            y2={H - 8}
+            className="stroke-border"
+            strokeWidth={1}
+          />
+          <text
+            x={W - 10}
+            y={CY - 6}
+            textAnchor="end"
+            className="fill-muted-foreground font-mono plot-text-xs"
+          >
+            x[0]
+          </text>
+          <text
+            x={CX + 6}
+            y={18}
+            className="fill-muted-foreground font-mono plot-text-xs"
+          >
+            x[1]
+          </text>
+          <ellipse
+            cx={CX}
+            cy={CY}
+            rx={loudNow * scale}
+            ry={quietNow * scale}
+            transform={`rotate(${String(-(NOISE_ANGLE * 180) / Math.PI)} ${String(CX)} ${String(CY)})`}
+            fill="none"
+            className="stroke-h0"
+            strokeWidth={1.2}
+            strokeDasharray="2 3"
+          />
+          <text
+            x={CX + Math.cos(NOISE_ANGLE) * loudNow * scale + 4}
+            y={CY - Math.sin(NOISE_ANGLE) * loudNow * scale}
+            className="fill-h0 stroke-card font-mono plot-text-xs"
+            strokeWidth={3}
+            paintOrder="stroke"
+          >
+            {whitened ? (
+              'noise (1σ)'
+            ) : (
+              <>
+                <Sym base="C" sub="w" /> (1σ)
+              </>
+            )}
+          </text>
+          {clouds.h0.map((p, i) => {
+            const s = toScreen(morph(p, t))
+            return (
+              <circle
+                key={`a${i}`}
+                cx={s.x}
+                cy={s.y}
+                r={2.2}
+                className="fill-h0"
+                opacity={0.5}
+              />
+            )
+          })}
+          {clouds.h1.map((p, i) => {
+            const s = toScreen(morph(p, t))
+            return (
+              <circle
+                key={`b${i}`}
+                cx={s.x}
+                cy={s.y}
+                r={2.2}
+                className="fill-h1"
+                opacity={0.55}
+              />
+            )
+          })}
+          <line
+            x1={2 * CX - bestEnd.x}
+            y1={2 * CY - bestEnd.y}
+            x2={bestEnd.x}
+            y2={bestEnd.y}
+            className="stroke-foreground"
+            strokeWidth={1.4}
+            strokeDasharray="5 4"
+          />
+          <text
+            x={bestEnd.x + (bestEnd.x >= CX ? -4 : 4)}
+            y={bestEnd.y + (bestEnd.y < CY ? 14 : -6)}
+            textAnchor={bestEnd.x >= CX ? 'end' : 'start'}
+            className="fill-foreground stroke-card font-mono plot-text-xs"
+            strokeWidth={3}
+            paintOrder="stroke"
+          >
+            {whitened ? (
+              'optimal h'
+            ) : (
+              <>
+                optimal ∝ <Sym base="C" sub="w" />
+                ⁻¹p
+              </>
+            )}
+          </text>
+          <line
+            x1={2 * CX - dirEnd.x}
+            y1={2 * CY - dirEnd.y}
+            x2={dirEnd.x}
+            y2={dirEnd.y}
+            className="stroke-cursor"
+            strokeWidth={2}
+          />
+          <path
+            d={`M ${String(CX + 30)} ${String(CY)} A 30 30 0 0 0 ${String(CX + 30 * Math.cos(theta))} ${String(CY - 30 * Math.sin(theta))}`}
+            fill="none"
+            className="stroke-cursor"
+            strokeWidth={1.5}
+          />
+          <text
+            x={CX + 40 * Math.cos(theta / 2)}
+            y={CY - 40 * Math.sin(theta / 2) + 4}
+            className="fill-cursor font-mono plot-text-sm"
+          >
+            θ
+          </text>
+          <line
+            x1={CX}
+            y1={CY}
+            x2={meanPoint.x}
+            y2={meanPoint.y}
+            className="stroke-h1-ink"
+            strokeWidth={1.5}
+          />
+          <circle
+            cx={CX}
+            cy={CY}
+            r={4}
+            className="fill-h0 stroke-card"
+            strokeWidth={1.5}
+          />
+          <circle
+            cx={meanPoint.x}
+            cy={meanPoint.y}
+            r={4.5}
+            className="fill-h1 stroke-card"
+            strokeWidth={1.5}
+          />
+          <text
+            x={meanPoint.x + 8}
+            y={meanPoint.y - 6}
+            className="fill-h1-ink stroke-card font-mono plot-text-sm"
+            strokeWidth={3}
+            paintOrder="stroke"
+          >
+            {whitened ? 'Δμ (whitened)' : 'Δμ = Ap'}
+          </text>
+        </Plot>
+        <Plot
+          viewW={SHADOW_W}
+          viewH={SHADOW_H}
+          ariaLabel="The two clouds projected onto the chosen direction"
         >
-          x[1]
-        </text>
-        <ellipse
-          cx={CX}
-          cy={CY}
-          rx={loudNow * scale}
-          ry={quietNow * scale}
-          transform={`rotate(${String(-(NOISE_ANGLE * 180) / Math.PI)} ${String(CX)} ${String(CY)})`}
-          fill="none"
-          className="stroke-h0"
-          strokeWidth={1.2}
-          strokeDasharray="2 3"
-        />
-        <text
-          x={CX + Math.cos(NOISE_ANGLE) * loudNow * scale + 4}
-          y={CY - Math.sin(NOISE_ANGLE) * loudNow * scale}
-          className="fill-h0 stroke-card font-mono plot-text-xs"
-          strokeWidth={3}
-          paintOrder="stroke"
-        >
-          <Sym base="C" sub="w" /> (1σ)
-        </text>
-        {clouds.h0.map((p, i) => {
-          const s = toScreen(morph(p, t))
-          return (
-            <circle
-              key={`a${i}`}
-              cx={s.x}
-              cy={s.y}
-              r={2.2}
-              className="fill-h0"
-              opacity={0.5}
-            />
-          )
-        })}
-        {clouds.h1.map((p, i) => {
-          const s = toScreen(morph(p, t))
-          return (
-            <circle
-              key={`b${i}`}
-              cx={s.x}
-              cy={s.y}
-              r={2.2}
-              className="fill-h1"
-              opacity={0.55}
-            />
-          )
-        })}
-        <line
-          x1={2 * CX - bestEnd.x}
-          y1={2 * CY - bestEnd.y}
-          x2={bestEnd.x}
-          y2={bestEnd.y}
-          className="stroke-foreground"
-          strokeWidth={1.4}
-          strokeDasharray="5 4"
-        />
-        <text
-          x={bestEnd.x + (bestEnd.x >= CX ? -4 : 4)}
-          y={bestEnd.y + (bestEnd.y < CY ? 14 : -6)}
-          textAnchor={bestEnd.x >= CX ? 'end' : 'start'}
-          className="fill-foreground stroke-card font-mono plot-text-xs"
-          strokeWidth={3}
-          paintOrder="stroke"
-        >
-          optimal ∝ <Sym base="C" sub="w" />
-          ⁻¹p
-        </text>
-        <line
-          x1={2 * CX - dirEnd.x}
-          y1={2 * CY - dirEnd.y}
-          x2={dirEnd.x}
-          y2={dirEnd.y}
-          className="stroke-cursor"
-          strokeWidth={2}
-        />
-        <path
-          d={`M ${String(CX + 30)} ${String(CY)} A 30 30 0 0 0 ${String(CX + 30 * Math.cos(theta))} ${String(CY - 30 * Math.sin(theta))}`}
-          fill="none"
-          className="stroke-cursor"
-          strokeWidth={1.5}
-        />
-        <text
-          x={CX + 40 * Math.cos(theta / 2)}
-          y={CY - 40 * Math.sin(theta / 2) + 4}
-          className="fill-cursor font-mono plot-text-sm"
-        >
-          θ
-        </text>
-        <line
-          x1={CX}
-          y1={CY}
-          x2={meanPoint.x}
-          y2={meanPoint.y}
-          className="stroke-h1-ink"
-          strokeWidth={1.5}
-        />
-        <circle
-          cx={CX}
-          cy={CY}
-          r={4}
-          className="fill-h0 stroke-card"
-          strokeWidth={1.5}
-        />
-        <text
-          x={CX - 8}
-          y={CY + 16}
-          textAnchor="end"
-          className="fill-h0 stroke-card font-mono plot-text-xs"
-          strokeWidth={3}
-          paintOrder="stroke"
-        >
-          0
-        </text>
-        <circle
-          cx={meanPoint.x}
-          cy={meanPoint.y}
-          r={4.5}
-          className="fill-h1 stroke-card"
-          strokeWidth={1.5}
-        />
-        <text
-          x={meanPoint.x + 8}
-          y={meanPoint.y - 6}
-          className="fill-h1-ink stroke-card font-mono plot-text-sm"
-          strokeWidth={3}
-          paintOrder="stroke"
-        >
-          Δμ = Ap
-        </text>
-      </Plot>
-      <Plot
-        viewW={W}
-        viewH={SHADOW_H}
-        ariaLabel="The two clouds projected onto the chosen direction"
-        className="mt-2"
-      >
-        <text
-          x={10}
-          y={16}
-          className="fill-muted-foreground font-mono plot-text-sm"
-        >
-          shadow on your direction: y = hᵀx
-        </text>
-        <line
-          x1={20}
-          y1={SHADOW_H - 28}
-          x2={W - 20}
-          y2={SHADOW_H - 28}
-          className="stroke-muted-foreground"
-          strokeWidth={1}
-        />
-        <path
-          d={shadowPath(0)}
-          fill="none"
-          className="stroke-h0"
-          strokeWidth={2}
-        />
-        <path
-          d={shadowPath(proj.mean)}
-          fill="none"
-          className="stroke-h1"
-          strokeWidth={2}
-        />
-        <line
-          x1={sx(0)}
-          y1={SHADOW_H - 22}
-          x2={sx(proj.mean)}
-          y2={SHADOW_H - 22}
-          className="stroke-foreground"
-          strokeWidth={1}
-        />
-        <text
-          x={(sx(0) + sx(proj.mean)) / 2}
-          y={SHADOW_H - 8}
-          textAnchor="middle"
-          className="fill-foreground font-mono plot-text-sm"
-        >
-          SNR = {formatNumber(d2, 2)}
-        </text>
-      </Plot>
+          <text
+            x={10}
+            y={16}
+            className="fill-muted-foreground font-mono plot-text-sm"
+          >
+            shadow on your direction: y = hᵀx
+          </text>
+          <line
+            x1={20}
+            y1={SHADOW_H - 28}
+            x2={SHADOW_W - 20}
+            y2={SHADOW_H - 28}
+            className="stroke-muted-foreground"
+            strokeWidth={1}
+          />
+          <path
+            d={shadowPath(0)}
+            fill="none"
+            className="stroke-h0"
+            strokeWidth={2}
+          />
+          <path
+            d={shadowPath(proj.mean)}
+            fill="none"
+            className="stroke-h1"
+            strokeWidth={2}
+          />
+          <line
+            x1={sx(0)}
+            y1={SHADOW_H - 22}
+            x2={sx(proj.mean)}
+            y2={SHADOW_H - 22}
+            className="stroke-foreground"
+            strokeWidth={1}
+          />
+          <text
+            x={(sx(0) + sx(proj.mean)) / 2}
+            y={SHADOW_H - 8}
+            textAnchor="middle"
+            className="fill-foreground font-mono plot-text-sm"
+          >
+            SNR = {formatNumber(d2, 2)}
+          </text>
+        </Plot>
+      </div>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        <MathText text="The shadow's separation is $SNR_y = (\mathbf{h}^T A\mathbf{p})^2 / \mathbf{h}^T\mathbf{C}_w\mathbf{h}$ for the current picture. Drag on the cloud to aim $\mathbf{h}$." />
+        <MathText text="The shadow's separation is (difference of means)² / variance of $y$ in the picture shown. With no whitening that is $SNR_y = (\mathbf{h}^T A\mathbf{p})^2 / \mathbf{h}^T\mathbf{C}_w\mathbf{h}$. Drag on the cloud to aim $\mathbf{h}$." />
       </p>
     </FigureShell>
   )

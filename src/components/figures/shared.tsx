@@ -12,9 +12,10 @@ type FigureShellProps = {
 }
 
 /**
- * Frame for every interactive figure. The visual takes the full width; the
- * controls sit right under it, so the figure and the hand that moves it stay
- * in one view; readouts follow as numbers with their labels.
+ * Frame for every interactive figure. The visual takes the full width, the
+ * computed readouts sit right under it, next to what they measure, and the
+ * controls follow, so figure, numbers and the hand that moves them share one
+ * view.
  */
 function FigureShell({
   title,
@@ -35,14 +36,14 @@ function FigureShell({
         <MathText text={instruction} />
       </p>
       <div className="mt-4 min-w-0">{children}</div>
-      <div className="mt-5 grid items-start justify-items-start gap-x-8 gap-y-5 border-t border-border pt-5 sm:grid-cols-2 lg:grid-cols-3">
-        {controls}
-      </div>
       {readout !== undefined ? (
-        <div className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-border pt-4 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-border pt-4 sm:grid-cols-3 lg:grid-cols-4">
           {readout}
         </div>
       ) : null}
+      <div className="mt-4 grid items-start justify-items-start gap-x-8 gap-y-5 border-t border-border pt-5 sm:grid-cols-2 lg:grid-cols-3">
+        {controls}
+      </div>
     </section>
   )
 }

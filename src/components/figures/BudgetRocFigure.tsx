@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { SliderControl } from '@/components/SliderControl.tsx'
 import {
   FigureShell,
@@ -6,6 +6,7 @@ import {
   Plot,
   ReadoutRow,
   AxisTicks,
+  Hatch,
   Sym,
 } from '@/components/figures/shared.tsx'
 import {
@@ -24,6 +25,7 @@ function BudgetRocFigure() {
   const [alphaPct, setAlphaPct] = useState(10)
   const [enrDb, setEnrDb] = useState(6)
 
+  const hatchId = `hatch-${useId().replace(/[^a-zA-Z0-9]/g, '')}`
   const alpha = alphaPct / 100
   const enr = 10 ** (enrDb / 10)
   const separation = Math.sqrt(enr)
@@ -142,11 +144,8 @@ function BudgetRocFigure() {
             className="fill-detection"
             opacity={0.22}
           />
-          <path
-            d={tail(0, gamma)}
-            className="fill-false-alarm"
-            opacity={0.85}
-          />
+          <Hatch id={hatchId} className="stroke-false-alarm" />
+          <path d={tail(0, gamma)} fill={`url(#${hatchId})`} />
           <path
             d={density(0)}
             fill="none"

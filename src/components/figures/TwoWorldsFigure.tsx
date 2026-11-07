@@ -162,6 +162,7 @@ function TwoWorldsFigure() {
           <ReadoutRow
             label="$P_M = 1 - P_D$"
             value={formatPercentValue(pMiss)}
+            tone="h1"
           />
           {draw !== null ? (
             <p className="pt-1 text-xs leading-5 text-foreground">

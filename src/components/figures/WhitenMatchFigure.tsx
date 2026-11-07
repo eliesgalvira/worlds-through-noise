@@ -77,7 +77,7 @@ function deflection(theta: number, t: number): number {
 }
 
 const SHADOW_W = 300
-const SHADOW_H = 300
+const SHADOW_H = 260
 
 function WhitenMatchFigure() {
   const [whiten, setWhiten] = useState(0)
@@ -288,8 +288,8 @@ function WhitenMatchFigure() {
             strokeDasharray="2 3"
           />
           <text
-            x={CX + Math.cos(NOISE_ANGLE) * loudNow * scale + 4}
-            y={CY - Math.sin(NOISE_ANGLE) * loudNow * scale}
+            x={CX + Math.cos(NOISE_ANGLE) * 2.6 * loudNow * scale}
+            y={CY - Math.sin(NOISE_ANGLE) * 2.6 * loudNow * scale}
             className="fill-h0 plot-halo font-mono plot-text-xs"
           >
             {whitened ? (
@@ -447,7 +447,7 @@ function WhitenMatchFigure() {
             textAnchor="middle"
             className="fill-foreground font-mono plot-text-sm"
           >
-            <Sym base="SNR" sub="y" /> = {formatNumber(d2, 2)}
+            gap of means, <Sym base="SNR" sub="y" /> = {formatNumber(d2, 2)}
           </text>
         </Plot>
       </div>

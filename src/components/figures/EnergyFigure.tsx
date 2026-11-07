@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { SliderControl } from '@/components/SliderControl.tsx'
 import { MathText } from '@/components/MathText.tsx'
 import {
@@ -8,6 +8,7 @@ import {
   ReadoutRow,
   ReadoutNote,
   AxisTicks,
+  Hatch,
   Sym,
 } from '@/components/figures/shared.tsx'
 import { formatPercentValue } from '@/components/figures/figure-utils.ts'
@@ -31,6 +32,7 @@ function EnergyFigure() {
   const [alphaPct, setAlphaPct] = useState(10)
 
   // Real samples, as in the June 2026 final this module follows.
+  const hatchId = `hatch-${useId().replace(/[^a-zA-Z0-9]/g, '')}`
   const dof = samples
   const snr = snrPct / 100
   const alpha = alphaPct / 100
@@ -70,6 +72,8 @@ function EnergyFigure() {
   const h0Path = pathOf(h0Density)
   const h1Path = pathOf(h1Density)
   const threshold = gamma / dof
+  // Mode of the average power under H1: (N − 2)/N in σ² units, times 1 + SNR.
+  const h1Mode = (Math.max(dof - 2, 0.2) / dof) * (1 + snr)
   // Labels flip to the left of their mark when the right side has no room
   // or when the power mark sits right next to the threshold.
   const labelLeft = xOf(threshold) > W * 0.55
@@ -131,6 +135,7 @@ function EnergyFigure() {
           <ReadoutRow
             label="$P_{FA}$ (both)"
             value={formatPercentValue(alpha)}
+            tone="bad"
           />
           <ReadoutNote>
             <MathText text="When the jailer's $P_D \approx \alpha$, the transmission is statistically invisible. The energy detector notices powers only down to $P \propto 1/\sqrt{N}$, while the receiver that knows the waveform detects it down to $P \propto 1/N$." />
@@ -173,12 +178,40 @@ function EnergyFigure() {
           className="fill-detection"
           opacity={0.2}
         />
-        <path
-          d={tailOf(h0Density, threshold)}
-          className="fill-false-alarm"
-          opacity={0.5}
-        />
+        <Hatch id={hatchId} className="stroke-false-alarm" />
+        <path d={tailOf(h0Density, threshold)} fill={`url(#${hatchId})`} />
         <path d={h0Path} fill="none" className="stroke-h0" strokeWidth={2} />
+        <text
+          x={xOf(threshold) + (labelLeft ? -6 : 6)}
+          y={H - 56}
+          textAnchor={labelLeft ? 'end' : 'start'}
+          className="plot-halo fill-detection font-mono plot-text-sm"
+        >
+          jailer <Sym base="P" sub="D" />
+        </text>
+        <text
+          x={xOf(threshold) + (labelLeft ? -6 : 6)}
+          y={H - 44}
+          textAnchor={labelLeft ? 'end' : 'start'}
+          className="plot-halo fill-false-alarm font-mono plot-text-sm"
+        >
+          <Sym base="P" sub="FA" />
+        </text>
+        <text
+          x={xOf(Math.max(dof - 2, 0.2) / dof) + 6}
+          y={yOf(h0Density(Math.max(dof - 2, 0.2) / dof)) + 14}
+          className="plot-halo fill-h0 font-mono plot-text-sm"
+        >
+          H0
+        </text>
+        <text
+          x={xOf(h1Mode) + 6}
+          y={yOf(h1Density(h1Mode)) + 14}
+          className="plot-halo fill-h1-ink font-mono plot-text-sm"
+        >
+          H1
+        </text>
+
         <path d={h1Path} fill="none" className="stroke-h1" strokeWidth={2} />
         <line
           x1={xOf(threshold)}
@@ -210,7 +243,7 @@ function EnergyFigure() {
           textAnchor="middle"
           className="fill-muted-foreground font-mono plot-text-sm"
         >
-          average power y/N, in units of σ²
+          average power y/N, in units of σ<tspan baselineShift="sub">w</tspan>²
         </text>
         <line
           x1={xOf(1 + snr)}

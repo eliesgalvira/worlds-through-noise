@@ -46,7 +46,6 @@ function BitVoteFigure() {
     (acc, q, k) => acc + (!(decideOne[k] ?? false) ? q : 0),
     0,
   )
-  const pError = p0 * pFalseOne + p1 * pMissOne
   const firstOne = decideOne.findIndex(Boolean)
   // Bayes risk in units of the cost of a false one (C10 = 1, C01 = ratio),
   // against plain majority vote, which ignores priors and costs.
@@ -122,10 +121,6 @@ function BitVoteFigure() {
             value={formatPercentValue(pMissOne)}
             tone="h1"
           />
-          <ReadoutRow
-            label="Total error probability"
-            value={formatPercentValue(pError)}
-          />
           <ReadoutRow label="Bayes risk" value={formatNumber(risk, 3)} />
           <ReadoutRow
             label="Bayes risk, majority vote"
@@ -142,12 +137,13 @@ function BitVoteFigure() {
       <Legend
         items={[
           {
-            label: '$P_0 \\Pr(k \\mid b{=}0)$',
+            label: '$P_0 \\Pr(k \\mid \\mathcal{H}_0)$, bit 0',
             swatchClass: 'fill-h0',
             square: true,
           },
           {
-            label: '$P_1 C_{01} \\Pr(k \\mid b{=}1)$, with $C_{10} = 1$',
+            label:
+              '$P_1 C_{01} \\Pr(k \\mid \\mathcal{H}_1)$, bit 1, with $C_{10} = 1$',
             swatchClass: 'fill-h1',
             square: true,
           },
@@ -233,7 +229,7 @@ function BitVoteFigure() {
             y={24}
             className="fill-muted-foreground font-mono plot-text-sm"
           >
-            decide 0
+            ← decide 0
           </text>
         ) : null}
         <line

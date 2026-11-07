@@ -206,7 +206,7 @@ function Legend({ items }: LegendProps) {
                 x2="19"
                 y2="3"
                 strokeWidth="2.5"
-                strokeDasharray={item.dash === true ? '3 3' : undefined}
+                strokeDasharray={item.dash === true ? '5 3' : undefined}
                 className={item.swatchClass}
               />
             </svg>
@@ -258,4 +258,46 @@ function Sym({ base, sub }: { readonly base: string; readonly sub: string }) {
   )
 }
 
-export { AxisTicks, FigureShell, Legend, Plot, ReadoutNote, ReadoutRow, Sym }
+/**
+ * Diagonal hatching for an area drawn over another one (α over P_D): the
+ * lower fill stays visible between the lines instead of mixing into brown.
+ */
+function Hatch({
+  id,
+  className,
+}: {
+  readonly id: string
+  readonly className: string
+}) {
+  return (
+    <defs>
+      <pattern
+        id={id}
+        width="5"
+        height="5"
+        patternUnits="userSpaceOnUse"
+        patternTransform="rotate(45)"
+      >
+        <line
+          x1="0"
+          y1="0"
+          x2="0"
+          y2="5"
+          strokeWidth="2.2"
+          className={className}
+        />
+      </pattern>
+    </defs>
+  )
+}
+
+export {
+  AxisTicks,
+  FigureShell,
+  Hatch,
+  Legend,
+  Plot,
+  ReadoutNote,
+  ReadoutRow,
+  Sym,
+}

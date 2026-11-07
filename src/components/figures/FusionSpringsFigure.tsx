@@ -46,7 +46,7 @@ function FusionSpringsFigure() {
 
   const xOf = (v: number) => 10 + ((v - X_MIN) / (X_MAX - X_MIN)) * (W - 20)
   // Fixed scale, so a spring only changes when its own σ changes.
-  const springWidth = (w: number) => 0.75 + (w / MAX_WEIGHT) * 9
+  const springWidth = (w: number) => 0.75 + Math.sqrt(w / MAX_WEIGHT) * 9
 
   return (
     <FigureShell
@@ -81,9 +81,7 @@ function FusionSpringsFigure() {
               setPriorOn((on) => !on)
             }}
           >
-            <MathText
-              text={`${priorOn ? 'Remove' : 'Add'} the prior spring at $\\mu_\\theta = ${PRIOR_MEAN}$`}
-            />
+            {priorOn ? 'Remove the prior spring' : 'Add the prior spring'}
           </Button>
           {priorOn ? (
             <SliderControl
@@ -207,7 +205,7 @@ function FusionSpringsFigure() {
           <g>
             <line
               x1={xOf(PRIOR_MEAN)}
-              y1={H - 24}
+              y1={H - 14}
               x2={xOf(estimate)}
               y2={H - 58}
               className="stroke-prior"
@@ -216,14 +214,14 @@ function FusionSpringsFigure() {
             />
             <circle
               cx={xOf(PRIOR_MEAN)}
-              cy={H - 24}
+              cy={H - 14}
               r={5}
               className="fill-prior stroke-card"
               strokeWidth={1.5}
             />
             <text
               x={xOf(PRIOR_MEAN) + 9}
-              y={H - 20}
+              y={H - 10}
               className="fill-prior font-mono plot-text-sm"
             >
               <Sym base="μ" sub="θ" /> = {PRIOR_MEAN}

@@ -19,7 +19,7 @@ const W = 470
 const H = 300
 /** Left edge of the plot, leaving room for the score ticks. */
 const LEFT = 40
-const RIGHT = W - 10
+const RIGHT = W - 16
 const AXIS_Y = H - 46
 const TOP = 16
 
@@ -55,7 +55,8 @@ function PeriodogramFigure() {
 
   const xOf = (f: number) => LEFT + (f / 0.5) * (RIGHT - LEFT)
   const yOf = (s: number) => AXIS_Y - (s / maxSpec) * (AXIS_Y - TOP)
-  const scoreTicks = niceTicks(maxSpec, 4)
+  // Zero sits on the frequency axis, which already labels it.
+  const scoreTicks = niceTicks(maxSpec, 5).filter((tick) => tick > 0)
 
   return (
     <FigureShell

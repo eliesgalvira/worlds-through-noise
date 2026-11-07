@@ -82,9 +82,14 @@ function EstimatorRaceFigure() {
   const meanHist = histogramOf(result.means, bins)
   const midHist = histogramOf(result.midranges, bins)
   // One fixed count scale for every N and noise, so a pile only changes
-  // when its estimator does; the tallest bars are clipped at the top.
+  // when its estimator does. A pile taller than the frame is clipped and
+  // prints the count of its tallest bar.
   const maxCount = RUNS * 0.3
-  const barH = (count: number) => Math.min(count / maxCount, 1) * (H - 60)
+  const barH = (count: number) => Math.min(count / maxCount, 1) * (H - 70)
+  const clippedPeak = (hist: ReadonlyArray<number>) => {
+    const peak = Math.max(...hist)
+    return peak > maxCount ? [{ count: peak, i: hist.indexOf(peak) }] : []
+  }
   const meanStats = stats(result.means)
   const midStats = stats(result.midranges)
 
@@ -213,6 +218,22 @@ function EstimatorRaceFigure() {
           className="stroke-h1"
           strokeWidth={2}
         />
+        {[
+          { hist: meanHist, className: 'fill-h0' },
+          { hist: midHist, className: 'fill-h1-ink' },
+        ].flatMap(({ hist, className }) =>
+          clippedPeak(hist).map(({ count, i }) => (
+            <text
+              key={`${className}${i}`}
+              x={10 + (i + 0.5) * slotW}
+              y={36}
+              textAnchor="middle"
+              className={`plot-halo font-mono plot-text-xs ${className}`}
+            >
+              {count}↑
+            </text>
+          )),
+        )}
         <line
           x1={xOf(TRUTH)}
           y1={12}

@@ -28,4 +28,11 @@ describe('renderWrappedMath', () => {
     expect(html).not.toContain('katex-display')
     expect(html).toContain('newline')
   })
+
+  it('starts a new line at each spaced approx or implies step', () => {
+    for (const step of ['\\approx', '\\Rightarrow', '\\Longrightarrow']) {
+      const html = renderWrappedMath(`a \\;${step}\\; b`)
+      expect(html).toContain('newline')
+    }
+  })
 })

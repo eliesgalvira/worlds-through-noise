@@ -129,18 +129,6 @@ export function sampleAutocorrelation(
   return out
 }
 
-/** Periodogram value |Σ x(n) e^{-j2πfn}|² / N at one frequency. */
-export function periodogramAt(x: ReadonlyArray<number>, f: number): number {
-  let re = 0
-  let im = 0
-  for (let n = 0; n < x.length; n += 1) {
-    const angle = -2 * Math.PI * f * n
-    re += (x[n] ?? 0) * Math.cos(angle)
-    im += (x[n] ?? 0) * Math.sin(angle)
-  }
-  return (re * re + im * im) / x.length
-}
-
 /** PSD of the biased autocorrelation estimate, evaluated on a frequency grid. */
 export function psdFromAutocorrelation(
   r: ReadonlyArray<number>,

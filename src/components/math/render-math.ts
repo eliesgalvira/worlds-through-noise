@@ -25,12 +25,15 @@ export function renderDisplayMath(latex: string): string {
  * narrow for it: each formula a \\qquad separates starts a new line, so do
  * the ≈ and ⟹ steps, and the browser may break a long line after a relation.
  */
+/** A spaced ≈ or ⇒ step, e.g. "\\;\\approx\\;", which starts a new wrapped line. */
+const STEP_RELATION =
+  /\\;\s*\\(approx|Rightarrow|Longrightarrow|implies)\s*\\;/g
+
 export function renderWrappedMath(latex: string): string {
   return katex.renderToString(
     `\\displaystyle ${latex
       .replaceAll('\\qquad', '\\\\')
-      .replaceAll('\\;\\approx\\;', '\\\\ \\approx ')
-      .replaceAll('\\;\\Longrightarrow\\;', '\\\\ \\Longrightarrow ')}`,
+      .replace(STEP_RELATION, '\\\\ \\$1 ')}`,
     { displayMode: false, throwOnError: false, strict: 'ignore' },
   )
 }

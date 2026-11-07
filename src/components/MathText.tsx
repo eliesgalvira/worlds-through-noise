@@ -59,6 +59,39 @@ const WRAP_SCALE = 0.85
 const MIN_EQUATION_SCALE = 0.6
 
 /**
+ * Refits of every mounted equation, run together in one frame when a font
+ * finishes loading: KaTeX's fonts often start loading only after the first
+ * layout, when fonts.ready has already resolved. One document listener for
+ * all equations instead of one each.
+ */
+const refits = new Set<() => void>()
+let refitQueued = false
+function refitAll() {
+  if (refitQueued) {
+    return
+  }
+  refitQueued = true
+  requestAnimationFrame(() => {
+    refitQueued = false
+    refits.forEach((refit) => {
+      refit()
+    })
+  })
+}
+function watchFonts(refit: () => void): () => void {
+  if (refits.size === 0) {
+    document.fonts.addEventListener('loadingdone', refitAll)
+  }
+  refits.add(refit)
+  return () => {
+    refits.delete(refit)
+    if (refits.size === 0) {
+      document.fonts.removeEventListener('loadingdone', refitAll)
+    }
+  }
+}
+
+/**
  * A display-mode KaTeX equation. When it is wider than its box (a long
  * solution step on a phone), it shrinks a little, then breaks into lines
  * after its relations. Only a piece still too wide at 60 % scrolls.
@@ -91,13 +124,16 @@ function MathBlock({ latex, boxed = false, className }: MathBlockProps) {
         box.style.fontSize = `${String(scale * 100)}%`
       }
     }
+    // Rendered only for an equation that turns out too wide.
+    let wrapped: string | null = null
     const fit = () => {
       box.innerHTML = html.__html
       shrink(WRAP_SCALE)
       const wrap = box.scrollWidth > box.clientWidth + 1
       box.toggleAttribute('data-wrapped', wrap)
       if (wrap) {
-        box.innerHTML = renderWrappedMath(latex)
+        wrapped ??= renderWrappedMath(latex)
+        box.innerHTML = wrapped
         shrink(MIN_EQUATION_SCALE)
       }
       // Still too wide at the smallest size: fade the right edge so the eye
@@ -117,12 +153,10 @@ function MathBlock({ latex, boxed = false, className }: MathBlockProps) {
       },
       () => undefined,
     )
-    // KaTeX's fonts often start loading only after the first layout, when
-    // fonts.ready has already resolved: refit when a font load finishes.
-    document.fonts.addEventListener('loadingdone', fit)
+    const unwatch = watchFonts(fit)
     return () => {
       live = false
-      document.fonts.removeEventListener('loadingdone', fit)
+      unwatch()
     }
   }, [latex, html])
 

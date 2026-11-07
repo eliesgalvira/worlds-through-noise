@@ -11,6 +11,7 @@ import {
   AxisTicks,
 } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
+import { bias, mse } from '@/domain/math/estimation.ts'
 import { gaussian, makeRng } from '@/domain/math/kernel.ts'
 
 const TRUTH = 0.5
@@ -65,8 +66,9 @@ function stats(values: ReadonlyArray<number>): { mean: number; sd: number } {
   return { mean, sd: Math.sqrt(variance) }
 }
 
-function mse({ mean, sd }: { mean: number; sd: number }): number {
-  return sd * sd + (mean - TRUTH) * (mean - TRUTH)
+/** MSE of a pile of estimates around the truth, from its measured stats. */
+function raceMse({ mean, sd }: { mean: number; sd: number }): number {
+  return mse(bias(mean, TRUTH), sd * sd)
 }
 
 function histogramOf(
@@ -215,7 +217,7 @@ function EstimatorRaceFigure() {
             value={
               result === null
                 ? '—'
-                : mse(meanStats) < mse(midStats)
+                : raceMse(meanStats) < raceMse(midStats)
                   ? 'sample mean'
                   : 'midrange'
             }
@@ -223,7 +225,7 @@ function EstimatorRaceFigure() {
           <ReadoutNote>
             {kind === 'uniform' &&
             result !== null &&
-            mse(midStats) < mse(meanStats)
+            raceMse(midStats) < raceMse(meanStats)
               ? 'Both noises have variance 1. The ranking flipped with the distribution: “best estimator” is a property of the pair.'
               : 'Both noises have variance 1.'}
           </ReadoutNote>

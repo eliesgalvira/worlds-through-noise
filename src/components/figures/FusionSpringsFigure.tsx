@@ -11,6 +11,7 @@ import {
   Sym,
 } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
+import { sampleMean } from '@/domain/math/estimation.ts'
 
 const W = 470
 const H = 260
@@ -19,8 +20,11 @@ const X_MAX = 70
 
 const SENSOR_READINGS = [44, 53, 58]
 const PRIOR_MEAN = 38
-/** Stiffest spring the controls allow: σ = 0.8 gives 1/σ² ≈ 1.56. */
-const MAX_WEIGHT = 1 / (0.8 * 0.8)
+/** Smallest sensor noise the sliders allow, and so the stiffest spring. */
+const SIGMA_MIN = 0.8
+const MAX_WEIGHT = 1 / (SIGMA_MIN * SIGMA_MIN)
+/** Height of the sensor readings above the axis. */
+const READING_Y = 40
 
 function FusionSpringsFigure() {
   const [sigmas, setSigmas] = useState<ReadonlyArray<number>>([2, 3.5, 5])
@@ -47,8 +51,7 @@ function FusionSpringsFigure() {
   const xOf = (v: number) => 10 + ((v - X_MIN) / (X_MAX - X_MIN)) * (W - 20)
   // The θ̂ label goes on the side with fewer springs, and left of the
   // data-only ring when the prior is on.
-  const readingsMean =
-    SENSOR_READINGS.reduce((a, b) => a + b, 0) / SENSOR_READINGS.length
+  const readingsMean = sampleMean(SENSOR_READINGS)
   const labelLeft = priorOn || estimate < readingsMean
   // Fixed scale, so a spring only changes when its own σ changes.
   const springWidth = (w: number) => 0.75 + Math.sqrt(w / MAX_WEIGHT) * 9
@@ -65,7 +68,7 @@ function FusionSpringsFigure() {
               label={`Sensor ${String(index + 1)} noise (reads ${String(reading)})`}
               variable={`σ${String(index + 1)}`}
               value={sigmas[index] ?? 1}
-              min={0.8}
+              min={SIGMA_MIN}
               max={12}
               step={0.1}
               {...(index === 0
@@ -191,7 +194,7 @@ function FusionSpringsFigure() {
           humidity θ
         </text>
         {SENSOR_READINGS.map((reading, index) => {
-          const y = 40
+          const y = READING_Y
           return (
             <g key={reading}>
               <line

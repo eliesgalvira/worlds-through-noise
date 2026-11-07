@@ -4,6 +4,7 @@ import { MathText } from '@/components/MathText.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
 import {
   AxisTicks,
+  AxisTicksY,
   FigureShell,
   Legend,
   Plot,
@@ -19,6 +20,8 @@ const TRUTH = 1
 const W = 640
 /** Left margin for the vertical-axis numbers, clear of the curve. */
 const LEFT = 40
+/** Hypothetical re-runs whose peaks fill the wobble strip. */
+const RERUNS = 40
 const H = 404
 /** Bottom of the curve area, where the θ axis runs. */
 const AXIS_Y = 214
@@ -63,11 +66,11 @@ function CurvatureFigure() {
     SCORE_Y - ((information * (sampleMean - theta)) / SCORE_MAX) * SCORE_HALF
   const beyondAxis = sample.filter((x) => x < T_MIN || x > T_MAX).length
 
-  // Wobble strip: peak positions over 40 independent hypothetical samples.
+  // Wobble strip: peak positions over RERUNS independent hypothetical samples.
   const peaks = useMemo(() => {
     const rng = makeRng(seed + 5000)
     const out: Array<number> = []
-    for (let k = 0; k < 40; k += 1) {
+    for (let k = 0; k < RERUNS; k += 1) {
       const draws = gaussianVector(rng, n)
       out.push(TRUTH + (sigma * draws.reduce((a, b) => a + b, 0)) / n)
     }
@@ -154,7 +157,7 @@ function CurvatureFigure() {
             value={formatNumber(crbStd, 3)}
           />
           <ReadoutRow
-            label="Std of the 40 peaks (bottom strip)"
+            label={`Std of the ${String(RERUNS)} peaks (bottom strip)`}
             value={formatNumber(peakStd, 3)}
           />
           <ReadoutRow
@@ -217,17 +220,13 @@ function CurvatureFigure() {
           <text x={12} y={16} stroke="none" className="font-mono plot-text-xs">
             ln f − peak
           </text>
-          {[0, -5, -10].map((tick) => (
-            <text
-              key={tick}
-              x={12}
-              y={yOf(tick) + 3}
-              stroke="none"
-              className="font-mono plot-text-xs"
-            >
-              {tick === 0 ? '0' : `−${String(-tick)}`}
-            </text>
-          ))}
+          <AxisTicksY
+            x={LEFT}
+            ticks={[0, -5, -10].map((tick) => ({
+              y: yOf(tick),
+              label: tick === 0 ? '0' : `−${String(-tick)}`,
+            }))}
+          />
         </g>
         <path
           d={curvePath}
@@ -355,7 +354,7 @@ function CurvatureFigure() {
           y={AXIS_Y + 168}
           className="fill-muted-foreground font-mono plot-text-xs"
         >
-          40 re-run peaks: std {formatNumber(peakStd, 3)}
+          {RERUNS} re-run peaks: std {formatNumber(peakStd, 3)}
           {peaksBeyond > 0 ? `, ${String(peaksBeyond)} beyond the axis` : ''}
         </text>
         <line

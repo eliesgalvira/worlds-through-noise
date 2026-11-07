@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
 import {
   AxisTicks,
+  AxisTicksY,
   FigureShell,
   Legend,
   Plot,
@@ -18,6 +19,9 @@ import {
 } from '@/domain/math/kernel.ts'
 
 const TRUE_FREQ = 0.21
+/** Band of candidate frequencies the bank sweeps, in cycles/sample. */
+const F_FROM = 0.005
+const F_TO = 0.495
 const AMPLITUDE = 1
 const W = 470
 const H = 372
@@ -50,32 +54,30 @@ function PeriodogramFigure() {
   // About eight points per 1/N, so the drawn peak reaches the value the
   // readouts report even at the largest N.
   const frequencies = useMemo(
-    () => linspace(0.005, 0.495, Math.max(220, Math.ceil(0.49 * 8 * n))),
+    () =>
+      linspace(F_FROM, F_TO, Math.max(220, Math.ceil((F_TO - F_FROM) * 8 * n))),
     [n],
   )
-  const spectrum = useMemo(
-    () => frequencies.map((f) => complexPeriodogramAt(signal, f)),
-    [signal, frequencies],
-  )
-  const maxSpec = Math.max(...spectrum, 1e-9)
-  const peakIndex = spectrum.reduce(
-    (bestIdx, v, i) => (v > (spectrum[bestIdx] ?? 0) ? i : bestIdx),
-    0,
-  )
-  // The display grid is coarser than the main lobe at large N: refine the
-  // peak on a fine grid around the best grid point before reading it out.
-  const coarseStep = 0.49 / (frequencies.length - 1)
-  const peak = linspace(
-    (frequencies[peakIndex] ?? 0) - coarseStep,
-    (frequencies[peakIndex] ?? 0) + coarseStep,
-    41,
-  ).reduce(
-    (best, f) => {
-      const score = complexPeriodogramAt(signal, f)
-      return score > best.score ? { f, score } : best
-    },
-    { f: frequencies[peakIndex] ?? 0, score: maxSpec },
-  )
+  const { spectrum, maxSpec, peak } = useMemo(() => {
+    const values = frequencies.map((f) => complexPeriodogramAt(signal, f))
+    const best = values.reduce(
+      (bestIdx, v, i) => (v > (values[bestIdx] ?? 0) ? i : bestIdx),
+      0,
+    )
+    const top = Math.max(...values, 1e-9)
+    // The grid is coarser than the main lobe at large N: refine the peak on
+    // a fine grid around the best grid point before reading it out.
+    const fBest = frequencies[best] ?? 0
+    const step = (F_TO - F_FROM) / (frequencies.length - 1)
+    const refined = linspace(fBest - step, fBest + step, 41).reduce(
+      (acc, f) => {
+        const value = complexPeriodogramAt(signal, f)
+        return value > acc.value ? { f, value } : acc
+      },
+      { f: fBest, value: top },
+    )
+    return { spectrum: values, maxSpec: top, peak: refined }
+  }, [signal, frequencies])
   const fMl = peak.f
   const candidateScore = complexPeriodogramAt(signal, candidate)
 
@@ -172,7 +174,7 @@ function PeriodogramFigure() {
           />
           <ReadoutRow
             label="Amplitude $|\hat{A}_{ML}|$"
-            value={formatNumber(Math.sqrt(peak.score / n), 2)}
+            value={formatNumber(Math.sqrt(peak.value / n), 2)}
             tone="estimate"
           />
           <ReadoutRow
@@ -274,26 +276,13 @@ function PeriodogramFigure() {
         />
         <g className="fill-muted-foreground stroke-muted-foreground">
           <line x1={LEFT} y1={TOP} x2={LEFT} y2={AXIS_Y} strokeWidth={1} />
-          {matchTicks.map((tick) => (
-            <g key={tick}>
-              <line
-                x1={LEFT - 4}
-                y1={yOf(tick)}
-                x2={LEFT}
-                y2={yOf(tick)}
-                strokeWidth={1}
-              />
-              <text
-                x={LEFT - 6}
-                y={yOf(tick) + 3}
-                textAnchor="end"
-                stroke="none"
-                className="font-mono plot-text-xs"
-              >
-                {formatNumber(tick, tick < 1 ? 1 : 0)}
-              </text>
-            </g>
-          ))}
+          <AxisTicksY
+            x={LEFT}
+            ticks={matchTicks.map((tick) => ({
+              y: yOf(tick),
+              label: formatNumber(tick, tick < 1 ? 1 : 0),
+            }))}
+          />
           <text
             x={LEFT + 8}
             y={TOP - 14}

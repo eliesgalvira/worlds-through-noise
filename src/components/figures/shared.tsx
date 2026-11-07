@@ -263,6 +263,34 @@ function AxisTicks({ y, ticks }: AxisTicksProps) {
   )
 }
 
+type AxisTicksYProps = {
+  /** x of the vertical axis, in viewBox units. */
+  readonly x: number
+  readonly ticks: ReadonlyArray<{ readonly y: number; readonly label: string }>
+}
+
+/** Small tick marks with their numbers left of a vertical plot axis. */
+function AxisTicksY({ x, ticks }: AxisTicksYProps) {
+  return (
+    <g className="fill-muted-foreground stroke-muted-foreground">
+      {ticks.map((tick) => (
+        <g key={tick.label}>
+          <line x1={x - 4} y1={tick.y} x2={x} y2={tick.y} strokeWidth={1} />
+          <text
+            x={x - 6}
+            y={tick.y + 3}
+            textAnchor="end"
+            stroke="none"
+            className="font-mono plot-text-xs"
+          >
+            {tick.label}
+          </text>
+        </g>
+      ))}
+    </g>
+  )
+}
+
 /** A symbol with a subscript inside SVG text, e.g. P with FA. */
 function Sym({ base, sub }: { readonly base: string; readonly sub: string }) {
   return (
@@ -310,6 +338,7 @@ function Hatch({
 
 export {
   AxisTicks,
+  AxisTicksY,
   ControlRow,
   FigureShell,
   Hatch,

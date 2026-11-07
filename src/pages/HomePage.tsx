@@ -10,7 +10,7 @@ function HomePage() {
   const { home, labels, manifest } = currentCourse
 
   return (
-    <div className="mx-auto max-w-6xl px-4 sm:px-6">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6">
       <section className="pb-14 pt-16 lg:pt-24">
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
           {manifest.eyebrow}
@@ -77,7 +77,7 @@ function HomePage() {
                       <MathText text={entry.tagline} />
                     </p>
                     <p className="mt-2 font-mono text-xs text-muted-foreground">
-                      {lesson.modules.map((m) => m.id).join(' · ')} —{' '}
+                      {lesson.modules.map((m) => m.id).join(', ')} —{' '}
                       {lesson.modules.length} figures,{' '}
                       {lesson.workedProblems.length} exam problems worked step
                       by step

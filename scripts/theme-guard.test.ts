@@ -29,3 +29,42 @@ describe('theme guard', () => {
     expect(offenders).toEqual([])
   })
 })
+
+describe('copy guard', () => {
+  it('never uses a middle dot as a separator in UI text', () => {
+    const offenders = sources(SRC).flatMap((path) =>
+      readFileSync(path, 'utf8')
+        .split('\n')
+        .flatMap((line, index) => {
+          const code = line.trim()
+          const comment =
+            code.startsWith('//') ||
+            code.startsWith('*') ||
+            code.startsWith('/*') ||
+            code.startsWith('{/*')
+          return !comment && / · /.test(code)
+            ? [`${path.slice(SRC.length)}:${String(index + 1)}`]
+            : []
+        }),
+    )
+    expect(offenders).toEqual([])
+  })
+})
+
+describe('KaTeX guard', () => {
+  it('uses single backslashes in double-quoted JSX attributes', () => {
+    // JSX attributes do no escape processing: "\\mathbf" renders as text.
+    const offenders = sources(SRC)
+      .filter((path) => path.endsWith('.tsx'))
+      .flatMap((path) =>
+        readFileSync(path, 'utf8')
+          .split('\n')
+          .flatMap((line, index) =>
+            /\w="[^"]*\\\\[a-zA-Z]/.test(line)
+              ? [`${path.slice(SRC.length)}:${String(index + 1)}`]
+              : [],
+          ),
+      )
+    expect(offenders).toEqual([])
+  })
+})

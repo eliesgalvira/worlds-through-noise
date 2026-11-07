@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, ChevronDown, RotateCcw } from 'lucide-react'
 import { MathBlock, MathText } from '@/components/MathText.tsx'
+import { StatementFigure } from '@/course/StatementFigure.tsx'
 import type { ProblemPartRecord, WorkedProblemRecord } from '@/domain/types.ts'
 import { cn } from '@/lib/utils.ts'
 
@@ -150,7 +151,12 @@ function WorkedProblem({ problem, className }: WorkedProblemProps) {
         </p>
         <div className="mt-2 space-y-3">
           {problem.statement.map((block, index) =>
-            block.kind === 'math' ? (
+            block.kind === 'figure' ? (
+              <StatementFigure
+                key={`${String(index)}-${block.key}`}
+                figureKey={block.key}
+              />
+            ) : block.kind === 'math' ? (
               <MathBlock
                 key={`${String(index)}-${block.content.slice(0, 24)}`}
                 latex={block.content}

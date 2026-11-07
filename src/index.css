@@ -225,6 +225,13 @@
  * Figure text keeps one apparent size on screen whatever the viewBox: Plot
  * sets --plot-px to viewBox units per CSS pixel of its rendered width.
  */
+/* A paper-colored outline that keeps SVG text legible over curves and dots. */
+@utility plot-halo {
+  stroke: var(--card);
+  stroke-width: 3px;
+  paint-order: stroke;
+}
+
 @utility plot-text-xs {
   font-size: calc(10px * var(--plot-px, 1));
 }

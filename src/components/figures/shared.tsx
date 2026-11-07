@@ -12,9 +12,10 @@ type FigureShellProps = {
 }
 
 /**
- * Frame for every interactive figure. The visual takes the full width; the
- * controls sit right under it, so the figure and the hand that moves it stay
- * in one view; readouts follow as numbers with their labels.
+ * Frame for every interactive figure. The visual takes the full width, the
+ * computed readouts sit right under it, next to what they measure, and the
+ * controls follow, so figure, numbers and the hand that moves them share one
+ * view.
  */
 function FigureShell({
   title,
@@ -35,14 +36,14 @@ function FigureShell({
         <MathText text={instruction} />
       </p>
       <div className="mt-4 min-w-0">{children}</div>
-      <div className="mt-5 grid items-start justify-items-start gap-x-8 gap-y-5 border-t border-border pt-5 sm:grid-cols-2 lg:grid-cols-3">
-        {controls}
-      </div>
       {readout !== undefined ? (
-        <div className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-border pt-4 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-border pt-4 sm:grid-cols-3 lg:grid-cols-4">
           {readout}
         </div>
       ) : null}
+      <div className="mt-4 grid items-start justify-items-start gap-x-8 gap-y-5 border-t border-border pt-5 sm:grid-cols-2 lg:grid-cols-3">
+        {controls}
+      </div>
     </section>
   )
 }
@@ -58,7 +59,7 @@ type PlotProps = {
 
 /**
  * SVG plot surface with optional pointer dragging in viewBox coordinates. It
- * never grows taller than about half the window, and it publishes
+ * never grows taller than `--plot-max-h` (about half the window), and it publishes
  * `--plot-px` (viewBox units per CSS pixel) so the `plot-text-*` utilities
  * render at the same apparent size in every figure and at every width.
  */
@@ -110,7 +111,7 @@ function Plot({
       role="img"
       aria-label={ariaLabel}
       className={cn(
-        'mx-auto block w-full max-w-[calc(55svh*var(--plot-aspect))] select-none rounded-md border border-border bg-card',
+        'mx-auto block w-full max-w-[calc(var(--plot-max-h,55svh)*var(--plot-aspect))] select-none rounded-md border border-border bg-card',
         onDragPoint !== undefined && 'cursor-crosshair touch-none',
         className,
       )}
@@ -183,6 +184,8 @@ type LegendProps = {
     readonly label: string
     readonly swatchClass: string
     readonly dash?: boolean
+    /** Bars get a filled square instead of a line. */
+    readonly square?: boolean
   }>
 }
 
@@ -191,17 +194,23 @@ function Legend({ items }: LegendProps) {
     <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
       {items.map((item) => (
         <span key={item.label} className="inline-flex items-center gap-1.5">
-          <svg viewBox="0 0 20 6" className="h-1.5 w-5" aria-hidden="true">
-            <line
-              x1="1"
-              y1="3"
-              x2="19"
-              y2="3"
-              strokeWidth="2.5"
-              strokeDasharray={item.dash === true ? '3 3' : undefined}
-              className={item.swatchClass}
-            />
-          </svg>
+          {item.square === true ? (
+            <svg viewBox="0 0 10 10" className="size-2.5" aria-hidden="true">
+              <rect width="10" height="10" className={item.swatchClass} />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 20 6" className="h-1.5 w-5" aria-hidden="true">
+              <line
+                x1="1"
+                y1="3"
+                x2="19"
+                y2="3"
+                strokeWidth="2.5"
+                strokeDasharray={item.dash === true ? '5 3' : undefined}
+                className={item.swatchClass}
+              />
+            </svg>
+          )}
           <MathText text={item.label} />
         </span>
       ))}
@@ -209,4 +218,86 @@ function Legend({ items }: LegendProps) {
   )
 }
 
-export { FigureShell, Plot, ReadoutRow, ReadoutNote, Legend }
+type AxisTicksProps = {
+  /** Baseline y of the axis, in viewBox units. */
+  readonly y: number
+  readonly ticks: ReadonlyArray<{ readonly x: number; readonly label: string }>
+}
+
+/** Small tick marks with their numbers under a horizontal plot axis. */
+function AxisTicks({ y, ticks }: AxisTicksProps) {
+  return (
+    <g className="fill-muted-foreground stroke-muted-foreground">
+      {ticks.map((tick) => (
+        <g key={tick.label}>
+          <line x1={tick.x} y1={y} x2={tick.x} y2={y + 4} strokeWidth={1} />
+          <text
+            x={tick.x}
+            y={y + 14}
+            textAnchor="middle"
+            stroke="none"
+            className="font-mono plot-text-xs"
+          >
+            {tick.label}
+          </text>
+        </g>
+      ))}
+    </g>
+  )
+}
+
+/** A symbol with a subscript inside SVG text, e.g. P with FA. */
+function Sym({ base, sub }: { readonly base: string; readonly sub: string }) {
+  return (
+    <>
+      {base}
+      <tspan baselineShift="sub" fontSize="0.75em">
+        {sub}
+      </tspan>
+    </>
+  )
+}
+
+/**
+ * Diagonal hatching for an area drawn over another one (α over P_D): the
+ * lower fill stays visible between the lines instead of mixing into brown.
+ */
+function Hatch({
+  id,
+  className,
+}: {
+  readonly id: string
+  readonly className: string
+}) {
+  return (
+    <defs>
+      <pattern
+        id={id}
+        width="5"
+        height="5"
+        patternUnits="userSpaceOnUse"
+        patternTransform="rotate(45)"
+      >
+        <line
+          x1="2.5"
+          y1="0"
+          x2="2.5"
+          y2="5"
+          strokeWidth="2.2"
+          className={className}
+        />
+      </pattern>
+    </defs>
+  )
+}
+
+export {
+  AxisTicks,
+  FigureShell,
+  Hatch,
+  Legend,
+  Plot,
+  ReadoutNote,
+  ReadoutRow,
+  Sym,
+}

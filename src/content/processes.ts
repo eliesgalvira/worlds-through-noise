@@ -17,11 +17,11 @@ export const processesLesson: LessonRecord = {
       question: 'What exactly is random about a random process?',
       trap: 'The notation $x(n)$ looks like one signal — a single wiggle — so “stationary” sounds like a property of the wiggle you see. It cannot be: the notation is hiding a second argument. The full name of the object is $x(n, S)$, and until you ask what $S$ is, nothing about it is random at all.',
       object:
-        'So here is a picture that gives $S$ a body: an infinite library and a rule. $S$ is the outcome of a chance experiment — you walk in blindfolded and pull one book off the shelf; the draw $S_1$ might be Don Quixote, $S_2$ might be Moby-Dick. $n$ is a page number. The rule $x(n, S)$ returns a number: “count how many times the letter e appears on page $n$ of book $S$.” The random process is the library plus the rule. The trace on your screen is one book’s worth of answers — chance acted exactly once, at the moment the book was pulled.',
+        'So here is a picture that gives $S$ a body: an infinite library and a rule. $S$ is the outcome of a chance experiment — you walk in blindfolded and pull one book off the shelf. The draw $S_1$ might be Don Quixote and $S_2$ Moby-Dick. $n$ is a page number. The rule $x(n, S)$ returns a number: “count how many times the letter e appears on page $n$ of book $S$.” The random process is the library plus the rule. The trace on your screen is one book’s worth of answers — chance acted exactly once, at the moment the book was pulled.',
       action:
-        'With that picture, the figure below becomes an instrument with two dials, and the whole module is learning to turn one dial at a time. Fix the book: read it page after page and you get $x(n, S_1)$ — a fixed list of numbers, called a realization; nothing about it is random anymore. Fix the page instead, say $n_0 = 30$: each book gives its own answer, so “the count on page 30 of a randomly pulled book” is a scalar random variable $x(30, S)$, and the histogram in the figure is its distribution, built from the actual values. Then run the test that defines this module: take the histogram at page 30, take it again at page 60, and compare. Stationary (in the wide sense the course uses) means every page gives the same center and the same width, and the link between two pages depends only on how far apart they are. The burst process fails this visibly: its middle pages are loud and its edges quiet, so the two histograms disagree, and no single book read alone could have told you.',
+        'With that picture, the figure below becomes an instrument with two dials, and the whole module is learning to turn one dial at a time. Fix the book: read it page after page and you get $x(n, S_1)$ — a fixed list of numbers, called a realization. Nothing about it is random anymore. Fix the page instead, say $n_0 = 30$: each book gives its own answer, so “the count on page 30 of a randomly pulled book” is a scalar random variable $x(30, S)$, and the histogram in the figure is its distribution, built from the actual values. Then run the test that defines this module: take the histogram at page 30, take it again at page 60, and compare. Stationary (in the wide sense the course uses) means every page gives the same center and the same width, and the link between two pages depends only on how far apart they are. The burst process fails this visibly: its middle pages are loud and its edges quiet, so the two histograms disagree, and no single book read alone could have told you.',
       payoff:
-        'Once you have turned both dials yourself, the definitions have nothing left to hide. One rule gives four objects, chosen by which dials you fix: both → a plain number; only $S$ → a realization; only $n$ → a random variable; neither → the process itself. $E\\{x(n_0)\\}$ and $\\sigma^2(n_0)$ stop being formulas: they are the center and the width of the page-$n_0$ histogram — one pair of numbers per page. Stationarity ($m_x(n) = m_x$, $r_x(n{+}m, n) = r_x(m)$) is the statement that these numbers are the same for every page, so one page is as good as another. Ergodicity is a separate and stronger claim: reading ONE book cover to cover gives the same averages as polling the whole library at one page — and it is the only reason we can measure anything from a single recording.',
+        'Once you have turned both dials yourself, the definitions have nothing left to hide. One rule gives four objects, chosen by which dials you fix: both → a plain number. Only $S$ → a realization. Only $n$ → a random variable. Neither → the process itself. $E\\{x(n_0)\\}$ and $\\sigma^2(n_0)$ stop being formulas: they are the center and the width of the page-$n_0$ histogram — one pair of numbers per page. Stationarity ($m_x(n) = m_x$, $r_x(n{+}m, n) = r_x(m)$) is the statement that these numbers are the same for every page, so one page is as good as another. Ergodicity is a separate and stronger claim: reading ONE book cover to cover gives the same averages as polling the whole library at one page — and it is the only reason we can measure anything from a single recording.',
       equations: [
         {
           sentence:
@@ -64,17 +64,17 @@ export const processesLesson: LessonRecord = {
       id: 'P2',
       title: 'Autocorrelation is self-resemblance under a shift',
       question: 'What does $r_x(m)$ actually measure?',
-      trap: 'The autocorrelation is defined as $r_x(m) = E\\{x(n{+}m)\\,x^*(n)\\}$: an average of the signal multiplied by its own value from $m$ samples earlier (the star is a complex conjugate; for real signals ignore it). Read as a formula, it feels like bookkeeping — two time indices to keep straight and a symmetry to recite. What it measures is far simpler than what it says.',
+      trap: 'The autocorrelation is defined as $r_x(m) = E\\{x(n{+}m)\\,x^*(n)\\}$: an average of the signal multiplied by its own value from $m$ samples earlier (the star is a complex conjugate. For real signals ignore it). Read as a formula, it feels like bookkeeping — two time indices to keep straight and a symmetry to recite. What it measures is far simpler than what it says.',
       object:
         'Picture the signal and a transparent copy of it on a slider. Slide the copy $m$ samples to the side, lay it over the original, multiply the samples that overlap, and average the products. That average is one number, and it is the autocorrelation at lag $m$. It comes out large when the signal still resembles itself after the shift, and near zero when the shift has destroyed all resemblance. In one word: $r_x(m)$ measures memory.',
       action:
-        'The figure below performs exactly this multiplication and averaging on a real generated signal. Drag the lag $m$ and watch the overlap product collapse into one number, $\\hat{r}_x(m)$, which is stamped onto the growing autocorrelation plot underneath. Then try all three signals and watch memory die at three different speeds: for white noise all resemblance is gone at the first shift; for filtered noise it fades over a few lags; for the tone in noise it never dies — it oscillates forever.',
+        'The figure below performs exactly this multiplication and averaging on a real generated signal. Drag the lag $m$ and watch the overlap product collapse into one number, $\\hat{r}_x(m)$, which is stamped onto the growing autocorrelation plot underneath. Then try all three signals and watch memory die at three different speeds: for white noise all resemblance is gone at the first shift. For filtered noise it fades over a few lags. For the tone in noise it never dies — it oscillates forever.',
       payoff:
         'After a few drags, the properties you were asked to memorize become things you have seen. $r_x(0)$ is the power, because at zero shift a signal overlaps itself perfectly. No lag can beat $r_x(0)$, because nothing overlaps better than no shift. And the power spectral density is the same information asked in the language of frequency: a wide, slowly-fading $r_x$ means a narrow spectrum, a spiky $r_x$ means a flat one. The Fourier pair is a change of language, not new content.',
       equations: [
         {
           sentence:
-            'Power spectral density: the autocorrelation, re-expressed by frequency; the area under it is the power.',
+            'Power spectral density: the autocorrelation, re-expressed by frequency. The area under it is the power.',
           latex:
             'S_X(f) = \\sum_{k=-\\infty}^{+\\infty} r_X(k)\\, e^{-j2\\pi f k}, \\qquad P_X = r_X(0) = \\int_{-1/2}^{1/2} S_X(f)\\,df',
         },
@@ -83,14 +83,14 @@ export const processesLesson: LessonRecord = {
             'Filtering a stationary process reshapes its spectrum with the filter magnitude as a mask.',
           latex: 'S_Y(f) = |H(f)|^2\\, S_X(f), \\qquad m_y = m_x H(0)',
           caption:
-            'The output stays stationary; only the sand under the curve is redistributed.',
+            'The output stays stationary. Only the sand under the curve is redistributed.',
         },
       ],
       prediction: {
         question:
           'For a pure complex tone $A e^{j\\varphi} e^{j2\\pi f_0 n}$ with random phase, what does $r_x(m)$ look like?',
         answer:
-          '$r_x(m) = |A|^2 e^{j2\\pi f_0 m}$: constant magnitude forever. A tone never forgets itself; its spectrum is a single spike at $f_0$.',
+          '$r_x(m) = |A|^2 e^{j2\\pi f_0 m}$: constant magnitude forever. A tone never forgets itself. Its spectrum is a single spike at $f_0$.',
       },
       transfer:
         'A prediction filter can only exploit memory. Read from an autocorrelation plot how many lags of memory are available, and say what happens to predictability when $r_x(m) = P_x\\,\\delta(m)$.',
@@ -135,7 +135,7 @@ export const processesLesson: LessonRecord = {
       transfer:
         'Pulse design (Tema 2, radar): to maximize detection SNR in colored noise, the pulse must be the eigenvector of $\\mathbf{C}_w$ with the smallest eigenvalue. Restate that as a fact about walking this terrain for $\\mathbf{C}_w$ instead of $\\mathbf{R}_x$.',
       examRefs: [
-        'Parcial Oct 2025, Ex. 1: codeword design in colored noise via eigen-directions',
+        'Midterm Oct 2025, Ex. 1: codeword design in colored noise via eigen-directions',
         'Tema 1 ejercicio final: max-SNR FIR filter for a noisy tone',
       ],
     },
@@ -143,7 +143,7 @@ export const processesLesson: LessonRecord = {
   workedProblems: [
     {
       id: 'wp-sinusoid-predictor',
-      source: 'Exercise collection · Temes 4–5 (Feb 2026) · Ex. 4.8',
+      source: 'Exercise collection, Temas 4 and 5 (Feb 2026), Ex. 4.8',
       title: 'A sinusoid that predicts itself',
       why: 'Tema 1 never gets its own exam problem — its moves open the others. This exercise runs both P1 and P2: an ensemble average over the random phase gives the exact $r_x(m)$, then a single recorded realization has to reproduce it by time averages, and you watch the biased estimator fall short.',
       statement: [
@@ -170,7 +170,7 @@ export const processesLesson: LessonRecord = {
           steps: [
             {
               title: 'Average over the phase, not over time',
-              body: 'The only random thing here is $\\varphi$, so the expectation is an average over the phase deck. Expand the product of cosines; the term carrying $2\\varphi$ averages to zero over a full uniform circle.',
+              body: 'The only random thing here is $\\varphi$, so the expectation is an average over the phase deck. Expand the product of cosines. The term carrying $2\\varphi$ averages to zero over a full uniform circle.',
               latex:
                 '\\begin{aligned} r_x(m) &= E\\{x(n+m)\\,x(n)\\} = 2\\cos\\!\\left(\\tfrac{\\pi}{2}m\\right) + 2\\,\\underbrace{E\\left\\{\\cos\\!\\left(\\tfrac{\\pi}{2}(2n+m) + 2\\varphi\\right)\\right\\}}_{=\\,0} \\\\[2pt] &= 2\\cos\\!\\left(\\tfrac{\\pi}{2}m\\right) \\end{aligned}',
               note: 'No $n$ survives — the phase average makes the process stationary, exactly the P1 move.',
@@ -239,7 +239,7 @@ export const processesLesson: LessonRecord = {
           ],
           answer: {
             sentence:
-              'The biased estimate shrinks the lag-2 correlation by the factor $(N-2)/N$ — a half at $N=4$, a quarter at $N=8$ — and the predictor inherits the shrinkage; only as $N \\to \\infty$ does $a_2$ reach $-1$.',
+              'The biased estimate shrinks the lag-2 correlation by the factor $(N-2)/N$ — a half at $N=4$, a quarter at $N=8$ — and the predictor inherits the shrinkage. Only as $N \\to \\infty$ does $a_2$ reach $-1$.',
             latex:
               'a_2 = -\\tfrac{1}{2} \\;(N{=}4), \\qquad a_2 = -\\tfrac{3}{4} \\;(N{=}8), \\qquad a_2 \\to -1 \\;(N \\to \\infty)',
           },
@@ -270,7 +270,7 @@ export const processesLesson: LessonRecord = {
     },
     {
       id: 'wp-tone-noise',
-      source: 'Exercise collection · Temes 4–5 (Feb 2026) · Ex. 4.9',
+      source: 'Exercise collection, Temas 4 and 5 (Feb 2026), Ex. 4.9',
       title: 'Tone in noise: the workhorse autocorrelation',
       why: 'This is the $r_x(m) = P\\cos(\\omega_1 m) + \\sigma_w^2\\,\\delta(m)$ object that P2 builds and P3 walks on. Part (d) is the eigenvalue fact the Oct 2025 exam (Detection workbook, last part) pays real points for.',
       statement: [
@@ -301,7 +301,7 @@ export const processesLesson: LessonRecord = {
           ],
           answer: {
             sentence:
-              'The tone never forgets itself; the noise forgets instantly.',
+              'The tone never forgets itself. The noise forgets instantly.',
             latex: 'r_x(m) = P\\cos(\\omega_1 m) + \\sigma_w^2\\,\\delta(m)',
           },
         },

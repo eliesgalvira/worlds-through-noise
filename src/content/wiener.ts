@@ -48,8 +48,8 @@ export const wienerLesson: LessonRecord = {
       transfer:
         'System identification (exam staple): $\\mathbf{x} = \\mathbf{s} + \\mathbf{w}_x$, $d = \\mathbf{c}^H\\mathbf{s} + w_d$ gives $\\mathbf{h}_{opt} = \\frac{SNR}{SNR+1}\\,\\mathbf{c}$. Locate that answer on the bowl: noise on the input shrinks the bottom toward zero, never rotates it.',
       examRefs: [
-        'Teoría T4 Ejemplo 1: identification, $\\mathbf{h}_{opt} = \\frac{SNR}{SNR+1}\\mathbf{c}$',
-        'Teoría T4 Ejemplo 2: equalizer — zero-forcer at high SNR, matched filter at low SNR',
+        'Slides T4 Example 1: identification, $\\mathbf{h}_{opt} = \\frac{SNR}{SNR+1}\\mathbf{c}$',
+        'Slides T4 Example 2: equalizer — zero-forcer at high SNR, matched filter at low SNR',
       ],
     },
     {
@@ -91,7 +91,7 @@ export const wienerLesson: LessonRecord = {
         'Final Jun 2026, Ex. 2(a–d): derive $P_z$, minimize, express $z = As + Bw$, and answer where to put the microphone. Then keep going — parts (e–g) hand the same knob to LMS.',
       examRefs: [
         'Final Jun 2026, Ex. 2: two-microphone canceller, scalar Wiener + LMS',
-        'Teoría T4: fetal ECG and helicopter cancellation architectures',
+        'Slides T4: fetal ECG and helicopter cancellation architectures',
       ],
     },
     {
@@ -129,9 +129,9 @@ export const wienerLesson: LessonRecord = {
           '$Q = M$: the error filter needs $M$ zeros on the unit circle, one per tone — equivalently $\\mathbf{R}_t$ has rank $M$.',
       },
       transfer:
-        'Ejercicio 5.1 (ALE / spectrum overlay): choose the decorrelation delay $D$ so the wideband channel forgets itself but the narrowband channels do not, then explain what appears at $y(n)$ and at $e(n)$.',
+        'Exercise 5.1 (ALE / spectrum overlay): choose the decorrelation delay $D$ so the wideband channel forgets itself but the narrowband channels do not, then explain what appears at $y(n)$ and at $e(n)$.',
       examRefs: [
-        'Teoría T4 Ejemplos 3–5: carrier recovery, multi-tone prediction, ALE',
+        'Slides T4 Examples 3–5: carrier recovery, multi-tone prediction, ALE',
         'Final Jun 2025, Ex. 3: echo cancellation with regularized $\\mathbf{R}_x$ (adds $\\alpha\\mathbf{I}$ — shifts every eigenvalue)',
       ],
     },
@@ -139,7 +139,7 @@ export const wienerLesson: LessonRecord = {
   workedProblems: [
     {
       id: 'wp-two-mics',
-      source: 'Final · 19 Juny 2026 · Ex. 2, parts a–d (of a–g)',
+      source: 'Final, June 19 2026, Ex. 2, parts a–d (of a–g)',
       title: 'Two microphones: cancel the jackhammer, keep the music',
       why: 'The W2 canceller as a real exam problem, reduced to a single gain so every Wiener idea is visible by hand: the error-power bowl, the derivative that finds its bottom, and the physical placement rule that the algebra ends up dictating.',
       statement: [
@@ -246,7 +246,7 @@ export const wienerLesson: LessonRecord = {
     },
     {
       id: 'wp-pilot-predictor',
-      source: 'Final · 7 Gener 2026 · Ex. 2, parts d–g (of a–k)',
+      source: 'Final, January 7 2026, Ex. 2, parts d–g (of a–k)',
       title: 'Predicting a pilot tone out of the noise',
       why: 'The W3 predictor on the course’s favorite signal model $\\mathbf{R}_x = |A_0|^2\\mathbf{s}^*\\mathbf{s}^T + \\sigma^2\\mathbf{I}$: one matrix-inversion-lemma move gives $\\mathbf{h}_{opt}$ in closed form, and the payoff is an SNR multiplied by $Q$. Continues the pilot-tone detector from the Detection page.',
       statement: [
@@ -354,7 +354,7 @@ export const wienerLesson: LessonRecord = {
     },
     {
       id: 'wp-ar-wiener',
-      source: 'Exercise collection · Temes 4–5 (Feb 2026) · Ex. 4.1',
+      source: 'Exercise collection, Temas 4 and 5 (Feb 2026), Ex. 4.1',
       title: 'The canonical AR(1) denoiser',
       why: 'The collection’s opening exercise and the numbers everyone should have solved once by hand: build $r_s(m)$ from the AR recursion (a Tema 1 move), fill the $2 \\times 2$ normal equations, and price the cleanup with the MMSE formula.',
       statement: [

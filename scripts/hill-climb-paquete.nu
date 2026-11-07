@@ -23,6 +23,8 @@ def main [
   --secciones: string = "" # secciones de leccion-*, separadas por comas; vacío: todas
   --figuras: string = "" # interacciones; vacío: todas
   --estados-por-seccion: string = "" # p. ej. "cuaderno=inicial+resuelto,vista=inicial"
+  --trozos-por-estado: string = "" # p. ej. "extremo=figura,resuelto=despues": solo esos trozos (ver partes.tsv)
+  --max-partes: string = "" # p. ej. "cuaderno=6": como mucho N teselas por sección, ancho y estado
 ] {
   let anchos = lista $anchos
   let estados = lista $estados
@@ -32,6 +34,10 @@ def main [
     let p = $par | split row "="
     {seccion: $p.0, estados: ($p.1 | split row "+")}
   }
+  let trozos = lista $trozos_por_estado | each {|par| let p = $par | split row "="; {estado: $p.0, trozos: ($p.1 | split row "+")} }
+  let topes = lista $max_partes | each {|par| let p = $par | split row "="; {seccion: $p.0, max: ($p.1 | into int)} }
+  let manifiesto = $capturas | path join partes.tsv
+  let partes = if ($manifiesto | path exists) { open --raw $manifiesto | lines | where {|l| $l != "" } | each {|l| let c = $l | split row "\t"; {nombre: $c.0, trozo: $c.1} } } else { [] }
   let refs = ls --all $referencias | get name
   let ajenas = $refs | path basename | where {|f| $f !~ '^producto-[a-z]\.png$' }
   if ($refs | is-empty) or not ($ajenas | is-empty) {
@@ -43,12 +49,17 @@ def main [
   }
   let todas = ls $capturas | get name | path basename
   let lecciones = $todas | where {|f|
-    let m = $f | parse --regex '^leccion-(?<ancho>\d+)-(?<estado>[a-z]+)-(?<seccion>[a-z0-9]+)-\d+\.png$'
+    let m = $f | parse --regex '^leccion-(?<ancho>\d+)-(?<estado>[a-z]+)-(?<seccion>[a-z0-9]+)-(?<n>\d+)\.png$'
     if ($m | is-empty) { false } else {
       let c = $m | first
       let propios = $por_seccion | where seccion == $c.seccion
       let estados = if ($propios | is-empty) { $estados } else { $propios | first | get estados }
-      ($c.ancho in $anchos) and ($c.estado in $estados) and (($secciones | is-empty) or ($c.seccion in $secciones))
+      let solo = $trozos | where estado == $c.estado
+      let trozo = $partes | where nombre == $f | get --optional 0.trozo | default "completa"
+      let tope = $topes | where seccion == $c.seccion | get --optional 0.max | default 1000
+      (($c.ancho in $anchos) and ($c.estado in $estados) and (($secciones | is-empty) or ($c.seccion in $secciones))
+        and (($solo | is-empty) or $trozo == "completa" or ($trozo in ($solo | first | get trozos)))
+        and (($c.n | into int) <= $tope))
     }
   }
   let interacciones = $todas | where {|f|

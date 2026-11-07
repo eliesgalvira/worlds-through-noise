@@ -7,6 +7,8 @@ import {
   Legend,
   Plot,
   ReadoutRow,
+  AxisTicks,
+  Sym,
 } from '@/components/figures/shared.tsx'
 import {
   formatNumber,
@@ -17,8 +19,10 @@ import { gaussianVector, makeRng } from '@/domain/math/kernel.ts'
 
 const W = 470
 const H = 260
-const X_MIN = 20
-const X_MAX = 80
+const X_MIN = 12
+const X_MAX = 88
+const GAMMA_MIN = 25
+const GAMMA_MAX = 75
 // Ferritin screen: the SICK world has the LOWER mean.
 const M0 = 58
 const M1 = 42
@@ -66,6 +70,16 @@ function TwoWorldsFigure() {
     return `${inner} L ${xOf(to).toFixed(1)} ${H - 34} L ${xOf(from).toFixed(1)} ${H - 34} Z`
   }
 
+  // The decision labels sit on either side of the threshold. Near an edge,
+  // the one without room drops to a second row on the other side, its arrow
+  // still pointing at its region.
+  const leftRoom = xOf(threshold) > 100
+  const rightRoom = xOf(threshold) < W - 100
+  // Each hypothesis is named on the outer foot of its own curve, clear of the
+  // threshold row at the top and of the other curve.
+  const footOf = (mean: number, side: number) =>
+    Math.min(X_MAX - 3, Math.max(X_MIN + 3, mean + side * 2 * sd))
+
   const drawPatient = () => {
     const rng = makeRng(seed)
     const world = rng() < 0.5 ? 'H0' : 'H1'
@@ -86,8 +100,8 @@ function TwoWorldsFigure() {
 
   return (
     <FigureShell
-      title="Two machines, one number — and a flipped threshold"
-      instruction="$\mathcal{H}_1$ (anemia) is the LEFT pile: sick patients have lower ferritin, so you call $\mathcal{H}_1$ below the threshold. Draw a patient, judge them, then raise $N$ and watch both piles tighten by $\sqrt{N}$ until the overlap drains."
+      title="Two Gaussian hypotheses, one threshold on the sample mean"
+      instruction="Under $\mathcal{H}_1$ (anemia) the sample mean of ferritin is centered at $m_1 = 42$, below the healthy $m_0 = 58$, so the detector decides $\mathcal{H}_1$ below $\gamma$. One measurement has standard deviation $\sigma = 11$. Draw a patient and judge it, then raise $N$: both densities narrow as $\sigma/\sqrt{N}$ and both error areas shrink."
       controls={
         <>
           <SliderControl
@@ -108,8 +122,8 @@ function TwoWorldsFigure() {
             label="Threshold"
             variable="γ"
             value={threshold}
-            min={X_MIN + 5}
-            max={X_MAX - 5}
+            min={GAMMA_MIN}
+            max={GAMMA_MAX}
             step={0.5}
             meaning="Below $\gamma$ you declare anemia."
             onValueChange={setThreshold}
@@ -128,7 +142,7 @@ function TwoWorldsFigure() {
                 setDraw((d) => (d === null ? null : { ...d, revealed: true }))
               }}
             >
-              Reveal the world
+              Show the true diagnosis
             </Button>
           </div>
         </>
@@ -148,6 +162,7 @@ function TwoWorldsFigure() {
           <ReadoutRow
             label="$P_M = 1 - P_D$"
             value={formatPercentValue(pMiss)}
+            tone="h1"
           />
           {draw !== null ? (
             <p className="pt-1 text-xs leading-5 text-foreground">
@@ -187,7 +202,7 @@ function TwoWorldsFigure() {
         ariaLabel="Densities of the sample mean under both hypotheses with a movable threshold"
         onDragPoint={(x) => {
           const v = X_MIN + ((x - 10) / (W - 20)) * (X_MAX - X_MIN)
-          setThreshold(Math.min(X_MAX - 5, Math.max(X_MIN + 5, v)))
+          setThreshold(Math.min(GAMMA_MAX, Math.max(GAMMA_MIN, v)))
         }}
       >
         <line
@@ -229,17 +244,44 @@ function TwoWorldsFigure() {
           strokeWidth={2}
           strokeDasharray="5 3"
         />
-        <text x={14} y={22} className="fill-h1-ink font-mono plot-text-sm">
+        <text
+          x={xOf(threshold) + (leftRoom ? -6 : 6)}
+          y={leftRoom ? 22 : 38}
+          textAnchor={leftRoom ? 'end' : 'start'}
+          className="fill-h1-ink font-mono plot-text-sm"
+        >
           ← decide H1
         </text>
         <text
-          x={W - 14}
-          y={22}
-          textAnchor="end"
+          x={xOf(threshold) + (rightRoom ? 6 : -6)}
+          y={rightRoom ? 22 : 38}
+          textAnchor={rightRoom ? 'start' : 'end'}
           className="fill-h0 font-mono plot-text-sm"
         >
           decide H0 →
         </text>
+        <text
+          x={xOf(threshold) - 6}
+          y={H - 42}
+          textAnchor="end"
+          className="fill-false-alarm plot-halo font-mono plot-text-sm"
+        >
+          <Sym base="P" sub="FA" /> {formatPercentValue(pFalseAlarm)}
+        </text>
+        <text
+          x={xOf(threshold) + 6}
+          y={H - 42}
+          className="fill-h1-ink plot-halo font-mono plot-text-sm"
+        >
+          <Sym base="P" sub="M" /> {formatPercentValue(pMiss)}
+        </text>
+        <AxisTicks
+          y={H - 34}
+          ticks={[20, 30, 42, 50, 58, 70, 80].map((v) => ({
+            x: xOf(v),
+            label: String(v),
+          }))}
+        />
         {draw !== null ? (
           <g>
             <line
@@ -261,31 +303,31 @@ function TwoWorldsFigure() {
         ) : null}
         <text
           x={W / 2}
-          y={H - 10}
+          y={H - 4}
           textAnchor="middle"
           className="fill-muted-foreground font-mono plot-text-sm"
         >
           sample mean of ferritin (drag to move γ)
         </text>
         <text
-          x={xOf(M1)}
-          y={yOf(normalPdf(M1, M1, sd)) - 8}
-          textAnchor="middle"
+          x={xOf(footOf(M1, -1)) - 4}
+          y={Math.min(yOf(normalPdf(footOf(M1, -1), M1, sd)) - 6, H - 52)}
+          textAnchor="end"
           className="fill-h1-ink font-mono plot-text"
         >
           H1
         </text>
         <text
-          x={xOf(M0)}
-          y={yOf(normalPdf(M0, M0, sd)) - 8}
-          textAnchor="middle"
+          x={xOf(footOf(M0, +1)) + 4}
+          y={Math.min(yOf(normalPdf(footOf(M0, +1), M0, sd)) - 6, H - 52)}
+          textAnchor="start"
           className="fill-h0 font-mono plot-text"
         >
           H0
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        <MathText text="The red area is the false-alarm probability being manufactured; both error probabilities are computed from $N(m, \sigma^2/N)$, never faked." />
+        <MathText text="Red: healthy patients called anemic, $P_{FA}$. Amber: anemic patients missed, $P_M$. Both are computed from $\mathcal{N}(m, \sigma^2/N)$. Every curve has area 1. The plot rescales its height so both fit." />
       </p>
     </FigureShell>
   )

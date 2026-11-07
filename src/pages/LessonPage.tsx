@@ -19,7 +19,7 @@ function LessonPage({ lesson }: LessonPageProps) {
 
   return (
     <>
-      <div className="mx-auto max-w-6xl px-4 pb-6 pt-12 sm:px-6 lg:pt-16">
+      <div className="mx-auto max-w-7xl px-4 pb-6 pt-12 sm:px-6 lg:pt-16">
         <header
           id="lesson-intro"
           className="max-w-4xl scroll-mt-32 xl:scroll-mt-24"
@@ -57,7 +57,7 @@ function LessonPage({ lesson }: LessonPageProps) {
         variant="mobile"
       />
 
-      <div className="mx-auto grid max-w-[92rem] gap-12 px-4 py-10 sm:px-6 xl:grid-cols-[minmax(0,1fr)_17rem]">
+      <div className="mx-auto grid max-w-7xl gap-12 px-4 py-10 sm:px-6 xl:grid-cols-[minmax(0,1fr)_17rem]">
         <main className="min-w-0">
           {lesson.modules.map((module) => (
             <LessonModule

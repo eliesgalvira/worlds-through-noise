@@ -1,5 +1,6 @@
 import { SliderControl } from '@/components/SliderControl.tsx'
 import { MathText } from '@/components/MathText.tsx'
+import { cn } from '@/lib/utils.ts'
 import {
   FigureShell,
   Legend,
@@ -7,13 +8,16 @@ import {
   ReadoutRow,
   ReadoutNote,
 } from '@/components/figures/shared.tsx'
-import { formatPercentValue } from '@/components/figures/figure-utils.ts'
+import {
+  formatNumber,
+  formatPercentValue,
+} from '@/components/figures/figure-utils.ts'
 import { binomialPmf } from '@/domain/math/kernel.ts'
 import { useState } from 'react'
 
 const COPIES = 5
 const W = 470
-const H = 280
+const H = 230
 
 function BitVoteFigure() {
   const [epsilonPct, setEpsilonPct] = useState(20)
@@ -42,17 +46,32 @@ function BitVoteFigure() {
     (acc, q, k) => acc + (!(decideOne[k] ?? false) ? q : 0),
     0,
   )
-  const pError = p0 * pFalseOne + p1 * pMissOne
+  const firstOne = decideOne.findIndex(Boolean)
+  // Bayes risk in units of the cost of a false one (C10 = 1, C01 = ratio),
+  // against plain majority vote, which ignores priors and costs.
+  const risk = p0 * pFalseOne + costRatio * p1 * pMissOne
+  const majority = Math.ceil((COPIES + 1) / 2)
+  const tail = (pmf: ReadonlyArray<number>, from: number) =>
+    pmf.reduce((acc, q, k) => acc + (k >= from ? q : 0), 0)
+  const majorityRisk =
+    p0 * tail(pmf0, majority) + costRatio * p1 * (1 - tail(pmf1, majority))
 
-  const maxPmf = Math.max(...pmf0, ...pmf1, 1e-9)
+  // Bars are weighted by prior and cost, so the rule decides 1 exactly
+  // where the amber bar is taller than the blue one.
+  const weight0 = pmf0.map((q) => p0 * q)
+  const weight1 = pmf1.map((q) => costRatio * p1 * q)
+  const maxPmf = Math.max(...weight0, ...weight1, 1e-9)
+  // The bar that counts as an error at k: blue where the rule says 1.
+  const errorWeight = (k: number) =>
+    (decideOne[k] ?? false) ? (weight0[k] ?? 0) : (weight1[k] ?? 0)
   const slot = (W - 40) / (COPIES + 1)
   const xOf = (k: number) => 20 + k * slot + slot / 2
   const barH = (p: number) => (p / maxPmf) * (H - 70)
 
   return (
     <FigureShell
-      title="Count the ones — then let the prior lean on the count"
-      instruction="A bit is written five times; each copy flips with probability $\varepsilon$. The bars show the exactly computed distribution of the count of ones under each stored bit. The tinted region is where the rule says “bit = 1.” Now make ones rare, or make missing them expensive, and watch the boundary walk."
+      title="MAP and minimum-risk decisions on a repeated bit"
+      instruction="A bit is stored five times and each copy flips with probability $\varepsilon$. Each bar is the exact probability of reading $k$ ones under a stored bit, weighted by that bit’s prior (and by the cost of missing a 1), so the rule decides bit = 1 in the shaded region, where the amber bar is taller. Change the prior of a one or the cost of missing it and watch the boundary move."
       controls={
         <>
           <SliderControl
@@ -68,7 +87,7 @@ function BitVoteFigure() {
           />
           <SliderControl
             label="Prior of a one"
-            variable="P(1)"
+            variable="P₁"
             value={priorPct}
             min={2}
             max={98}
@@ -102,20 +121,32 @@ function BitVoteFigure() {
             value={formatPercentValue(pMissOne)}
             tone="h1"
           />
+          <ReadoutRow label="Bayes risk" value={formatNumber(risk, 3)} />
           <ReadoutRow
-            label="Total error probability"
-            value={formatPercentValue(pError)}
+            label="Bayes risk, majority vote"
+            value={formatNumber(majorityRisk, 3)}
           />
-          <ReadoutNote>
-            <MathText text="With $\Pr(1) = 0.5$ and equal costs the boundary sits at majority vote — check it, then break it." />
-          </ReadoutNote>
+          {priorPct === 50 && costRatio === 1 ? (
+            <ReadoutNote>
+              <MathText text="With $P_1 = 0.5$ and equal costs the boundary sits at majority vote, $k \geq 3$." />
+            </ReadoutNote>
+          ) : null}
         </>
       }
     >
       <Legend
         items={[
-          { label: 'count of ones if bit = 0', swatchClass: 'stroke-h0' },
-          { label: 'count of ones if bit = 1', swatchClass: 'stroke-h1' },
+          {
+            label: '$P_0 \\Pr(k \\mid \\mathcal{H}_0)$, bit 0',
+            swatchClass: 'fill-h0',
+            square: true,
+          },
+          {
+            label:
+              '$P_1 C_{01} \\Pr(k \\mid \\mathcal{H}_1)$, bit 1, with $C_{10} = 1$',
+            swatchClass: 'fill-h1',
+            square: true,
+          },
         ]}
       />
       <Plot
@@ -131,26 +162,47 @@ function BitVoteFigure() {
                 y={12}
                 width={slot}
                 height={H - 44}
-                className="fill-h1"
-                opacity={0.09}
+                className="fill-foreground"
+                opacity={0.06}
               />
             ) : null}
             <rect
               x={xOf(k) - 14}
-              y={H - 32 - barH(pmf0[k] ?? 0)}
+              y={H - 32 - barH(weight0[k] ?? 0)}
               width={12}
-              height={barH(pmf0[k] ?? 0)}
-              className="fill-h0"
+              height={barH(weight0[k] ?? 0)}
+              className={
+                (decideOne[k] ?? false)
+                  ? 'fill-h0 stroke-false-alarm'
+                  : 'fill-h0'
+              }
+              strokeWidth={(decideOne[k] ?? false) ? 2.5 : 0}
               opacity={0.85}
             />
             <rect
               x={xOf(k) + 2}
-              y={H - 32 - barH(pmf1[k] ?? 0)}
+              y={H - 32 - barH(weight1[k] ?? 0)}
               width={12}
-              height={barH(pmf1[k] ?? 0)}
-              className="fill-h1"
+              height={barH(weight1[k] ?? 0)}
+              className={
+                (decideOne[k] ?? false) ? 'fill-h1' : 'fill-h1 stroke-h1-ink'
+              }
+              strokeWidth={(decideOne[k] ?? false) ? 0 : 2.5}
               opacity={0.85}
             />
+            {errorWeight(k) > 0.04 * maxPmf ? (
+              <text
+                x={(decideOne[k] ?? false) ? xOf(k) - 8 : xOf(k) + 8}
+                y={H - 36 - barH(errorWeight(k))}
+                textAnchor="middle"
+                className={cn(
+                  'plot-halo font-mono plot-text-xs',
+                  (decideOne[k] ?? false) ? 'fill-false-alarm' : 'fill-h1-ink',
+                )}
+              >
+                error
+              </text>
+            ) : null}
             <text
               x={xOf(k)}
               y={H - 16}
@@ -159,20 +211,27 @@ function BitVoteFigure() {
             >
               k={k}
             </text>
-            <text
-              x={xOf(k)}
-              y={26}
-              textAnchor="middle"
-              className={
-                (decideOne[k] ?? false)
-                  ? 'fill-h1-ink font-mono plot-text-xs'
-                  : 'fill-h0 font-mono plot-text-xs'
-              }
-            >
-              {(decideOne[k] ?? false) ? '→1' : '→0'}
-            </text>
           </g>
         ))}
+        {firstOne >= 0 ? (
+          <text
+            x={firstOne === COPIES ? W - 22 : 20 + firstOne * slot + 6}
+            y={24}
+            textAnchor={firstOne === COPIES ? 'end' : 'start'}
+            className="fill-foreground font-mono plot-text-sm"
+          >
+            decide 1 →
+          </text>
+        ) : null}
+        {firstOne !== 0 ? (
+          <text
+            x={26}
+            y={24}
+            className="fill-muted-foreground font-mono plot-text-sm"
+          >
+            ← decide 0
+          </text>
+        ) : null}
         <line
           x1={16}
           y1={H - 32}
@@ -183,8 +242,7 @@ function BitVoteFigure() {
         />
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        Error probabilities are exact binomial sums over the shaded region — the
-        minimum-risk rule is whichever shading you can’t improve.
+        <MathText text="Outlined bars are the errors: a blue bar in the shaded region (a 0 read as 1) or an amber bar outside it (a 1 read as 0). Their heights add up to the Bayes risk of the rule, and the rule keeps the shorter bar of each pair, so no other shading adds up to less." />
       </p>
     </FigureShell>
   )

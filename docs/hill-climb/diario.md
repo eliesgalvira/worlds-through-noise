@@ -122,3 +122,111 @@ Colores nuevos de esta ronda (texto o trazo sobre cada superficie):
 | texto del botón (papel) sobre tinta | 1.00  | 1.09    | 1.17  | 1.08                | 10.86          |
 
 Detección sobre `muted` (4,22) y sobre `false-alarm/12` (4,41) no se pintan como texto en ninguna pantalla: solo como trazo en las figuras, donde basta 3:1.
+
+## Detección: ronda base
+
+Captura `det-base2` de `main` en `5d0f7298` (tras el catálogo). Detección se reparte en dos paquetes con la misma rúbrica, porque una captura entera son unas 300 imágenes y un revisor no puede leerlas (decidido por el agente, revisable). El paquete 1a lleva D3, D2 y el cuaderno, lo que más pesa en el parcial. El 1b lleva D1, D4 y D5. Cada paquete tiene 73 imágenes, a 1440 y 390 (900 queda fuera para que quepa), `extremo` solo con la figura y `resuelto` solo con lo que va tras la figura. Referencias: R1, R2, R4, R11 y R13, y en el 1a un problema resuelto con pasos.
+
+Lanzados a las 23:26 y 23:28, informes a las 23:39 y 23:41. Auditorías limpias.
+
+| Tarea                      | 1a ancho   | 1a móvil | 1b ancho       | 1b móvil       |
+| -------------------------- | ---------- | -------- | -------------- | -------------- |
+| T1 Motivada                | 2 (DET-07) | 2        | 1 (DET-13)     | 1              |
+| T2 Leer la figura          | 1 (DET-06) | 1        | 1 (DET-10)     | 1              |
+| T3 Predecir y comprobar    | 0 (DET-01) | 0        | 0 (DET-09)     | 0              |
+| T4 Del dibujo a la fórmula | 0 (DET-03) | 0        | 0 (DET-08)     | 0              |
+| T5 Problema de examen      | 0 (DET-02) | 0        | no verificable | no verificable |
+| T6 Orientarse              | 2 (DET-12) | 2        | 3              | 2 (DET-12)     |
+
+### Registro de defectos
+
+| Id     | Gravedad | Qué                                                                                                                                                           | Visto por                                  | Estado  |
+| ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | ------- |
+| DET-01 | bloquea  | Predicción de D3 falsa: con **p** sobre el eje ruidoso, $\mathbf C_w^{-1}\mathbf p \parallel \mathbf p$                                                       | 1a, verificado (Tema 2, p. 33 y 38)        | abierto |
+| DET-02 | bloquea  | Cuaderno de la anemia, g) y h): piden un ROC que no se ve                                                                                                     | 1a, verificado (parcial 2025-04, p. 2 y 5) | abierto |
+| DET-03 | bloquea  | ENR: la nota da $2\lvert A\rvert^2\mathbf p^H\mathbf C_w^{-1}\mathbf p$ como general, pero el 2 es del modelo complejo. Varios nombres para la misma magnitud | 1a, verificado (Tema 2, p. 23, 28 y 31)    | abierto |
+| DET-04 | adivinar | D3 promete histogramas de las sombras y un medidor que la figura no dibuja. La lectura usa u, Δμ y C, y la ecuación h, p y C_w                                | 1a                                         | abierto |
+| DET-05 | adivinar | Ecuaciones cortadas a 390 px sin señal (47 en el cuaderno)                                                                                                    | 1a, 1b                                     | abierto |
+| DET-06 | adivinar | D2: α sale marrón bajo el verde, $P_D$ sin leyenda, el ROC en el ámbar de H1, la línea sin γ, los ejes sin escala, el rótulo cortado a 390                    | 1a                                         | abierto |
+| DET-07 | fricción | La fórmula llega antes que el problema, y las metáforas tapan los términos técnicos                                                                           | 1a, 1b (DET-13)                            | abierto |
+| DET-08 | bloquea  | D4 mezcla el modelo real (texto y examen) y el complejo (figura)                                                                                              | 1b                                         | abierto |
+| DET-09 | bloquea  | Predicción de D4 con «$N = 2$ (complex)»: con $\chi^2_4$ la respuesta 0,32 es falsa                                                                           | 1b                                         | abierto |
+| DET-10 | adivinar | D1: eje sin cifras, área ámbar sin nombre, «decide H0» fijo y tachado por el umbral                                                                           | 1b                                         | abierto |
+| DET-11 | adivinar | D4: eje reescalado sin marcas, etiquetas que chocan                                                                                                           | 1b                                         | abierto |
+| DET-12 | fricción | Índice: «Perform the action» y «Prediction & transfer» se repiten diez veces, la barra del móvil no dice el apartado, faltan problemas sin señal de scroll    | 1a, 1b                                     | abierto |
+| DET-13 | adivinar | Siglas y símbolos sin presentar: NP, σ₀² y σ₁², ENR con una A que no existe en D1, MRB, εᵢ                                                                    | 1b                                         | abierto |
+| DET-14 | adivinar | γ nombra el umbral de la media y el del cociente de verosimilitudes en D1                                                                                     | 1b                                         | abierto |
+| DET-15 | adivinar | El $P_D$ del carcelero pasa a rojo, el color de la falsa alarma                                                                                               | 1b                                         | abierto |
+| DET-16 | menor    | Mezcla de idiomas en las fuentes de examen («TEMA 02», «7 ABRIL 2025») y notación que cambia ($P_D$ y $P_d$)                                                  | 1a, 1b                                     | abierto |
+| DET-17 | menor    | Rótulos SVG con guion bajo («P_FA →»)                                                                                                                         | 1a                                         | abierto |
+
+## Detección: ronda 1
+
+Commits `b110bfc8` y `434339b4`. Los dos paquetes se arreglan en una sola ronda, porque casi todo vive en piezas compartidas. Un subagente Opus verificó contra el temario los tres hallazgos de contenido del paquete 1a (DET-01, DET-02 y DET-03). El revisor tenía razón en los tres, aunque en DET-03 solo a medias: el 2 es correcto en el modelo complejo.
+
+Qué cambió y qué defecto ataca:
+
+- DET-01: la predicción de D3 pregunta ahora por un **p** entre los dos ejes, y la respuesta explica por qué **p** solo es óptimo si es autovector.
+- DET-03: la nota separa el caso real ($NA^2/\sigma^2$ y $d_M^2$) del complejo ($SNR_y$ con su 2), y la figura de D3 usa los nombres del temario.
+- DET-08 y DET-09: D4 pasa a muestras reales, como el examen de junio de 2026. La predicción con $N = 2$ es ahora exacta ($\chi^2_2$ es exponencial).
+- DET-02: el enunciado de g) da los tres puntos leídos del ROC del examen.
+- DET-13 y DET-14: η para el umbral del cociente, $q_0$ y $q_1$ en la binomial, MRB desplegada, ENR con $m_1 - m_0$.
+- DET-06, DET-10, DET-11 y DET-17: piezas nuevas `AxisTicks` y `Sym` en la librería, áreas con su símbolo, rótulos de decisión junto al umbral, D2 apilada en el móvil, ROC en tinta con el punto en color cursor, D4 en eje fijo de potencia media.
+- DET-05: `MathBlock` reduce la ecuación hasta el 60 % para que quepa, y desvanece el borde si aún desborda. En el cuaderno a 390 px, de 47 ecuaciones con scroll se pasa a 29, y esas 29 llevan la señal.
+- DET-12: el índice pierde las dos subentradas genéricas de cada apartado, y la barra del móvil dice el apartado.
+- DET-15: el $P_D$ del carcelero ya no pasa a rojo.
+
+Regresión vista antes de lanzar: a 390 px, en D1, los rótulos de decisión, que ahora siguen al umbral, chocaban con «H1» y «H0». Se arregló en `434339b4` antes de lanzar.
+
+Lo que el banco enseñó sobre sí mismo: una captura de página entera agranda la ventana, y con ella cada unidad `svh`, así que la página se reorganizaba a mitad de captura (cuelgues de 30 s y teselas fuera de la página). `Plot` lee ahora su tope de alto de `--plot-max-h`, que el banco fija en píxeles. Además, un `ResizeObserver` por ecuación hacía que la captura del estado resuelto pasara de 37 s a más de 5 minutos; se cambió por una medida única al montar.
+
+Notas tras la ronda 1 (informes a las 00:46 y 00:47, auditorías limpias):
+
+| Tarea | 1a ancho          | 1a móvil | 1b ancho            | 1b móvil       |
+| ----- | ----------------- | -------- | ------------------- | -------------- |
+| T1    | 2                 | 2        | 1                   | 1              |
+| T2    | 1                 | 1        | 0 (pie de D5 falso) | 0              |
+| T3    | 0 (sombras de D3) | 0        | 1                   | 1              |
+| T4    | 1                 | 1        | 0 (frase √N en D4)  | 0              |
+| T5    | 2                 | 2        | no verificable      | no verificable |
+| T6    | **4**             | **4**    | **4**               | 3              |
+
+Cerrados en la ronda 1: DET-01, DET-03 (a medias, falta la línea que une la figura con la ecuación compleja), DET-08, DET-09, DET-10 (en parte), DET-12, DET-13 (en parte), DET-14 y DET-15. Abiertos nuevos: DET-18 (`bloquea`, el pie de D5 decía que las dos probabilidades suman las barras sombreadas), DET-19 (`bloquea`, «la separación es √N» contra √(N/2) en la ecuación de D4), DET-20 (cuerpo de la lección desalineado con la cabecera a 1440) y DET-21 (las lecturas lejos de su marca).
+
+## Detección: ronda 2
+
+Commits `0c3a9ac0` y el siguiente (marcas del ROC). Ataca DET-04 (la sombra de D3: las dos densidades proyectadas, con la SNR entre los centros), DET-18 y DET-19 (verificados a mano contra la propia ecuación), DET-03 (línea bajo la ecuación de D3), DET-02 (el ROC del examen redibujado en el enunciado, con el + calculado con el umbral MAP), DET-20 (un solo contenedor de 80 rem), DET-21 (valores junto a $P_{FA}$, $P_M$, γ y el punto del ROC), DET-16 (fuentes en inglés y sin «·»), DET-07 en las tarjetas (títulos con los términos del examen), D5 (barras de error con contorno y riesgo de Bayes) y la notación (μ, $P_D$). El brief prohíbe «;» como separador en la UI: los 67 «;» de la prosa de detección, estimación y procesos pasaron a punto.
+
+Un fallo mío visto antes de lanzar: el significado del control de D3 mostraba «mathbfh» porque escapé dos veces una barra en un atributo JSX. Quedó arreglado, y el test de guarda lo detecta desde ahora.
+
+## Detección: rondas 3 a 5 y fusión
+
+| Tarea                      | base 1a | r5 1a ancho          | r5 1a móvil | base 1b        | r5 1b ancho                 | r5 1b móvil   |
+| -------------------------- | ------- | -------------------- | ----------- | -------------- | --------------------------- | ------------- |
+| T1 Motivada                | 2       | 2                    | 2           | 1              | 2                           | 2             |
+| T2 Leer la figura          | 1       | 1                    | 1           | 1              | 0 → arreglado en `458104c7` | 0 → arreglado |
+| T3 Predecir y comprobar    | 0       | 3 (4 en la r4)       | 2           | 0              | 2                           | 2             |
+| T4 Del dibujo a la fórmula | 0       | 2                    | 2           | 0              | 1 → arreglado en `458104c7` | 1 → arreglado |
+| T5 Problema de examen      | 0       | 2 (4 en las r3 y r4) | 2           | no verificable | —                           | —             |
+| T6 Orientarse              | 2       | **4**                | **4**       | 3              | **4**                       | **4**         |
+
+Revisores: 12 en total (dos por ronda, de la base a la r5), todos Opus 5.5 effort high, nuevos y en hilos del proyecto de revisores, y todas las auditorías limpias. Cada informe se leyó entero, y cada hallazgo raro se miró en la imagen exacta antes de actuar.
+
+Qué cambió en las rondas 3 a 5:
+
+- r3: rótulos de D3 coherentes con el blanqueo (regresión de la r2, ya fijada), $Q_{\chi^2_N}$ (era $Q_{\chi_N}$), $\sigma_z^2$ definido, $\eta$ en D5, lecturas justo bajo cada figura (cambio de librería en `FigureShell`), D3 con nube y sombra lado a lado, D4 con colas sombreadas, D5 con barras ponderadas por prior y coste.
+- r4: frases rotas por el cambio de «;» reescritas, γ en serif cursiva (en monoespaciada se leía como y), valores dentro de las áreas, D5 con barras de error rotuladas, el banco calcula bien el desplazamiento de la vista en el móvil.
+- r5: `Hatch` en la librería (α rayado sobre $P_D$ en vez de marrón), D4 con curvas y áreas rotuladas, sombra de D3 con su barra nombrada.
+- Simplify: utilidad `plot-halo` en vez de 13 halos escritos a mano, `StatementFigure` con clave tipada y sin cadena de props.
+
+Verificación de contenido antes de fusionar: dos subagentes Opus contra `course/` (informes `merge1` y `merge2`). `merge1` encontró 1 error (la acción de D3 decía que **p** se inclina hacia el eje ruidoso, cuando está justo a medio camino) y 4 dudosos. `merge2` no encontró ningún error y sí 4 dudosos. Todos arreglados o anotados en el texto («las transparencias llaman $\gamma_{MRB}$ a este umbral», «la resolución impresa llama γ al multiplicador»). Code-review en dos ejes de `origin/main..69958458`, y después de cada rango nuevo (`..e24445d8`, `..133dcce2`, `..2af386f4`, `..458104c7`). Simplify con cuatro ángulos.
+
+Compromisos al fusionar (decidido por el agente, revisable). Lo que no llega al 95 %:
+
+- **T1 (2):** los revisores piden abrir D2 a D5 con el problema concreto antes de la fórmula. La gramática de la lección («nombrar la trampa») abre con la fórmula del examen a propósito. Reordenar la prosa de cinco apartados es reescribir contenido verificado, y no da tiempo antes del corte. Queda para el lunes.
+- **T3 y T5 en el móvil (2):** a 390 px la figura y su control no caben juntos, y las ecuaciones largas del cuaderno se encogen o desplazan. La solución correcta es partir cada ecuación en líneas (`aligned`), una por una, más de 29 ecuaciones. Queda para el lunes.
+- **T2 (1) en el paquete 1a:** quedan etiquetas que se rozan en D3 y dos marcas sin rótulo en la sombra.
+- **T4 (2) en el paquete 1a:** las ecuaciones de D3 son del modelo complejo del curso, y la figura es el caso real. La nota lo explica, pero el revisor sigue pidiendo una marca por término.
+- **T5 en ancho (2 en la r5):** el ROC del examen queda arriba en el enunciado, lejos de los apartados g y h que lo usan.
+
+Contraste con la meta: T6 llega a 4 en los dos anchos y los dos paquetes. T3 llegó a 4 en ancho en la r4. Los errores de contenido de la base (9 que bloqueaban) están cerrados.

@@ -32,10 +32,15 @@ export type LessonModuleRecord = {
   readonly examRefs: ReadonlyArray<string>
 }
 
+/** Figures an exam statement refers to, redrawn from the model. */
+export type StatementFigureKey = 'anemia-roc'
+
 /** A block of problem prose (`text`, inline math between $…$) or display math (`math`). */
 export type ProblemBlock =
   | { readonly kind: 'text'; readonly content: string }
   | { readonly kind: 'math'; readonly content: string }
+  /** A figure from the original statement, redrawn; looked up by key. */
+  | { readonly kind: 'figure'; readonly key: StatementFigureKey }
 
 export type SolutionStepRecord = {
   /** The move being made, as a short imperative. */

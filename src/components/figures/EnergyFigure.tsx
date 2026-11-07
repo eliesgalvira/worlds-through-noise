@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { SliderControl } from '@/components/SliderControl.tsx'
 import { MathText } from '@/components/MathText.tsx'
 import {
@@ -7,6 +7,9 @@ import {
   Plot,
   ReadoutRow,
   ReadoutNote,
+  AxisTicks,
+  Hatch,
+  Sym,
 } from '@/components/figures/shared.tsx'
 import { formatPercentValue } from '@/components/figures/figure-utils.ts'
 import { linspace } from '@/domain/math/distributions.ts'
@@ -20,49 +23,69 @@ import {
 
 const W = 470
 const H = 280
+/** Average power axis, in units of σ_w². */
+const X_MAX = 4
 
 function EnergyFigure() {
   const [samples, setSamples] = useState(10)
   const [snrPct, setSnrPct] = useState(60)
   const [alphaPct, setAlphaPct] = useState(10)
 
-  const dof = 2 * samples // complex observations
+  // Real samples, as in the June 2026 final this module follows.
+  const hatchId = `hatch-${useId().replace(/[^a-zA-Z0-9]/g, '')}`
+  const dof = samples
   const snr = snrPct / 100
   const alpha = alphaPct / 100
 
-  // Test statistic y/σ²: χ²_dof under H0, (1+SNR)·χ²_dof under H1.
+  // y/σ² is χ²_N under H0 and (1+SNR)·χ²_N under H1. The plot shows the
+  // average power y/N in units of σ_w², on a fixed axis.
   const gamma = chi2TailInv(alpha, dof)
   const pdJailer = chi2Tail(gamma / (1 + snr), dof)
-  // The intended receiver knows the waveform: coherent gain √(N·SNR·2).
-  const pdReceiver = qFunc(qInv(alpha) - Math.sqrt(2 * samples * snr))
+  // The intended receiver knows the waveform: deflection √(N·P/σ²).
+  const pdReceiver = qFunc(qInv(alpha) - Math.sqrt(samples * snr))
 
-  const xMax = (1 + snr) * (dof + 4 * Math.sqrt(2 * dof)) + 4
-  const xs = useMemo(() => linspace(0.01, xMax, 240), [xMax])
-  const peak = Math.max(
-    ...xs.map((v) => chi2Pdf(v, dof)),
-    ...xs.map((v) => chi2Pdf(v / (1 + snr), dof) / (1 + snr)),
-    1e-9,
-  )
-  const xOf = (v: number) => 10 + (v / xMax) * (W - 20)
-  const yOf = (p: number) => H - 32 - (p / peak) * (H - 58)
+  const xs = useMemo(() => linspace(0.005, X_MAX, 320), [])
+  const h0Density = (p: number) => dof * chi2Pdf(dof * p, dof)
+  const h1Density = (p: number) =>
+    (dof * chi2Pdf((dof * p) / (1 + snr), dof)) / (1 + snr)
+  const peak = Math.max(...xs.map(h0Density), ...xs.map(h1Density), 1e-9)
+  const xOf = (p: number) => 10 + (Math.min(p, X_MAX) / X_MAX) * (W - 20)
+  const yOf = (d: number) => H - 40 - (d / peak) * (H - 66)
 
-  const h0Path = xs
-    .map(
-      (v, i) =>
-        `${i === 0 ? 'M' : 'L'} ${xOf(v).toFixed(1)} ${yOf(chi2Pdf(v, dof)).toFixed(1)}`,
-    )
-    .join(' ')
-  const h1Path = xs
-    .map(
-      (v, i) =>
-        `${i === 0 ? 'M' : 'L'} ${xOf(v).toFixed(1)} ${yOf(chi2Pdf(v / (1 + snr), dof) / (1 + snr)).toFixed(1)}`,
-    )
-    .join(' ')
+  const pathOf = (density: (p: number) => number) =>
+    xs
+      .map(
+        (p, i) =>
+          `${i === 0 ? 'M' : 'L'} ${xOf(p).toFixed(1)} ${yOf(density(p)).toFixed(1)}`,
+      )
+      .join(' ')
+  const tailOf = (density: (p: number) => number, from: number) => {
+    const grid = linspace(Math.min(from, X_MAX), X_MAX, 120)
+    const top = grid
+      .map(
+        (p, i) =>
+          `${i === 0 ? 'M' : 'L'} ${xOf(p).toFixed(1)} ${yOf(density(p)).toFixed(1)}`,
+      )
+      .join(' ')
+    return `${top} L ${xOf(X_MAX).toFixed(1)} ${H - 40} L ${xOf(from).toFixed(1)} ${H - 40} Z`
+  }
+  const h0Path = pathOf(h0Density)
+  const h1Path = pathOf(h1Density)
+  const threshold = gamma / dof
+  // Mode of the average power under H1: (N − 2)/N in σ² units, times 1 + SNR.
+  const h1Mode = (Math.max(dof - 2, 0.2) / dof) * (1 + snr)
+  // Labels flip to the left of their mark when the right side has no room
+  // or when the power mark sits right next to the threshold.
+  const labelLeft = xOf(threshold) > W * 0.55
+  const powerLeft =
+    xOf(1 + snr) < xOf(threshold) && xOf(threshold) - xOf(1 + snr) < 70
+  // Next to the threshold the power label rises above the P_FA label.
+  const powerHigh = Math.abs(xOf(1 + snr) - xOf(threshold)) < 70
 
   return (
     <FigureShell
-      title="Two loudness gauges, separating at $\sqrt{N}$"
-      instruction="Nobody knows the waveform, so the detector can only measure energy. The bumps are exact chi-squared densities of the measured power under each hypothesis. Slide $N$: the centers stay $P$ apart while the widths shrink like $1/\sqrt{N}$ — separation is slow. Compare the jailer with the receiver, who knows the waveform and gains the full $N$."
+      title="Energy detector: the waveform is unknown"
+      instruction="The detector does not know the waveform, so it measures the average power $y/N$. The curves are its exact $\chi^2$ densities under each hypothesis. Raise $N$: the centers stay at $\sigma^2$ and $\sigma^2 + P$ while the widths shrink like $1/\sqrt{N}$. Compare the jailer’s $P_D$ with that of the receiver, who knows the waveform."
       controls={
         <>
           <SliderControl
@@ -72,7 +95,7 @@ function EnergyFigure() {
             min={2}
             max={150}
             step={1}
-            meaning="Complex samples of the suspected transmission."
+            meaning="Real samples of the suspected transmission."
             onValueChange={setSamples}
             format={(v) => `N = ${v.toFixed(0)}`}
           />
@@ -94,7 +117,7 @@ function EnergyFigure() {
             min={1}
             max={30}
             step={0.5}
-            meaning="The jailer's allowed rate of wrong accusations."
+            meaning="The jailer’s false-alarm probability."
             onValueChange={setAlphaPct}
             format={(v) => `${v.toFixed(1)}%`}
           />
@@ -104,17 +127,17 @@ function EnergyFigure() {
         <>
           <ReadoutRow
             label="Jailer's $P_D$ (energy detector)"
-            value={formatPercentValue(pdJailer)}
-            tone={pdJailer - alpha < 0.08 ? 'bad' : 'h1'}
+            value={`${formatPercentValue(pdJailer)}${pdJailer - alpha < 0.02 ? ' ≈ α' : ''}`}
+            tone="good"
           />
           <ReadoutRow
             label="Receiver's $P_D$ (knows waveform)"
             value={formatPercentValue(pdReceiver)}
-            tone="good"
           />
           <ReadoutRow
             label="$P_{FA}$ (both)"
             value={formatPercentValue(alpha)}
+            tone="bad"
           />
           <ReadoutNote>
             <MathText text="When the jailer's $P_D \approx \alpha$, the transmission is statistically invisible. The energy detector notices powers only down to $P \propto 1/\sqrt{N}$, while the receiver that knows the waveform detects it down to $P \propto 1/N$." />
@@ -146,42 +169,101 @@ function EnergyFigure() {
       >
         <line
           x1={10}
-          y1={H - 32}
+          y1={H - 40}
           x2={W - 10}
-          y2={H - 32}
+          y2={H - 40}
           className="stroke-muted-foreground"
           strokeWidth={1}
         />
-        <path d={h0Path} fill="none" className="stroke-h0" strokeWidth={2} />
-        <path d={h1Path} fill="none" className="stroke-h1" strokeWidth={2} />
-        <line
-          x1={xOf(gamma)}
-          y1={14}
-          x2={xOf(gamma)}
-          y2={H - 28}
-          className="stroke-threshold"
-          strokeWidth={2}
-          strokeDasharray="5 3"
+        <path
+          d={tailOf(h1Density, threshold)}
+          className="fill-detection"
+          opacity={0.2}
         />
+        <Hatch id={hatchId} className="stroke-false-alarm" />
+        <path d={tailOf(h0Density, threshold)} fill={`url(#${hatchId})`} />
+        <path d={h0Path} fill="none" className="stroke-h0" strokeWidth={2} />
+        {threshold < X_MAX ? (
+          <text
+            x={xOf(threshold) + (labelLeft ? -6 : 6)}
+            y={H - 44}
+            textAnchor={labelLeft ? 'end' : 'start'}
+            className="plot-halo fill-false-alarm font-mono plot-text-sm"
+          >
+            <Sym base="P" sub="FA" />
+          </text>
+        ) : null}
         <text
-          x={xOf(dof)}
-          y={H - 12}
-          textAnchor="middle"
-          className="fill-h0 font-mono plot-text-sm"
+          x={Math.max(xOf(Math.max(dof - 2, 0.2) / dof) - 6, 26)}
+          y={yOf(h0Density(Math.max(dof - 2, 0.2) / dof)) + 14}
+          textAnchor="end"
+          className="plot-halo fill-h0 font-mono plot-text-sm"
         >
-          Nσ²
+          H0
         </text>
         <text
-          x={xOf(dof * (1 + snr))}
-          y={H - 12}
-          textAnchor="middle"
-          className="fill-h1-ink font-mono plot-text-sm"
+          x={xOf(h1Mode) + 6}
+          y={yOf(h1Density(h1Mode)) + 14}
+          className="plot-halo fill-h1-ink font-mono plot-text-sm"
         >
-          N(σ²+P)
+          H1
+        </text>
+
+        <path d={h1Path} fill="none" className="stroke-h1" strokeWidth={2} />
+        {threshold < X_MAX ? (
+          <line
+            x1={xOf(threshold)}
+            y1={14}
+            x2={xOf(threshold)}
+            y2={H - 36}
+            className="stroke-threshold"
+            strokeWidth={2}
+            strokeDasharray="5 3"
+          />
+        ) : null}
+        <AxisTicks
+          y={H - 40}
+          ticks={[0, 1, 2, 3, 4].map((v) => ({ x: xOf(v), label: String(v) }))}
+        />
+        <text
+          x={xOf(threshold) + (labelLeft ? -4 : 4)}
+          y={24}
+          textAnchor={labelLeft ? 'end' : 'start'}
+          className="fill-threshold plot-halo font-mono plot-text-sm"
+        >
+          <tspan className="font-serif italic">γ</tspan>
+          {threshold < X_MAX ? null : ' beyond the axis'}
+          <tspan className="fill-detection">
+            , jailer <Sym base="P" sub="D" /> {formatPercentValue(pdJailer)}
+          </tspan>
+        </text>
+        <text
+          x={W / 2}
+          y={H - 4}
+          textAnchor="middle"
+          className="fill-muted-foreground font-mono plot-text-sm"
+        >
+          average power y/N, in units of σ<tspan baselineShift="sub">w</tspan>²
+        </text>
+        <line
+          x1={xOf(1 + snr)}
+          y1={H - 40}
+          x2={xOf(1 + snr)}
+          y2={H - 48}
+          className="stroke-h1-ink"
+          strokeWidth={1.5}
+        />
+        <text
+          x={xOf(1 + snr) + (powerLeft ? -4 : 4)}
+          y={powerHigh ? H - 66 : H - 50}
+          textAnchor={powerLeft ? 'end' : 'start'}
+          className="fill-h1-ink plot-halo font-mono plot-text-sm"
+        >
+          σ²+P
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        <MathText text="Densities and tails are exact $\chi^2_{2N}$ computations — watch how skewed they are at small $N$, where the exponential special case $P_D = P_{FA}^{\sigma_0^2/\sigma_1^2}$ lives." />
+        <MathText text="Densities and tails are exact $\chi^2_N$ computations. Both curves share one height scale, and the axis stops at $4\sigma_w^2$, so a wide $\mathcal{H}_1$ curve can run past it. At $N = 2$ they are exponentials, and $P_D = P_{FA}^{\sigma_0^2/\sigma_1^2}$ exactly, with $\sigma_0^2 = \sigma_w^2$ and $\sigma_1^2 = \sigma_w^2 + P$." />
       </p>
     </FigureShell>
   )

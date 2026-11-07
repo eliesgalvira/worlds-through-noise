@@ -92,6 +92,7 @@ const wanted = (id: string) =>
   onlyFigures.length === 0 || onlyFigures.includes(id)
 
 const failures: Array<string> = []
+const parts: Array<string> = []
 
 async function freePort(): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -374,14 +375,19 @@ async function shootSection(
     failures.push(`section ${id} not found`)
     return
   }
+  // Which slice of the section each tile shows, for the bundle to pick from.
+  const kinds =
+    edges.length === 4 ? ['texto', 'figura', 'despues'] : ['completa']
   let part = 0
   for (let index = 0; index + 1 < edges.length; index += 1) {
     const from = edges[index] ?? 0
     const to = edges[index + 1] ?? 0
     for (const tile of tiles(from, to - from, tileHeight(width))) {
       part += 1
+      const name = lessonImage(width, state, sectionSlug(id), part)
+      parts.push(`${name}\t${kinds[index] ?? 'completa'}`)
       await page.screenshot({
-        path: join(out, lessonImage(width, state, sectionSlug(id), part)),
+        path: join(out, name),
         fullPage: true,
         clip: { x: 0, y: tile.y, width, height: tile.height },
         animations: 'disabled',
@@ -410,6 +416,8 @@ async function openPage(
     reducedMotion: 'reduce',
   })
   const page = await context.newPage()
+  // A resolved lesson on a phone is a very tall page; three run at once.
+  page.setDefaultTimeout(120_000)
   await page.clock.setFixedTime(FIXED_TIME)
   await page.route('**/*', async (request) => {
     const url = request.request().url()
@@ -428,6 +436,17 @@ async function openPage(
   page.on('pageerror', (error) => {
     failures.push(`pageerror ${String(width)} ${state}: ${error.message}`)
   })
+  // A full-page screenshot stretches the viewport to the page height, which
+  // would also stretch every svh unit and relayout the page mid-capture. Pin
+  // the figures' height cap to the real window.
+  await page.addInitScript(
+    (maxH) => {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.documentElement.style.setProperty('--plot-max-h', maxH)
+      })
+    },
+    `${String(Math.round(viewportHeight(width) * 0.55))}px`,
+  )
   await page.addInitScript(() => {
     // Layout shift during load, before any input from the bench.
     Reflect.set(window, '__shift', 0)
@@ -454,12 +473,20 @@ async function shootView(page: Page, width: number, state: State, id: string) {
   await page.evaluate((figureId) => {
     const el = document.getElementById(`${figureId}-figure`)
     // Everything pinned to the top of the window: header and phone nav.
+    // Where each bar sits once stuck: its CSS top plus its height, whether
+    // or not it has stuck yet at the current scroll.
     const offset = Math.max(
       0,
       ...Array.from(document.querySelectorAll('.sticky'))
-        .map((bar) => bar.getBoundingClientRect())
-        .filter((box) => box.height > 0 && box.top < 120)
-        .map((box) => box.bottom),
+        .filter((bar) => bar instanceof HTMLElement && bar.offsetHeight > 0)
+        .map((bar) => {
+          const top = Number.parseFloat(getComputedStyle(bar).top)
+          const height = bar instanceof HTMLElement ? bar.offsetHeight : 0
+          // Horizontal bars only: the desktop contents column is sticky too.
+          return Number.isFinite(top) && top < 120 && height < 150
+            ? top + height
+            : 0
+        }),
     )
     if (el !== null) {
       window.scrollTo(
@@ -641,6 +668,7 @@ async function main(): Promise<void> {
     JSON.stringify(session.metrics, null, 2) + '\n',
   )
   await writeFile(join(out, 'fallos.txt'), failures.join('\n') + '\n')
+  await writeFile(join(out, 'partes.tsv'), parts.sort().join('\n') + '\n')
   if (failures.length > 0) {
     console.error(failures.join('\n'))
     process.exitCode = 1

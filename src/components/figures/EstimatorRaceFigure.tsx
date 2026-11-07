@@ -107,18 +107,10 @@ function EstimatorRaceFigure() {
   const xOf = (v: number) => 10 + ((v - X_MIN) / (X_MAX - X_MIN)) * (W - 20)
   const slotW = (W - 20) / bins
 
-  // Each bracket sits just above its own pile, at least one row apart.
-  const pileTop = (hist: ReadonlyArray<number>) =>
-    AXIS_Y - barH(Math.max(...hist))
-  let meanY = Math.max(pileTop(meanHist) - 14, 44)
-  let midY = Math.max(pileTop(midHist) - 14, 44)
-  if (Math.abs(meanY - midY) < 22) {
-    if (meanY <= midY) {
-      meanY = midY - 22
-    } else {
-      midY = meanY - 22
-    }
-  }
+  // The two brackets sit in two rows just above the taller pile.
+  const pilesTop = AXIS_Y - barH(Math.max(...meanHist, ...midHist))
+  const midY = Math.max(pilesTop - 14, 66)
+  const meanY = midY - 22
   const bracketRows = [
     {
       name: 'sample mean',
@@ -201,12 +193,12 @@ function EstimatorRaceFigure() {
       readout={
         <>
           <ReadoutRow
-            label="Sample mean: measured bias $b$, spread $\sigma$"
+            label="Sample mean: $b$, $\sigma$ (measured)"
             value={readout(meanStats)}
             tone="estimate"
           />
           <ReadoutRow
-            label="Midrange: measured bias $b$, spread $\sigma$"
+            label="Midrange: $b$, $\sigma$ (measured)"
             value={readout(midStats)}
           />
           <ReadoutRow

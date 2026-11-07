@@ -484,8 +484,8 @@ export const estimationLesson: LessonRecord = {
             'Write the result as $\\hat{\\theta}_{MAP} = \\frac{x_0}{\\alpha} + \\frac{\\mu_\\theta}{\\beta}$, give $\\alpha, \\beta$ in terms of $\\sigma_0^2, \\sigma_\\theta^2$, and analyze $\\sigma_\\theta^2 \\gg \\sigma_0^2$ and $\\sigma_0^2 \\gg \\sigma_\\theta^2$.',
           steps: [
             {
-              title: 'Divide through and read the coefficients',
-              body: 'Multiply numerator and denominator of each term to expose the printed form.',
+              title: 'Split the fraction and read the coefficients',
+              body: 'Split the MAP fraction into an $x_0$ term and a $\\mu_\\theta$ term. Multiplying the $x_0$ term above and below by $\\sigma_0^2$ leaves $x_0/(1 + \\sigma_0^2/\\sigma_\\theta^2)$. Multiplying the $\\mu_\\theta$ term by $\\sigma_\\theta^2$ leaves $\\mu_\\theta/(1 + \\sigma_\\theta^2/\\sigma_0^2)$.',
               latex:
                 '\\alpha = 1 + \\frac{\\sigma_0^2}{\\sigma_\\theta^2}, \\qquad \\beta = 1 + \\frac{\\sigma_\\theta^2}{\\sigma_0^2}',
             },

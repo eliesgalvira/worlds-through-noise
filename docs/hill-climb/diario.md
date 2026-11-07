@@ -230,3 +230,41 @@ Compromisos al fusionar (decidido por el agente, revisable). Lo que no llega al 
 - **T5 en ancho (2 en la r5):** el ROC del examen queda arriba en el enunciado, lejos de los apartados g y h que lo usan.
 
 Contraste con la meta: T6 llega a 4 en los dos anchos y los dos paquetes. T3 llegó a 4 en ancho en la r4. Los errores de contenido de la base (9 que bloqueaban) están cerrados.
+
+## Estimación: ronda base
+
+Captura `est-base2` de `main` en `9d60ae15`. Dos paquetes como en detección: el 2a lleva E2, E1 y el cuaderno, el 2b lleva E3 y E4. Referencias: cinco productos de estimación, y en el 2a un problema resuelto con pasos.
+
+| Tarea                      | 2a ancho   | 2a móvil | 2b ancho       | 2b móvil       |
+| -------------------------- | ---------- | -------- | -------------- | -------------- |
+| T1 Motivada                | 1          | 1        | 2              | 2              |
+| T2 Leer la figura          | 1          | 1        | 0 (EST-05)     | 0              |
+| T3 Predecir y comprobar    | 1          | 1        | 0 (EST-05)     | 0              |
+| T4 Del dibujo a la fórmula | 0 (EST-01) | 0        | 0 (EST-02)     | 0              |
+| T5 Problema de examen      | 4          | 2        | no verificable | no verificable |
+| T6 Orientarse              | 4          | 4        | 3              | 4              |
+
+### Registro de defectos
+
+| Id     | Gravedad | Qué                                                                                                          | Visto por                        | Estado               |
+| ------ | -------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------- | -------------------- |
+| EST-01 | bloquea  | E2: la CRB revelada lleva el 2 del ruido complejo y contradice el $\sigma^2/N$ del módulo, y no define **p** | 2a, verificado (Tema 3, p. 55)   | cerrado en r1        |
+| EST-02 | bloquea  | E4: la CRB revelada es la de A conocida, y la banda de la figura usaba una fórmula de ningún modelo          | 2b, verificado (p. 97, Kay 3.41) | cerrado en r1        |
+| EST-03 | bloquea  | E3: con el prior, la lectura de varianza decía $1/\sum 1/\sigma_i^2$ y mostraba la varianza a posteriori     | 2b, verificado                   | cerrado en r1        |
+| EST-04 | adivinar | E2: la parábola se aplana en una meseta, eje θ sin escala, θ verdadero sin valor                             | 2a                               | cerrado en r1        |
+| EST-05 | bloquea  | E3: el pie dice que el grosor es $1/\sigma_i^2$ y el muelle cambia sin tocar su σ                            | 2b, verificado                   | cerrado en r1        |
+| EST-06 | adivinar | E1: el histograma se reescala entre fotogramas y el solape crea un tercer color                              | 2a                               | cerrado en r1        |
+| EST-07 | adivinar | E4: ejes sin escala, $\hat f_{ML}$ sin marca                                                                 | 2b                               | cerrado en r1        |
+| EST-08 | adivinar | Colores de rol: estimaciones en magenta o ámbar, sensores en azul, lecturas en verde de detección            | 2a, 2b                           | cerrado en r1        |
+| EST-09 | fricción | Siglas y fórmulas antes del problema (introducción, E2, E3, E4) y frases de intriga                          | 2a, 2b                           | cerrado en r1        |
+| EST-10 | fricción | El texto nombra controles que no existen: estrategia de dos bloques, «score meter»                           | 2b, verificado                   | cerrado en r1        |
+| EST-11 | adivinar | «Prior confidence» funciona al revés de su nombre                                                            | 2b                               | cerrado en r1        |
+| EST-12 | menor    | Guiones bajos en rótulos SVG, casilla nativa, «TEMA 03»                                                      | 2b                               | cerrado salvo «Tema» |
+
+«Tema» se queda (decidido por el agente, revisable): es la palabra de las transparencias y del examen, y la prosa la usa como nombre propio en todas las lecciones.
+
+## Estimación: ronda 1
+
+Commits `d922d635` a la corrección del rótulo recortado de E1. Un subagente Opus verificó contra el temario los tres hallazgos de contenido (informe `est-r1`): el revisor tenía razón en los tres, y además encontró que la frase de los dos bloques describía un control inexistente. Los reemplazos salen literalmente del informe: Tema 3 p. 55 para E2, p. 97 para la ecuación de E4 y Kay 1993, ec. 3.41, para la sinusoide real que simula la figura.
+
+Piezas nuevas en la librería: tonos `estimate` y `cursor` en `ReadoutRow`, y `niceTicks` con su test. El banco pierde el paso «marcar» (ninguna figura usa ya una casilla).

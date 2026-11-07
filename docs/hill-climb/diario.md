@@ -268,3 +268,35 @@ Captura `est-base2` de `main` en `9d60ae15`. Dos paquetes como en detección: el
 Commits `d922d635` a la corrección del rótulo recortado de E1. Un subagente Opus verificó contra el temario los tres hallazgos de contenido (informe `est-r1`): el revisor tenía razón en los tres, y además encontró que la frase de los dos bloques describía un control inexistente. Los reemplazos salen literalmente del informe: Tema 3 p. 55 para E2, p. 97 para la ecuación de E4 y Kay 1993, ec. 3.41, para la sinusoide real que simula la figura.
 
 Piezas nuevas en la librería: tonos `estimate` y `cursor` en `ReadoutRow`, y `niceTicks` con su test. El banco pierde el paso «marcar» (ninguna figura usa ya una casilla).
+
+Notas tras la ronda 1 (auditorías limpias). Revisores nuevos, sin ningún `bloquea`, y todas las fórmulas visibles comprobadas como correctas:
+
+| Tarea | 2a ancho   | 2a móvil | 2b ancho       | 2b móvil       |
+| ----- | ---------- | -------- | -------------- | -------------- |
+| T1    | 3          | 3        | 3              | 3              |
+| T2    | 1          | 1        | 1              | 1              |
+| T3    | 3          | 3        | **4**          | 2              |
+| T4    | 1          | 1        | 1              | 1              |
+| T5    | 3          | 2        | no verificable | no verificable |
+| T6    | 1 (índice) | 1        | **4**          | **4**          |
+
+## Estimación: ronda 2
+
+Ataca lo que la ronda 1 dejó en `adivinar`: términos de ecuación sin marca (E1 dibuja centro y ±σ de cada montón y lee sesgo y MSE; E2 añade la franja del score con su pendiente $-I(\theta)$), títulos con el término técnico para el índice, la ecuación MAP con los sensores de la figura, muestras de leyenda con la forma de su marca (la librería cambia `square` por `mark`). En el cuaderno, los botones pasan a `Button` de la librería y el resultado lleva el recuadro.
+
+| Tarea | 2a ancho | 2a móvil | 2b ancho       | 2b móvil       |
+| ----- | -------- | -------- | -------------- | -------------- |
+| T1    | 3        | 3        | 2              | 2              |
+| T2    | 1        | 1        | 1              | 1              |
+| T3    | 2        | 2        | 1              | 1              |
+| T4    | 3        | 3        | 1              | 1              |
+| T5    | 2        | 2        | no verificable | no verificable |
+| T6    | **4**    | **4**    | **4**          | **4**          |
+
+Cada revisor nuevo encuentra defectos que ya estaban y que el anterior no citó (en 2b, la frase «as sensors accumulate» sin control para añadir sensores, que lleva ahí desde julio). Se arreglan igual: el objetivo son los defectos, no la nota.
+
+## Estimación: ronda 3
+
+- `MathBlock` parte en líneas una ecuación demasiado ancha (tras sus relaciones, y entre las fórmulas que separa un `\qquad`) en vez de encogerla al 60 % y desvanecer el borde. Ataca el compromiso del móvil que quedó abierto en detección, y vale para todas las lecciones.
+- E4 simula el tono complejo $Ae^{j2\pi fn}$ con ruido circular, el modelo del temario (p. 97), así que la lectura de la CRB y la ecuación revelada usan la misma cota y la misma SNR. Desaparece el pie que reconciliaba tono real y complejo.
+- Texto: nada adelanta el resultado antes de la acción, ninguna entradilla del cuaderno responde a sus apartados, «Tema» pasa a «Topic» en todo el sitio (decidido por el agente, revisable: los revisores lo marcaban en cada ronda como mezcla de idiomas, y la regla es conservar el inglés).

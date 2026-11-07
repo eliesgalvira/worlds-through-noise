@@ -80,7 +80,7 @@ export const estimationLesson: LessonRecord = {
           latex:
             '\\mathbf{x} = \\mathbf{p}(\\theta) + \\mathbf{w}, \\quad \\mathbf{w} \\sim \\mathcal{N}(\\mathbf{0}, \\sigma^2\\mathbf{I}) \\;\\Longrightarrow\\; \\sigma^2_{CR(\\theta)} = \\frac{\\sigma^2}{\\left\\| \\partial \\mathbf{p}(\\theta) / \\partial\\theta \\right\\|^2}',
           caption:
-            'Here the mean is $\\mathbf{p}(\\theta) = \\theta\\mathbf{1}$, so $\\|\\partial\\mathbf{p}/\\partial\\theta\\|^2 = N$ and the bound is $\\sigma^2/N$. Complex noise $\\mathcal{CN}(\\mathbf{0}, \\sigma^2\\mathbf{I})$ puts a 2 in the denominator. Frequency, whose derivative grows with $n$, gets a $1/N^3$ bound, amplitude only $1/N$.',
+            'In the figure the mean is $\\mathbf{p}(\\theta) = \\theta\\mathbf{1}$, so $\\|\\partial\\mathbf{p}/\\partial\\theta\\|^2 = N$ and the bound is $\\sigma^2/N$. Complex noise $\\mathcal{CN}(\\mathbf{0}, \\sigma^2\\mathbf{I})$ puts a 2 in the denominator. Frequency, whose derivative grows with $n$, gets a $1/N^3$ bound, amplitude only $1/N$.',
         },
       ],
       prediction: {
@@ -682,7 +682,7 @@ export const estimationLesson: LessonRecord = {
               title: 'Let the MSE go to zero',
               body: 'Efficiency gives unbiasedness plus variance equal to the bound $\\lambda/N$. The MSE is then $\\lambda/N \\to 0$ as $N \\to \\infty$.',
               latex:
-                'MSE\\{\\hat{\\lambda}_{ML}\\} = \\operatorname{var}\\{\\hat{\\lambda}_{ML}\\} = \\frac{\\lambda}{N} \\xrightarrow{N \\to \\infty} 0',
+                '\\operatorname{MSE}\\{\\hat{\\lambda}_{ML}\\} = \\operatorname{var}\\{\\hat{\\lambda}_{ML}\\} = \\frac{\\lambda}{N} \\xrightarrow{N \\to \\infty} 0',
             },
           ],
           answer: {

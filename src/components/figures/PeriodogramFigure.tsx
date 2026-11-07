@@ -8,7 +8,6 @@ import {
   FigureShell,
   Legend,
   Plot,
-  ReadoutNote,
   ReadoutRow,
   Sym,
 } from '@/components/figures/shared.tsx'
@@ -219,14 +218,9 @@ function PeriodogramFigure() {
             value={formatNumber(snr, 2)}
           />
           <ReadoutRow
-            label="CRB std $\sigma_{CR}(\hat{f})$ (theory)"
+            label="CRB std $\sigma_{CR(f)}$ (theory)"
             value={crbStd.toPrecision(2)}
           />
-          {answerShown && bandTooNarrow ? (
-            <ReadoutNote>
-              At this N the CRB band is thinner than its tick on the plot.
-            </ReadoutNote>
-          ) : null}
         </>
       }
     >
@@ -344,8 +338,8 @@ function PeriodogramFigure() {
               y={CRB_Y + 4}
               className="fill-truth font-mono plot-text-xs"
             >
-              <Sym base="f" sub="0" /> ±<Sym base="σ" sub="CR" /> ={' '}
-              {crbStd.toPrecision(2)}
+              <Sym base="σ" sub="CR" /> = {crbStd.toPrecision(2)}
+              {bandTooNarrow ? ', too thin to draw' : ''}
             </text>
             <line
               x1={xOf(TRUE_FREQ)}
@@ -357,6 +351,14 @@ function PeriodogramFigure() {
               strokeDasharray="4 4"
               opacity={0.7}
             />
+            <text
+              x={xOf(TRUE_FREQ) - 4}
+              y={AXIS_Y - 6}
+              textAnchor="end"
+              className="plot-halo fill-truth font-mono plot-text-xs"
+            >
+              <Sym base="f" sub="0" /> = {TRUE_FREQ.toFixed(3)}
+            </text>
           </g>
         ) : null}
         <path

@@ -52,7 +52,7 @@ export const estimationLesson: LessonRecord = {
         'What limits every unbiased estimator, and when does the perfect one exist?',
       trap: 'Every estimate built from noisy data wobbles from one experiment to the next. The Cramér–Rao bound (CRB) is a floor on that wobble: no unbiased estimator can have a variance below it. Its formula, an expectation of a squared derivative of a logarithm, then inverted, is hard to picture. So is the test for an efficient estimator, one whose variance actually touches the floor. Both are read off the likelihood $f(\\mathbf{x}; \\theta)$, drawn as a function of $\\theta$.',
       object:
-        'Draw the likelihood for the data you actually observed: it says how plausible each candidate value of $\\theta$ makes them. The peak of this landscape is the maximum-likelihood (ML) estimate. The sharpness near the peak is how confidently the data votes: a knife-edge peak pins $\\theta$ down, a broad hill leaves it loose. The strip under the landscape draws the slope of its logarithm, the score $\\partial \\ln f/\\partial\\theta$: zero at the peak, and steeper the sharper the peak. Fisher information is the average curvature of this landscape drawn on a log scale, and the CRB is its inverse: flat landscape, poor floor.',
+        'Draw the likelihood for the data you actually observed: it says how plausible each candidate value of $\\theta$ makes them. The peak of this landscape is the maximum-likelihood (ML) estimate. The sharpness near the peak is how confidently the data votes: a knife-edge peak pins $\\theta$ down, a broad hill leaves it loose. The strip under the landscape draws the slope of its logarithm, the score $\\partial \\ln f/\\partial\\theta$: zero at the peak, and steeper the sharper the peak. Fisher information, $I(\\theta)$, is the average curvature of this landscape drawn on a log scale, and the CRB is its inverse: flat landscape, poor floor.',
       action:
         'The figure draws $N$ samples $x_n = \\theta + w_n$ with Gaussian noise $w_n \\sim \\mathcal{N}(0, \\sigma^2)$, so $\\sigma$ is the noise standard deviation. Draw fresh samples and watch the landscape rebuild — the peak wobbles from draw to draw, and the size of the wobble matches the flatness. Raise $N$: each new sample multiplies another factor into the likelihood, the landscape sharpens, and the wobble’s variance shrinks like $1/N$ (its width like $1/\\sqrt{N}$). Raise the noise $\\sigma$ and it flattens again. The bar around the peak spans $\\pm\\sigma_{CR}$, the square root of the Cramér–Rao bound.',
       payoff:
@@ -106,7 +106,7 @@ export const estimationLesson: LessonRecord = {
       object:
         'Each measurement acts as a spring. $x_i$ is an anchor pulling the estimate toward itself with stiffness $1/\\sigma_i^2$: precise sensors are stiff springs, noisy sensors are slack ones. The estimate is where all the pulls balance. And a Gaussian prior is nothing special — it is one more spring, anchored at $\\mu_\\theta$, with stiffness $1/\\sigma_\\theta^2$.',
       action:
-        'In the figure, drag one sensor’s noise up and watch its spring slacken: the balance point slides away from it, while the combined variance grows, but never past what the other sensors achieve on their own. Raise $\\sigma_1$ to its maximum, a nearly broken sensor like the defective pixel of the June 2026 final (whose variance $\\sigma_0^2 \\to \\infty$), and watch the balance point settle between the other two sensors, as if the broken one were not there. Then switch the prior spring on, feel it pull the estimate toward $\\mu_\\theta$, and stiffen the sensors (lower their $\\sigma$) to watch the data springs overpower it.',
+        'In the figure, drag one sensor’s noise up and watch its spring slacken: the balance point slides away from it, while the combined variance grows, but never past what the other sensors achieve on their own. Raise $\\sigma_1$ to its maximum: sensor 1 then plays the defective pixel of the June 2026 final, whose variance the exam calls $\\sigma_0^2 \\to \\infty$, and watch the balance point settle between the other two sensors, as if the broken one were not there. Then switch the prior spring on, feel it pull the estimate toward $\\mu_\\theta$, and stiffen the sensors (lower their $\\sigma$) to watch the data springs overpower it.',
       payoff:
         'One picture now covers four exam staples: greenhouse-sensor fusion, the defective camera pixel, the BLUE (the best linear unbiased estimator — exactly this balance of springs, derived under a linearity constraint), and MAP shrinkage, $\\hat{\\theta}_{MAP} = {\\alpha\\hat{\\theta}_{ML}} + {(1-\\alpha)\\mu_\\theta}$, where $\\alpha$ is the data springs’ share of the total stiffness. It also explains why the prior fades as data accumulate: with $N$ equal data springs against one prior spring, the prior’s share $1 - \\alpha$ shrinks as $N$ grows.',
       equations: [
@@ -129,9 +129,9 @@ export const estimationLesson: LessonRecord = {
       ],
       prediction: {
         question:
-          'Eight good pixels and one broken one. How much does keeping the broken pixel cost the fused estimate?',
+          'Two good sensors and a broken one: push $\\sigma_1$ to 12. Does keeping sensor 1 raise or lower the estimator variance, compared with dropping it?',
         answer:
-          'None: keeping it can only help. Its weight $1/\\sigma_0^2 \\approx 0$ makes the fusion converge to the 8-pixel average, with variance just under $\\sigma^2/8$, where $\\sigma^2$ is the noise variance of each good pixel. Fusion degrades gracefully.',
+          'Lower, slightly: 7.78 against 8.22 for sensors 2 and 3 alone. Its weight $1/\\sigma_1^2 = 1/144$ is tiny but positive, so keeping it can only help. The June 2026 final asks the same with eight good pixels: the fusion lands just under $\\sigma^2/8$, with $\\sigma^2$ the noise variance of each good pixel.',
       },
       transfer:
         'Final Jun 2026, Ex. 1: defective pixel, with $\\sigma^2$ the noise variance of each good pixel and $\\sigma_0^2$ that of the broken one. Do (a) single pixel, (b) 9-pixel fusion, (c) the two limits $\\sigma_0^2 = \\sigma^2$ and $\\sigma_0^2 \\gg \\sigma^2$, (d–e) MAP with a $N(\\mu_\\theta, \\sigma_\\theta^2)$ prior. All five parts are spring diagrams.',
@@ -146,9 +146,9 @@ export const estimationLesson: LessonRecord = {
       title: 'ML frequency: a detector bank',
       question:
         'How does maximum likelihood find a frequency, and how precisely can it?',
-      trap: 'A tone $A e^{j2\\pi f n}$ of unknown frequency $f$ and unknown complex amplitude $A$ (its size and phase) is buried in noise, and you have $N$ samples $x(n)$. Which frequency is it? Maximum likelihood (ML) answers by testing every candidate frequency against the data and keeping the best match. Once the amplitude is maximized out, the best match is the $f$ that maximizes $|X(f)|^2$, with $X(f)$ the Fourier transform of the samples, and the figure runs that search.',
+      trap: 'A tone $A e^{j2\\pi f n}$ of unknown frequency $f$ and unknown complex amplitude $A$ (its size and phase) is buried in noise, and you have $N$ samples $x(n)$. Which frequency is it? Maximum likelihood (ML) answers by testing every candidate frequency against the data and keeping the best match, and the figure runs that search.',
       object:
-        'Think of it as a bank of candidate explanations. Each candidate frequency $f$ proposes a template, the vector $\\mathbf{s}(f)$ of samples a clean tone at $f$ would produce. The data rates every candidate by how much of $\\mathbf{x}$ lies along that template: $|\\mathbf{s}(f)^H\\mathbf{x}|^2 = |X(f)|^2$, with $^H$ the conjugate transpose, a correlation computed from your samples. ML picks the candidate with the best match. This is the Fourier transform working as a detector, not as a change of representation.',
+        'Think of it as a bank of candidate explanations. Each candidate frequency $f$ proposes a template, the vector $\\mathbf{s}(f)$ of samples a clean tone at $f$ would produce. The data rates every candidate by how much of $\\mathbf{x}$ lies along that template, a correlation computed from your samples. ML picks the candidate with the best match. This is the Fourier transform working as a detector, not as a change of representation.',
       action:
         'In the figure, slide the candidate $f$ across the band and watch the dot on the curve, whose height is the match $|X(f)|^2/N$: the landscape rises to a peak at the hidden tone. Add noise and watch spurious ripples start to compete. Then raise $N$ and watch the main peak narrow, and the CRB readout with it: a longer record makes the template more sensitive to small frequency errors.',
       payoff:
@@ -159,6 +159,8 @@ export const estimationLesson: LessonRecord = {
             'Maximize over amplitude first. The survivor is a matched-filter score swept across frequency.',
           latex:
             '\\hat f_{ML} = \\arg\\max_f \\frac{|X(f)|^2}{N}, \\qquad X(f) = \\sum_{n=0}^{N-1} x(n)\\, e^{-j2\\pi f n} = \\mathbf{s}(f)^H\\mathbf{x}, \\qquad \\hat A_{ML} = \\tfrac{1}{N} X(\\hat f_{ML})',
+          caption:
+            '$\\mathbf{s}(f)$ is the template, a clean tone at $f$, and $^H$ the conjugate transpose: $X(f)$ is the correlation whose size the figure plots as the match.',
         },
         {
           sentence:

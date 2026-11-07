@@ -136,7 +136,7 @@ function FusionSpringsFigure() {
             value={formatNumber(variance, 3)}
           />
           <ReadoutRow
-            label="Data share $\alpha$"
+            label="Data share $\alpha$ (prior on)"
             value={priorOn ? formatNumber(alpha, 2) : '—'}
           />
         </>

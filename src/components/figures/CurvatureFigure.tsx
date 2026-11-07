@@ -367,7 +367,7 @@ function CurvatureFigure() {
         />
         <text
           x={xOf(TRUTH + crbStd) + 6}
-          y={AXIS_Y + 184}
+          y={AXIS_Y + 172}
           className="plot-halo fill-estimate font-mono plot-text-xs"
         >
           θ ±<Sym base="σ" sub="CR" />

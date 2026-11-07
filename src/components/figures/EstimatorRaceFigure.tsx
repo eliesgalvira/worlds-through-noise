@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/button.tsx'
 import { MathText } from '@/components/MathText.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
@@ -123,7 +124,7 @@ function EstimatorRaceFigure() {
         ).length
   const bracketRows = [
     {
-      name: 'sample mean',
+      name: 'mean',
       stat: meanStats,
       y: MEAN_ROW,
       stroke: 'stroke-estimate',
@@ -161,6 +162,9 @@ function EstimatorRaceFigure() {
                 rerun('gaussian', n)
               }}
             >
+              {kind === 'gaussian' ? (
+                <Check className="size-4" aria-hidden="true" />
+              ) : null}
               Gaussian noise
             </Button>
             <Button
@@ -173,6 +177,9 @@ function EstimatorRaceFigure() {
                 rerun('uniform', n)
               }}
             >
+              {kind === 'uniform' ? (
+                <Check className="size-4" aria-hidden="true" />
+              ) : null}
               Uniform noise
             </Button>
           </div>
@@ -218,8 +225,8 @@ function EstimatorRaceFigure() {
               result === null
                 ? '—'
                 : raceMse(meanStats) < raceMse(midStats)
-                  ? 'sample mean'
-                  : 'midrange'
+                  ? `mean, ${formatNumber(raceMse(meanStats), 4)}`
+                  : `midrange, ${formatNumber(raceMse(midStats), 4)}`
             }
           />
           <ReadoutNote>
@@ -313,7 +320,7 @@ function EstimatorRaceFigure() {
             const left = xOf(Math.max(stat.mean - stat.sd, X_MIN))
             const right = xOf(Math.min(stat.mean + stat.sd, X_MAX))
             const center = xOf(stat.mean)
-            const label = `${name} spread ±${formatNumber(stat.sd, 3)}`
+            const label = `${name} ±${formatNumber(stat.sd, 3)}`
             // Beside the bracket on the side away from the truth line, so the
             // line never crosses it. Above the bracket when there is no room.
             const labelW = label.length * LABEL_CHAR_W

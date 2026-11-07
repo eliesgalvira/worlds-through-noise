@@ -213,11 +213,11 @@ function CurvatureFigure() {
           textAnchor={peakRight ? 'end' : 'start'}
           className="fill-truth font-mono plot-text-xs"
         >
-          true θ = {TRUTH}
+          θ = {TRUTH}
         </text>
         <g className="fill-muted-foreground stroke-muted-foreground">
           <text x={12} y={12} stroke="none" className="font-mono plot-text-xs">
-            ln f(x;θ) minus its peak
+            ln f − peak
           </text>
           {[0, -5, -10].map((tick) => (
             <text

@@ -36,7 +36,7 @@ const STRIP_HALF = 22
 /** Samples shown in the strip: enough to see the oscillation. */
 const STRIP_SAMPLES = 48
 /** Row of the CRB bracket, above the peak marker. */
-const CRB_Y = 86
+const CRB_Y = 76
 
 function PeriodogramFigure() {
   const [n, setN] = useState(48)
@@ -338,7 +338,7 @@ function PeriodogramFigure() {
             {bandTooNarrow ? (
               <text
                 x={xOf(TRUE_FREQ) + 5}
-                y={CRB_Y + 17}
+                y={CRB_Y + 21}
                 className="fill-truth font-mono plot-text-xs"
               >
                 band thinner than the tick

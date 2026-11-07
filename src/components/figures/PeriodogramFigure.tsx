@@ -390,7 +390,7 @@ function PeriodogramFigure() {
           textAnchor="middle"
           className="fill-muted-foreground font-mono plot-text-sm"
         >
-          candidate frequency f, cycles/sample (drag anywhere)
+          candidate f, cycles/sample
         </text>
       </Plot>
     </FigureShell>

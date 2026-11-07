@@ -300,3 +300,42 @@ Cada revisor nuevo encuentra defectos que ya estaban y que el anterior no citó 
 - `MathBlock` parte en líneas una ecuación demasiado ancha (tras sus relaciones, y entre las fórmulas que separa un `\qquad`) en vez de encogerla al 60 % y desvanecer el borde. Ataca el compromiso del móvil que quedó abierto en detección, y vale para todas las lecciones.
 - E4 simula el tono complejo $Ae^{j2\pi fn}$ con ruido circular, el modelo del temario (p. 97), así que la lectura de la CRB y la ecuación revelada usan la misma cota y la misma SNR. Desaparece el pie que reconciliaba tono real y complejo.
 - Texto: nada adelanta el resultado antes de la acción, ninguna entradilla del cuaderno responde a sus apartados, «Tema» pasa a «Topic» en todo el sitio (decidido por el agente, revisable: los revisores lo marcaban en cada ronda como mezcla de idiomas, y la regla es conservar el inglés).
+
+## Estimación: rondas 4 a 7
+
+Notas por ronda (ancho/móvil). Revisores nuevos en cada ronda, todos Opus 5.5 effort high, auditorías limpias.
+
+| Tarea | 2a r3 | 2a r4 | 2a r5 | 2a r6 | 2b r3 | 2b r4 | 2b r5 | 2b r6 |
+| ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
+| T1    | 2/2   | 3/3   | 1/1   | 1/1   | 2/2   | 1/1   | 1/1   | 0/0   |
+| T2    | 2/1   | 3/2   | 3/2   | 2/2   | 1/1   | 3/1   | 0/0   | 3/1   |
+| T3    | 2/2   | 2/2   | 2/2   | 2/2   | 2/2   | 2/2   | 0/0   | 1/1   |
+| T4    | 2/2   | 0/0   | 1/1   | 3/3   | 2/2   | 1/1   | 2/2   | 3/3   |
+| T5    | 3/0   | 3/2   | 3/3   | 0/0   | —     | —     | —     | —     |
+| T6    | 4/4   | 4/4   | 4/4   | 4/4   | 4/4   | 4/4   | 4/4   | 4/3   |
+
+Lo que la nota no cuenta: cada ronda cerró los defectos que citaba la anterior, y los ceros nuevos son casi siempre errores de contenido que estaban desde julio y que un revisor nuevo encontró por primera vez. Cuatro, todos corregidos:
+
+- «Si el score se curva, ningún estimador insesgado alcanza la cota» (E2). Falso: el criterio es la factorización $I(\theta)(g(\mathbf{x}) - \theta)$, y la exponencial y la Poisson del cuaderno tienen un score curvo que factoriza (r4).
+- σ² sin definir en la transferencia del píxel (r4), y una nota mía con α en dos sentidos (r4, corregida en r5).
+- «La media muestral tiene esperanza βαNA» en el paso b)01 del amplificador. Es la suma escalada β1ᵀx (r6).
+- La tesis de la lección decía que la CRB acota la nube «de cualquier estimador». Solo la de los insesgados (r6).
+
+Cambios de fondo en estas rondas:
+
+- `MathBlock` parte en líneas las ecuaciones que no caben. El primer intento no funcionaba en el cuaderno: React 19 reescribía el `innerHTML` en cada re-render porque el objeto `{__html}` era nuevo. Se encontró midiendo la caja en un navegador real (0 de ancho no, sino un HTML repuesto tras el ajuste). Ahora el objeto está memoizado, y hay un solo oyente de fuentes para todas las ecuaciones.
+- E4 simula el tono complejo del temario, dibuja la plantilla sobre las muestras, esconde el tono verdadero tras «Show the answer» y dibuja la banda de la CRB a escala (antes tenía un ancho mínimo que la exageraba hasta 60 veces).
+- E2 dibuja el score, y E1 dibuja centro y dispersión de cada montón.
+
+La auditoría de la r4 marcó «hill-climb» en las dos sesiones. Era el revisor describiendo el producto de referencia `producto-a` («the hill-climbing maximum likelihood figure»), no una fuga. Comprobado a mano en las dos sesiones.
+
+### Puertas: code-review, simplify y verificación de contenido
+
+Code-review en dos ejes de `9d60ae15..316321d9` (informe `code-review-est-1`). Respuestas:
+
+- Arreglado: banda CRB no a escala, `MathBlock boxed` y `ControlRow` en la librería en vez de clases sueltas, «;» como separador, CRB etiquetada como teoría, pie de E1 por `MathText`, nota de E1 calculada, muestras de E2 sin tope de 60, `coarseStep` derivado, doble render de KaTeX, frases que destripaban predicciones, regla W ≈ 470 de AGENTS.md (con `plot-text-*` el tamaño aparente no depende del viewBox).
+- Contestado sin cambio: los 9 commits que no dicen qué borraron ya están publicados (reescribir la historia de una rama con PR abierto no compensa); los siguientes sí lo dicen. Arrastre en E1–E3: no es una regresión, venía de julio, y E1 no tiene un parámetro continuo sobre el plano. Dispersión medida de f̂ en E4: exigiría cientos de periodogramas por render; la CRB va etiquetada como teoría. Los «;» de `adaptive.ts` y `wiener.ts` quedan fuera de alcance.
+
+Simplify (cuatro ángulos). Arreglado: `AxisTicksY` en la librería, un solo oyente de fuentes con refit en un frame, HTML partido perezoso, `mse` y `sampleMean` del dominio, `periodogramAt` muerto borrado, refinado del pico memoizado, constantes con nombre. Contestado: un helper común para colocar etiquetas a un lado u otro; la regla de cada figura depende de sus propias marcas y un helper no la simplificaría.
+
+Verificación de contenido: tres verificadores Opus contra `course/` (`est-r1`, `est-r2`, `est-r4`), todos sus errores y dudas aplicados o anotados. La verificación final de la lección entera está en curso.

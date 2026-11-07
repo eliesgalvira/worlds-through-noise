@@ -142,7 +142,7 @@ function PeriodogramFigure() {
             tone="estimate"
           />
           <ReadoutRow
-            label="Amplitude $|\hat{A}_{ML}| = |X(\hat{f}_{ML})|/N$"
+            label="Amplitude $|\hat{A}_{ML}|$"
             value={formatNumber(Math.sqrt(peak.score / n), 2)}
             tone="estimate"
           />

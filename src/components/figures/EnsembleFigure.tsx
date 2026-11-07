@@ -91,7 +91,7 @@ function EnsembleFigure() {
   return (
     <FigureShell
       title="One rule, two dials: walk a row, cut a column"
-      instruction="Each faint line is one book read page by page — one realization $x(n, S_k)$. The $S$ slider pulls one book forward (drawn in ink); the $n$ slider cuts a column, and the histogram on the right collects the answers all 28 books give on that page. The stationarity test: cut at $n = 30$, remember the histogram’s shape, then cut at $n = 60$ and compare. White and Filtered give the same shape everywhere; the Burst does not — its middle pages are louder."
+      instruction="Each faint line is one book read page by page, one realization $x(n, S_k)$. The $S$ slider pulls one book forward, drawn in ink. The $n$ slider cuts a column, and the histogram on the right collects the answers all 28 books give on that page. The stationarity test: cut at $n = 30$, remember the histogram’s shape, then cut at $n = 60$ and compare. White and Filtered give the same shape everywhere. The Burst does not, because its middle pages are louder."
       controls={
         <>
           <div className="space-y-2">

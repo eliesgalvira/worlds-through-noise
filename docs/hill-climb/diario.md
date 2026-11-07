@@ -323,7 +323,7 @@ Lo que la nota no cuenta: cada ronda cerró los defectos que citaba la anterior,
 
 Cambios de fondo en estas rondas:
 
-- `MathBlock` parte en líneas las ecuaciones que no caben. El primer intento no funcionaba en el cuaderno: React 19 reescribía el `innerHTML` en cada re-render porque el objeto `{__html}` era nuevo. Se encontró midiendo la caja en un navegador real (0 de ancho no, sino un HTML repuesto tras el ajuste). Ahora el objeto está memoizado, y hay un solo oyente de fuentes para todas las ecuaciones.
+- `MathBlock` parte en líneas las ecuaciones que no caben. El primer intento no funcionaba en el cuaderno: React 19 reescribía el `innerHTML` en cada re-render porque el objeto `{__html}` era nuevo. Se encontró midiendo la caja en un navegador real: el ajuste se aplicaba y un re-render posterior lo deshacía. Ahora el objeto está memoizado, y hay un solo oyente de fuentes para todas las ecuaciones.
 - E4 simula el tono complejo del temario, dibuja la plantilla sobre las muestras, esconde el tono verdadero tras «Show the answer» y dibuja la banda de la CRB a escala (antes tenía un ancho mínimo que la exageraba hasta 60 veces).
 - E2 dibuja el score, y E1 dibuja centro y dispersión de cada montón.
 

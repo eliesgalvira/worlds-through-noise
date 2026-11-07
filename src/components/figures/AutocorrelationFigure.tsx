@@ -129,7 +129,7 @@ function AutocorrelationFigure() {
             value={formatNumber(r0, 2)}
           />
           <ReadoutRow
-            label={`r̂(${lag}) — resemblance at lag ${lag}`}
+            label={`$\\hat{r}(${String(lag)})$, resemblance at lag ${String(lag)}`}
             value={formatNumber(rm, 2)}
             tone="h1"
           />
@@ -144,7 +144,7 @@ function AutocorrelationFigure() {
       <Legend
         items={[
           { label: 'signal $x(n)$', swatchClass: 'stroke-h0' },
-          { label: `shifted copy x(n−m)`, swatchClass: 'stroke-h1' },
+          { label: 'shifted copy $x(n-m)$', swatchClass: 'stroke-h1' },
         ]}
       />
       <Plot

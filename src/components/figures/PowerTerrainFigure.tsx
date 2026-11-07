@@ -65,7 +65,7 @@ function PowerTerrainFigure() {
             min={0}
             max={2.5}
             step={0.05}
-            meaning="Makes the terrain steeper along $\mathbf{u}_{\max}$."
+            meaning="Makes the terrain steeper, mostly along $\mathbf{u}_{\max}$."
             onValueChange={setAmplitude}
             format={(v) => v.toFixed(2)}
           />

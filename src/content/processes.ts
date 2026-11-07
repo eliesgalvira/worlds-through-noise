@@ -68,7 +68,7 @@ export const processesLesson: LessonRecord = {
       object:
         'Picture the signal and a transparent copy of it on a slider. Slide the copy $m$ samples to the side, lay it over the original, multiply the samples that overlap, and average the products. That average is one number, and it is the autocorrelation at lag $m$. It comes out large when the signal still resembles itself after the shift, and near zero when the shift has destroyed all resemblance. In one word: $r_x(m)$ measures memory.',
       action:
-        'The figure below performs exactly this multiplication and averaging on a real generated signal. Drag the lag $m$, with the slider or on the lower-left plot, and watch the amber copy slide. The average of the overlap products is one number, $\\hat{r}_x(m)$, the highlighted stem among the lags plotted underneath. Then try all three signals and watch memory die at three different speeds: for white noise all resemblance is gone at the first shift. For filtered noise it fades over a few lags. For the tone in noise it never dies, it oscillates forever.',
+        'The figure below performs exactly this multiplication and averaging on a real generated signal. Drag the lag $m$, with the slider or on the lower-left plot, and watch the amber copy slide. The average of the overlap products is one number, $\\hat{r}_x(m)$, the highlighted stem among the lags plotted underneath. Then try all three signals and watch memory die at three different speeds: for white noise all resemblance is gone at the first shift. For filtered noise it fades over a few lags. For the tone in noise it never dies: it oscillates forever.',
       payoff:
         'After a few drags, the properties you were asked to memorize become things you have seen. $r_x(0)$ is the power, because at zero shift a signal overlaps itself perfectly. No lag can beat $r_x(0)$, because nothing overlaps better than no shift. And the power spectral density is the same information asked in the language of frequency: a wide, slowly-fading $r_x$ means a narrow spectrum, a spiky $r_x$ means a flat one. The Fourier pair is a change of language, not new content.',
       equations: [
@@ -83,7 +83,7 @@ export const processesLesson: LessonRecord = {
             'Filtering a stationary process reshapes its spectrum with the filter magnitude as a mask.',
           latex: 'S_Y(f) = |H(f)|^2\\, S_X(f), \\qquad m_y = m_x H(0)',
           caption:
-            'The output stays stationary. Each frequency’s power is multiplied by $|H(f)|^2$, so the total power changes too.',
+            'The output stays stationary. Each frequency’s power is multiplied by $|H(f)|^2$, so the total power can change too.',
         },
       ],
       prediction: {

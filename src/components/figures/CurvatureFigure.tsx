@@ -132,7 +132,6 @@ function CurvatureFigure() {
           />
           <Button
             type="button"
-            variant="outline"
             size="sm"
             onClick={() => {
               setSeed((s) => s + 1)
@@ -154,7 +153,7 @@ function CurvatureFigure() {
             value={formatNumber(crbStd, 3)}
           />
           <ReadoutRow
-            label={`Std of the ${String(RERUNS)} peaks (bottom strip)`}
+            label={`Measured $\\sigma_{\\hat{\\theta}}$ (std of ${String(RERUNS)} peaks)`}
             value={formatNumber(peakStd, 3)}
           />
           <ReadoutRow

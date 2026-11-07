@@ -7,7 +7,7 @@ export const estimationLesson: LessonRecord = {
   thesis:
     'An estimator is a machine you must judge by its cloud of outputs, never by one lucky number — and the Cramér-Rao bound says how tight that cloud can be for any unbiased estimator.',
   intro: [
-    'Topic 3 has one skeleton: model the data $f(\\mathbf{x}; \\theta)$, ask how much the data even knows about $\\theta$ (the Cramér–Rao bound, CRB), look for the estimator that extracts all of it (the efficient estimator when it exists, otherwise the maximum-likelihood, ML, estimator, which reaches the bound as $N$ grows), and, when prior knowledge exists, add it through a prior density (a Gaussian prior acts as one more measurement).',
+    'Topic 3 walks one path, one module per step. E1 judges an estimator by its cloud of outputs. E2 finds the floor no unbiased estimator can beat. E3 fuses unequal measurements and adds prior knowledge. E4 finds a frequency by maximum likelihood.',
     'Exams walk this skeleton in order — “find the pdf, find the CRB, does the efficient estimator exist, find the ML, is it consistent” — so this lesson does too, with the objects made visible at each step.',
   ],
   modules: [
@@ -108,7 +108,7 @@ export const estimationLesson: LessonRecord = {
       action:
         'In the figure, drag one sensor’s noise up and watch its spring slacken: the balance point slides away from it, while the combined variance grows, but never past what the other sensors achieve on their own. Raise $\\sigma_1$ to its maximum: sensor 1 then plays the defective pixel of the June 2026 final, whose variance the exam calls $\\sigma_0^2 \\to \\infty$, and watch the balance point settle between the other two sensors, as if the broken one were not there. Then switch the prior spring on, feel it pull the estimate toward $\\mu_\\theta$, and stiffen the sensors (lower their $\\sigma$) to watch the data springs overpower it.',
       payoff:
-        'One picture now covers four exam staples: greenhouse-sensor fusion, the defective camera pixel, the BLUE (the best linear unbiased estimator — exactly this balance of springs, derived under a linearity constraint), and MAP shrinkage, $\\hat{\\theta}_{MAP} = {\\alpha\\hat{\\theta}_{ML}} + {(1-\\alpha)\\mu_\\theta}$, where $\\alpha$ is the data springs’ share of the total stiffness. It also explains why the prior fades as data accumulate: with $N$ equal data springs against one prior spring, the prior’s share $1 - \\alpha$ shrinks as $N$ grows.',
+        'One picture covers greenhouse-sensor fusion, the defective camera pixel, the best linear unbiased estimator (BLUE) and MAP shrinkage. The data springs’ share of the total stiffness is the readout $\\alpha$, and it explains why the prior fades as data accumulate: with $N$ equal data springs against one prior spring, the prior’s share $1 - \\alpha$ shrinks as $N$ grows.',
       equations: [
         {
           sentence:
@@ -124,7 +124,7 @@ export const estimationLesson: LessonRecord = {
           latex:
             '\\hat\\theta_{MAP} = \\frac{\\sum_i x_i/\\sigma_i^2 + \\mu_\\theta/\\sigma_\\theta^2}{\\sum_i 1/\\sigma_i^2 + 1/\\sigma_\\theta^2}, \\qquad \\sigma^2_{\\theta|\\mathbf{x}} = \\frac{1}{\\sum_i 1/\\sigma_i^2 + 1/\\sigma_\\theta^2}',
           caption:
-            "The second fraction is the posterior variance the figure reads out. The June-2026 final has one pixel $x_0$ with noise variance $\\sigma_0^2$: $\\sigma_\\theta^2 \\gg \\sigma_0^2$ trusts the data, $\\sigma_0^2 \\gg \\sigma_\\theta^2$ trusts the prior. The exam writes the answer as $x_0/k + \\mu_\\theta/m$ (it names these $\\alpha$ and $\\beta$) with $k = 1 + \\sigma_0^2/\\sigma_\\theta^2$ and $m = 1 + \\sigma_\\theta^2/\\sigma_0^2$, so $x_0/k = \\alpha x_0$ with the figure's data share $\\alpha$.",
+            "In shrinkage form this is $\\hat{\\theta}_{MAP} = \\alpha\\hat{\\theta}_{ML} + (1-\\alpha)\\mu_\\theta$, with $\\alpha$ the data share the figure reads out. The second fraction is the posterior variance the figure reads out. The June-2026 final has one pixel $x_0$ with noise variance $\\sigma_0^2$: $\\sigma_\\theta^2 \\gg \\sigma_0^2$ trusts the data, $\\sigma_0^2 \\gg \\sigma_\\theta^2$ trusts the prior. The exam writes the answer as $x_0/k + \\mu_\\theta/m$ (it names these $\\alpha$ and $\\beta$) with $k = 1 + \\sigma_0^2/\\sigma_\\theta^2$ and $m = 1 + \\sigma_\\theta^2/\\sigma_0^2$, so $x_0/k = \\alpha x_0$ with the figure's data share $\\alpha$.",
         },
       ],
       prediction: {
@@ -191,7 +191,7 @@ export const estimationLesson: LessonRecord = {
       id: 'wp-amp-gain',
       source: 'Midterm, April 13 2026, Ex. 1 (5 points)',
       title: 'Amplifier gain: the mean and the variance both know A',
-      why: 'The rare model where the parameter scales both moments at once. It exercises E1 (bias, variance), E2 (CRB and why an unbiased estimator can still waste information), and hands you an ML estimator built from power instead of mean.',
+      why: 'The rare model where the parameter scales both moments at once. It exercises E1 (bias, variance), E2 (CRB and why an unbiased estimator can still waste information), and asks for an ML estimator.',
       statement: [
         {
           kind: 'text',
@@ -944,7 +944,7 @@ export const estimationLesson: LessonRecord = {
       id: 'wp-cable',
       source: 'Midterm, April 13 2026, Ex. 2 (5 points)',
       title: 'Two wires, one value: the ML estimator that cancels interference',
-      why: 'A structured covariance you must assemble yourself — $\\sigma_w^2\\mathbf{q}\\mathbf{q}^T + \\sigma_v^2\\mathbf{I}$ — and an ML estimator to derive from it, then test against the interference power.',
+      why: 'You assemble the covariance of two correlated wires yourself, derive the ML estimator from it, then test it against the interference power.',
       statement: [
         {
           kind: 'text',

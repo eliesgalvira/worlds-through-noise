@@ -256,7 +256,7 @@ function PeriodogramFigure() {
           textAnchor="end"
           className="fill-cursor font-mono plot-text-xs"
         >
-          template at your f
+          template s(f) at your f
         </text>
         <line
           x1={LEFT}

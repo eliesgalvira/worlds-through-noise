@@ -121,7 +121,11 @@ function FusionSpringsFigure() {
       readout={
         <>
           <ReadoutRow
-            label={priorOn ? 'MAP estimate' : 'Fused ML estimate'}
+            label={
+              priorOn
+                ? 'MAP estimate $\\hat{\\theta}_{MAP}$'
+                : 'Fused ML estimate $\\hat{\\theta}$'
+            }
             value={formatNumber(estimate, 2)}
             tone="estimate"
           />
@@ -129,9 +133,13 @@ function FusionSpringsFigure() {
             label={
               priorOn
                 ? 'Posterior variance $\\sigma^2_{\\theta|\\mathbf{x}}$'
-                : 'Estimator variance'
+                : 'Estimator variance $\\mathrm{Var}(\\hat{\\theta})$'
             }
             value={formatNumber(variance, 3)}
+          />
+          <ReadoutRow
+            label="Variance without sensor 1"
+            value={formatNumber(1 / (totalWeight - (weights[0] ?? 0)), 3)}
           />
           <ReadoutRow
             label="Data share $\alpha$ (prior on)"
@@ -294,7 +302,7 @@ function FusionSpringsFigure() {
         <circle
           cx={xOf(estimate)}
           cy={H - 60}
-          r={7}
+          r={5}
           className="fill-estimate stroke-card"
           strokeWidth={2}
         />

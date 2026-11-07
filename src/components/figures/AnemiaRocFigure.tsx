@@ -62,19 +62,29 @@ function AnemiaRocFigure() {
           className="stroke-foreground"
           strokeWidth={2}
         />
-        {marks.map((mark) => (
-          <text
-            key={mark.label}
-            x={x(mark.pfa)}
-            y={y(mark.pd) + 5}
-            textAnchor="middle"
-            className="fill-false-alarm stroke-card font-mono plot-text"
-            strokeWidth={3}
-            paintOrder="stroke"
-          >
-            {mark.label}
-          </text>
-        ))}
+        {marks.map((mark) => {
+          const cx = x(mark.pfa)
+          const cy = y(mark.pd)
+          return (
+            <g
+              key={mark.label}
+              className="fill-none stroke-false-alarm"
+              strokeWidth={2}
+            >
+              {mark.label === '+' ? (
+                <path
+                  d={`M ${String(cx - 7)} ${String(cy)} H ${String(cx + 7)} M ${String(cx)} ${String(cy - 7)} V ${String(cy + 7)}`}
+                />
+              ) : mark.label === 'o' ? (
+                <circle cx={cx} cy={cy} r={6} />
+              ) : (
+                <path
+                  d={`M ${String(cx)} ${String(cy - 8)} L ${String(cx + 7)} ${String(cy + 5)} L ${String(cx - 7)} ${String(cy + 5)} Z`}
+                />
+              )}
+            </g>
+          )
+        })}
         <AxisTicks
           y={H - 40}
           ticks={[0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3].map((v) => ({

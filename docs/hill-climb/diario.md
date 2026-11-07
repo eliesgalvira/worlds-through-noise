@@ -261,7 +261,7 @@ Captura `est-base2` de `main` en `9d60ae15`. Dos paquetes como en detección: el
 | EST-11 | adivinar | «Prior confidence» funciona al revés de su nombre                                                            | 2b                               | cerrado en r1        |
 | EST-12 | menor    | Guiones bajos en rótulos SVG, casilla nativa, «TEMA 03»                                                      | 2b                               | cerrado salvo «Tema» |
 
-«Tema» se queda (decidido por el agente, revisable): es la palabra de las transparencias y del examen, y la prosa la usa como nombre propio en todas las lecciones.
+«Tema» se quedó en la ronda 1 y pasó a «Topic» en la ronda 3 (ver más abajo): los revisores lo marcaban en cada ronda como mezcla de idiomas.
 
 ## Estimación: ronda 1
 
@@ -338,4 +338,21 @@ Code-review en dos ejes de `9d60ae15..316321d9` (informe `code-review-est-1`). R
 
 Simplify (cuatro ángulos). Arreglado: `AxisTicksY` en la librería, un solo oyente de fuentes con refit en un frame, HTML partido perezoso, `mse` y `sampleMean` del dominio, `periodogramAt` muerto borrado, refinado del pico memoizado, constantes con nombre. Contestado: un helper común para colocar etiquetas a un lado u otro; la regla de cada figura depende de sus propias marcas y un helper no la simplificaría.
 
-Verificación de contenido: tres verificadores Opus contra `course/` (`est-r1`, `est-r2`, `est-r4`), todos sus errores y dudas aplicados o anotados. La verificación final de la lección entera está en curso.
+Verificación de contenido: tres verificadores Opus contra `course/` (`est-r1`, `est-r2`, `est-r4`), todos sus errores y dudas aplicados o anotados. La verificación final de la lección entera (`est-merge`) encontró 2 errores (una referencia a un examen sin estimación de frecuencia y una errata de signo copiada de la resolución impresa del cable, ahora con una nota que lo dice) y 7 dudas. Todo aplicado.
+
+Notas de las rondas 7 y 8 (ancho/móvil):
+
+| Tarea | 2a r7 | 2a r8 | 2b r7 | 2b r8 |
+| ----- | ----- | ----- | ----- | ----- |
+| T1    | 1/1   | 2/2   | 3/3   | 2/2   |
+| T2    | 3/2   | 3/2   | 3/2   | 1/1   |
+| T3    | 3/2   | 3/2   | 3/2   | 2/2   |
+| T4    | 3/3   | 3/3   | 1/1   | 3/3   |
+| T5    | 3/3   | 3/3   | —     | —     |
+| T6    | 4/4   | 4/4   | 4/4   | 4/4   |
+
+En la ronda 8 el paquete 2a no tuvo ningún defecto por encima de `fricción`.
+
+Ronda 8: «Predict first» pasó a ir antes de la figura en todas las lecciones (predecir después de ver no es predecir). El segundo code-review vio la regresión: en P1, D3, D5, A1 y A2 el párrafo de acción da la respuesta y quedaba justo encima. Ahora la predicción va entre el párrafo del objeto y el de la acción.
+
+Code-review del segundo rango (`code-review-est-2`). Arreglado: el orden de la predicción, `populationStd` en el dominio, sumas de pesos de E3, `LegendItem` exportado, umbral de fórmulas irrompibles a 36 caracteres (a 360 px una fórmula del cuaderno de Wiener ensanchaba la página; comprobado a 360 px que ninguna lección desborda), «Noise std» en E2 y E4, tests de `\implies` y del caso sin espaciar, AGENTS.md (W hasta 640, figuras repartidas desde `CourseFigure.tsx`). Contestado: los commits sin cuerpo de este rango ya están publicados; el resto los lleva. `complexToneInNoise` tiene seis parámetros posicionales como `toneInNoise`, su gemelo real; un objeto de opciones solo para uno de los dos rompería la simetría. Los umbrales de lado de las etiquetas de E4 (0.12, 0.42) son márgenes de borde en unidades de frecuencia, comentados encima.

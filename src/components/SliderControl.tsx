@@ -18,6 +18,8 @@ type SliderControlProps = {
   readonly unit?: string
   readonly onValueChange: (value: number) => void
   readonly format?: (value: number) => string
+  /** Shown but inert, e.g. a setting that only matters once a switch is on. */
+  readonly disabled?: boolean
   readonly className?: string
 }
 
@@ -32,6 +34,7 @@ function SliderControl({
   unit,
   onValueChange,
   format,
+  disabled = false,
   className,
 }: SliderControlProps) {
   const id = useId()
@@ -65,6 +68,7 @@ function SliderControl({
         max={max}
         step={step}
         aria-label={label}
+        disabled={disabled}
         onValueChange={(values) => {
           const next = values[0]
           if (next !== undefined) {

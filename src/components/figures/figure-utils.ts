@@ -28,3 +28,19 @@ export function formatPercentValue(value: number): string {
   }
   return `${(value * 100).toFixed(1)}%`
 }
+
+/** Round tick values from 0 up to max, with a 1, 2 or 5 step and about `count` ticks. */
+export function niceTicks(max: number, count: number): Array<number> {
+  if (!(max > 0)) {
+    return [0]
+  }
+  const raw = max / count
+  const power = 10 ** Math.floor(Math.log10(raw))
+  const step =
+    [1, 2, 5, 10].map((m) => m * power).find((s) => s >= raw) ?? 10 * power
+  const ticks: Array<number> = []
+  for (let k = 0; k * step <= max * (1 + 1e-9); k += 1) {
+    ticks.push(k * step)
+  }
+  return ticks
+}

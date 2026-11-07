@@ -7,7 +7,6 @@
 export type Paso =
   | { readonly deslizar: string; readonly valor: number }
   | { readonly pulsar: string }
-  | { readonly marcar: string }
 
 export type Interaccion = {
   readonly antes: ReadonlyArray<Paso>
@@ -19,7 +18,6 @@ const deslizar = (control: string, valor: number): Paso => ({
   valor,
 })
 const pulsar = (boton: string): Paso => ({ pulsar: boton })
-const marcar = (casilla: string): Paso => ({ marcar: casilla })
 
 export const INTERACCIONES: Readonly<Record<string, Interaccion>> = {
   P1: {
@@ -92,15 +90,15 @@ export const INTERACCIONES: Readonly<Record<string, Interaccion>> = {
     pasos: [
       [deslizar('Sample size', 10)],
       [deslizar('Sample size', 100)],
-      [deslizar('Noise level', 2.5)],
+      [deslizar('Noise std', 2.5)],
     ],
   },
   E3: {
     antes: [],
     pasos: [
       [deslizar('Sensor 1 noise', 12)],
-      [marcar('Add the prior spring')],
-      [deslizar('Prior confidence', 1)],
+      [pulsar('Prior spring')],
+      [deslizar('Prior spread', 1)],
     ],
   },
   E4: {
@@ -108,7 +106,7 @@ export const INTERACCIONES: Readonly<Record<string, Interaccion>> = {
     pasos: [
       [deslizar('Candidate frequency', 50)],
       [deslizar('Candidate frequency', 70)],
-      [deslizar('Samples', 256)],
+      [deslizar('Samples', 256), pulsar('Show the answer')],
     ],
   },
 }
@@ -126,8 +124,5 @@ function describirPaso(paso: Paso): string {
   if ('deslizar' in paso) {
     return `mueve el control «${paso.deslizar}» hasta ${String(paso.valor)} con el teclado`
   }
-  if ('pulsar' in paso) {
-    return `pulsa «${paso.pulsar}»`
-  }
-  return `marca «${paso.marcar}»`
+  return `pulsa «${paso.pulsar}»`
 }

@@ -7,8 +7,8 @@ export const wienerLesson: LessonRecord = {
   thesis:
     'The Wiener filter is the bottom of a bowl. Everything else — normal equations, orthogonality, prediction, cancellation — is a way of describing where the bottom is.',
   intro: [
-    'Tema 4 asks one question in four costumes: given an observed process $x(n)$ and a desired process $d(n)$, what fixed linear filter makes $\\mathbf{h}^H\\mathbf{x}(n)$ resemble $d(n)$ best in mean square? Identification, equalization, prediction and interference cancellation only differ in which wire carries which signal.',
-    'The object to own is the error surface $\\xi(\\mathbf{h}) = P_d - 2\\operatorname{Re}\\{\\mathbf{h}^H\\mathbf{r}_{xd}\\} + \\mathbf{h}^H\\mathbf{R}_x\\mathbf{h}$: a bowl over filter space whose shape is set by $\\mathbf{R}_x$ and whose bottom is $\\mathbf{h}_{opt} = \\mathbf{R}_x^{-1}\\mathbf{r}_{xd}$. Tema 5 will roll a ball down this exact bowl, so time spent feeling its curvature pays twice.',
+    'Topic 4 asks one question in four costumes: given an observed process $x(n)$ and a desired process $d(n)$, what fixed linear filter makes $\\mathbf{h}^H\\mathbf{x}(n)$ resemble $d(n)$ best in mean square? Identification, equalization, prediction and interference cancellation only differ in which wire carries which signal.',
+    'The object to own is the error surface $\\xi(\\mathbf{h}) = P_d - 2\\operatorname{Re}\\{\\mathbf{h}^H\\mathbf{r}_{xd}\\} + \\mathbf{h}^H\\mathbf{R}_x\\mathbf{h}$: a bowl over filter space whose shape is set by $\\mathbf{R}_x$ and whose bottom is $\\mathbf{h}_{opt} = \\mathbf{R}_x^{-1}\\mathbf{r}_{xd}$. Topic 5 will roll a ball down this exact bowl, so time spent feeling its curvature pays twice.',
   ],
   modules: [
     {
@@ -18,7 +18,7 @@ export const wienerLesson: LessonRecord = {
         'Where do the normal equations come from, and what does “orthogonality” mean physically?',
       trap: 'The Wiener filter’s defining result comes as two statements. The normal equations, $\\mathbf{R}_x\\mathbf{h}_{opt} = \\mathbf{r}_{xd}$ — where $\\mathbf{r}_{xd} = E\\{\\mathbf{x}(n)\\,d^*(n)\\}$ measures how the input correlates with the target — get memorized as “the formula.” And the orthogonality principle, $E\\{\\mathbf{x}(n)\\,e^*(n)\\} = \\mathbf{0}$, which says the optimal error $e(n)$ is uncorrelated with every input the filter can see, floats beside it as an unrelated slogan. They are one sentence said twice, and there is a place you can stand where that becomes plain.',
       object:
-        'That place is a bowl. Every 2-tap filter $\\mathbf{h}$ is a point on the floor, and the height above it is the honestly computed error power $\\xi(\\mathbf{h})$. The bowl is elliptical: its axes are the eigenvectors of $\\mathbf{R}_x$ — the same terrain from Tema 1 — and its steepness along each axis is the eigenvalue. Somewhere on the floor is a single lowest point.',
+        'That place is a bowl. Every 2-tap filter $\\mathbf{h}$ is a point on the floor, and the height above it is the honestly computed error power $\\xi(\\mathbf{h})$. The bowl is elliptical: its axes are the eigenvectors of $\\mathbf{R}_x$ — the same terrain from Topic 1 — and its steepness along each axis is the eigenvalue. Somewhere on the floor is a single lowest point.',
       action:
         'Find it by feel. In the figure, drag $\\mathbf{h}$ around while watching two meters: the error power $\\xi(\\mathbf{h})$, and the correlation between the input and the residual error, $E\\{\\mathbf{x}e^*\\}$. Away from the bottom, that correlation is not zero — meaning the error still contains material the filter could have predicted from its input but did not. Slide downhill and watch the correlation drain, reaching exactly zero at the bottom. That is the orthogonality principle, felt: the optimum is the point where the error has nothing left in common with the data.',
       payoff:
@@ -63,7 +63,7 @@ export const wienerLesson: LessonRecord = {
       action:
         'Turn the knob in the figure and watch the residual power $P_z = (1-h\\alpha)^2 + (1-h)^2$ trace a parabola — a one-dimensional slice of the Wiener bowl. Find the quietest point by hand, then check it against the formula $h_{opt} = \\frac{\\alpha+1}{\\alpha^2+1}$. Then move the microphone instead of the knob: slide $\\alpha$ toward 0 and cancellation becomes perfect ($h_{opt} = 1$: all jackhammer gone, music untouched); slide $\\alpha$ toward 1 and the two microphones hear the same thing — subtracting one from the other now removes music and noise alike.',
       payoff:
-        'The design rule falls out of the physics rather than the algebra: the reference sensor must hear the interference, not the signal — the cleaned SNR, $1/\\alpha^2$, explodes as $\\alpha \\to 0$ and falls back to the raw microphone’s 0 dB as $\\alpha \\to 1$. Keep this tiny system in mind for Tema 5: replace your knob-turning hand with a rule that senses the slope of the parabola and steps downhill, and you will have invented LMS.',
+        'The design rule falls out of the physics rather than the algebra: the reference sensor must hear the interference, not the signal — the cleaned SNR, $1/\\alpha^2$, explodes as $\\alpha \\to 0$ and falls back to the raw microphone’s 0 dB as $\\alpha \\to 1$. Keep this tiny system in mind for Topic 5: replace your knob-turning hand with a rule that senses the slope of the parabola and steps downhill, and you will have invented LMS.',
       equations: [
         {
           sentence:
@@ -99,13 +99,13 @@ export const wienerLesson: LessonRecord = {
       title: 'A signal that remembers is a signal you can predict',
       question:
         'Why does a linear predictor separate tones from noise — without being told any frequencies?',
-      trap: 'Two claims from the lecture notes: “the prediction-error filter is a whitening filter,” and “the ALE separates narrowband signals from wideband noise.” Heard cold, they sound like two more facts to file. They are one fact about memory — the memory you learned to measure with the autocorrelation in Tema 1 — and a predictor makes it audible.',
+      trap: 'Two claims from the lecture notes: “the prediction-error filter is a whitening filter,” and “the ALE separates narrowband signals from wideband noise.” Heard cold, they sound like two more facts to file. They are one fact about memory — the memory you learned to measure with the autocorrelation in Topic 1 — and a predictor makes it audible.',
       object:
         'A one-step predictor bets on the next sample using the previous $Q$ samples. Its only ammunition is correlation: a tone, whose autocorrelation never decays, is perfectly predictable from its past; white noise, whose autocorrelation is a single spike, is a coin flip no history can call. Feed the predictor tone-plus-noise and it can only chase the part with memory. Its output is a cleaned tone; its error, $e(n)$, is whatever refused to be predicted — the noise.',
       action:
         'In the figure, slide the tone’s SNR and watch the honestly computed optimal predictor split the signal: the prediction captures a fraction $\\frac{Q \\cdot SNR}{1 + Q \\cdot SNR}$ of the tone, and the error keeps the noise. Then look at the frequency response of the prediction-error filter (input minus prediction). As the SNR grows, a notch digs itself into the response exactly at the tone frequency $f_0$ — and nobody told the filter that frequency. The autocorrelation did.',
       payoff:
-        'Three exam objects collapse into this one behavior. The adaptive line enhancer (ALE) is this predictor with a delay chosen long enough that the wideband part forgets itself while the narrowband part still remembers. The whitening interpretation is this predictor with enough taps: it eats all the memory, leaving a white error — the principle behind DPCM and speech coding. And the eigen-story from Tema 1 closes the loop: as $\\sigma^2 \\to 0$, $\\mathbf{R}_x$ loses rank, $\\xi_{\\min} \\to 0$, and the error filter pins a zero on the unit circle at $e^{j2\\pi f_0}$. Prediction is the autocorrelation, weaponized.',
+        'Three exam objects collapse into this one behavior. The adaptive line enhancer (ALE) is this predictor with a delay chosen long enough that the wideband part forgets itself while the narrowband part still remembers. The whitening interpretation is this predictor with enough taps: it eats all the memory, leaving a white error — the principle behind DPCM and speech coding. And the eigen-story from Topic 1 closes the loop: as $\\sigma^2 \\to 0$, $\\mathbf{R}_x$ loses rank, $\\xi_{\\min} \\to 0$, and the error filter pins a zero on the unit circle at $e^{j2\\pi f_0}$. Prediction is the autocorrelation, weaponized.',
       equations: [
         {
           sentence:
@@ -268,7 +268,7 @@ export const wienerLesson: LessonRecord = {
           steps: [
             {
               title: 'Chain the two blocks',
-              body: 'The predictor reads the vector of the $Q$ past samples $\\mathbf{x}(n-1) = [x(n-1), \\dots, x(n-Q)]^T$ and outputs $\\hat{x}(n) = \\mathbf{h}^H\\mathbf{x}(n-1)$, its guess of the tone at time $n$. That prediction — not the raw sample — feeds the Neyman–Pearson detector of part (b), which compares its statistic against the threshold to decide tone present / tone lost.',
+              body: 'The predictor reads the vector $\\mathbf{x}(n-1)$ of the $Q$ past samples, $x(n-1)$ to $x(n-Q)$, and outputs $\\hat{x}(n) = \\mathbf{h}^H\\mathbf{x}(n-1)$, its guess of the tone at time $n$. That prediction — not the raw sample — feeds the Neyman–Pearson detector of part (b), which compares its statistic against the threshold to decide tone present / tone lost.',
             },
           ],
           answer: {
@@ -354,9 +354,9 @@ export const wienerLesson: LessonRecord = {
     },
     {
       id: 'wp-ar-wiener',
-      source: 'Exercise collection, Temas 4 and 5 (Feb 2026), Ex. 4.1',
+      source: 'Exercise collection, Topics 4 and 5 (Feb 2026), Ex. 4.1',
       title: 'The canonical AR(1) denoiser',
-      why: 'The collection’s opening exercise and the numbers everyone should have solved once by hand: build $r_s(m)$ from the AR recursion (a Tema 1 move), fill the $2 \\times 2$ normal equations, and price the cleanup with the MMSE formula.',
+      why: 'The collection’s opening exercise and the numbers everyone should have solved once by hand: build $r_s(m)$ from the AR recursion (a Topic 1 move), fill the $2 \\times 2$ normal equations, and price the cleanup with the MMSE formula.',
       statement: [
         {
           kind: 'text',

@@ -5,7 +5,7 @@ export const adaptiveLesson: LessonRecord = {
   ordinal: '05',
   title: 'Adaptive filtering',
   thesis:
-    'Steepest descent rolls a ball down the Wiener bowl. LMS rolls the same ball in fog — and the entire theory of Tema 5 is pricing the fog.',
+    'Steepest descent rolls a ball down the Wiener bowl. LMS rolls the same ball in fog — and the entire theory of Topic 5 is pricing the fog.',
   intro: [
     'Two reasons to abandon $\\mathbf{h} = \\mathbf{R}_x^{-1}\\mathbf{r}_{xd}$: the inverse is expensive, and the world may not sit still long enough for $\\mathbf{R}_x$ to mean anything. Steepest descent fixes the first with iteration; LMS fixes both by replacing the true gradient with the crudest possible estimate — one sample’s worth.',
     'Everything examinable lives in three quantities you can watch: the stability window $0 < \\mu < 2/\\lambda_{\\max}$, the convergence speed set by the eigenvalue spread $\\lambda_{\\max}/\\lambda_{\\min}$, and the misadjustment $\\mathcal{M} \\approx \\frac{\\mu}{2}\\operatorname{tr}(\\mathbf{R}_x)$ that LMS pays forever for its cheap gradient.',
@@ -16,9 +16,9 @@ export const adaptiveLesson: LessonRecord = {
       title: 'Rolling downhill',
       question:
         'Why does one step size converge, another crawl, and a third explode — on the same bowl?',
-      trap: 'Steepest descent replaces Tema 4’s matrix inversion with a loop: $\\mathbf{h}_{k+1} = \\mathbf{h}_k - \\mu(\\mathbf{R}_x\\mathbf{h}_k - \\mathbf{r}_{xd})$, where the term in parentheses is the gradient of the error bowl and $\\mu$, the step size, scales how far each iteration moves. The recursion is easy enough to memorize — and then the stability condition $0 < \\mu < 2/\\lambda_{\\max}$ arrives as an unexplained commandment. Why exactly 2? Why the largest eigenvalue?',
+      trap: 'Steepest descent replaces Topic 4’s matrix inversion with a loop: $\\mathbf{h}_{k+1} = \\mathbf{h}_k - \\mu(\\mathbf{R}_x\\mathbf{h}_k - \\mathbf{r}_{xd})$, where the term in parentheses is the gradient of the error bowl and $\\mu$, the step size, scales how far each iteration moves. The recursion is easy enough to memorize — and then the stability condition $0 < \\mu < 2/\\lambda_{\\max}$ arrives as an unexplained commandment. Why exactly 2? Why the largest eigenvalue?',
       object:
-        'Put a ball on the Tema 4 bowl. Each iteration reads the local slope and hops against it, hop length scaled by $\\mu$. Now recall that in the eigenvector basis the bowl has no cross-terms: the ball is really $Q$ independent one-dimensional balls (one per eigenvector of $\\mathbf{R}_x$, not one per tap), the $i$-th rolling on its own parabola of steepness $\\lambda_i$, shrinking its error by the factor $(1 - \\mu\\lambda_i)$ on every hop. The whole convergence theory is inside that factor.',
+        'Put a ball on the Topic 4 bowl. Each iteration reads the local slope and hops against it, hop length scaled by $\\mu$. Now recall that in the eigenvector basis the bowl has no cross-terms: the ball is really $Q$ independent one-dimensional balls (one per eigenvector of $\\mathbf{R}_x$, not one per tap), the $i$-th rolling on its own parabola of steepness $\\lambda_i$, shrinking its error by the factor $(1 - \\mu\\lambda_i)$ on every hop. The whole convergence theory is inside that factor.',
       action:
         'Drop the ball anywhere in the figure and press play. With small $\\mu$ everything creeps downhill safely. Push $\\mu$ past $1/\\lambda_{\\max}$ and the steep mode starts overshooting side to side — yet still converging, because the overshoot shrinks. Push past $2/\\lambda_{\\max}$ and the factor $|1 - \\mu\\lambda_{\\max}|$ exceeds 1: the overshoot compounds and the trajectory explodes, live. Then switch bowls: on the round one (eigenvalue spread 1.7) a single $\\mu$ suits every direction; on the cigar (spread 13) the $\\mu$ that the steep axis tolerates leaves the shallow axis crawling along the valley floor.',
       payoff:
@@ -61,7 +61,7 @@ export const adaptiveLesson: LessonRecord = {
       object:
         'It is the same bowl as A1, but in fog. LMS cannot see the slope; it feels one noisy sample of it — $\\mathbf{x}(n)e^*(n)$, whose AVERAGE is the true gradient but whose every individual instance points somewhere else. The trajectory becomes a drunken descent. And here is the crucial part: it never stops walking. At the very bottom the true slope is zero, but the noisy one-sample slope is not, so the ball jitters around the optimum forever. That permanent jitter is the misadjustment.',
       action:
-        'The figure runs real LMS — 2,600 honest iterations on the two-microphone canceller from Tema 4 with $\\alpha = 0$. Watch the learning curve $|e(n)|^2$ fall and then flatten, not at the Wiener floor $\\xi_{\\min}$ but a fixed percentage above it; compare the measured excess against the theory $\\mathcal{M} \\approx \\frac{\\mu}{2}\\operatorname{tr}(\\mathbf{R}_x)$. Turn $\\mu$ down and the floor sinks toward $\\xi_{\\min}$ while convergence stretches out. Then switch on drift, letting the true optimum wander: small-$\\mu$ LMS now lags hopelessly behind the moving bottom, while large-$\\mu$ LMS tracks it — jittering all the way.',
+        'The figure runs real LMS — 2,600 honest iterations on the two-microphone canceller from Topic 4 with $\\alpha = 0$. Watch the learning curve $|e(n)|^2$ fall and then flatten, not at the Wiener floor $\\xi_{\\min}$ but a fixed percentage above it; compare the measured excess against the theory $\\mathcal{M} \\approx \\frac{\\mu}{2}\\operatorname{tr}(\\mathbf{R}_x)$. Turn $\\mu$ down and the floor sinks toward $\\xi_{\\min}$ while convergence stretches out. Then switch on drift, letting the true optimum wander: small-$\\mu$ LMS now lags hopelessly behind the moving bottom, while large-$\\mu$ LMS tracks it — jittering all the way.',
       payoff:
         'After that run, $\\mu$ stops being a knob you guess and becomes a contract with three clauses priced by the same coin: convergence time scales like $1/(\\mu\\lambda)$, the permanent noise penalty scales like $\\mu$, and tracking agility in a drifting world demands the very $\\mu$ that steady-state cleanliness forbids. The June 2026 final prices the contract exactly — coefficient jitter $\\sigma_h^2 = \\frac{\\mu}{2}\\xi_{\\min}$ for the scalar canceller, hence a cleaned output SNR of $2/\\mu$: halve the step, double the SNR, wait twice as long. In a drifting world, the “safe” tiny step is the one that fails.',
       equations: [
@@ -308,7 +308,7 @@ export const adaptiveLesson: LessonRecord = {
       id: 'wp-ale-lms',
       source: 'Final, January 7 2026, Ex. 2, parts h–k (of a–k)',
       title: 'The adaptive line enhancer: step size, patience, misadjustment',
-      why: 'Every A1/A2 quantity asked in one chain, on the tone-plus-noise terrain from Tema 1: the stability bound from $\\lambda_{\\max}$, the convergence time from $\\lambda_{\\min}$, the misadjustment from the trace trick, and finally a single SNDR formula where $Q$ and $\\alpha$ fight each other.',
+      why: 'Every A1/A2 quantity asked in one chain, on the tone-plus-noise terrain from Topic 1: the stability bound from $\\lambda_{\\max}$, the convergence time from $\\lambda_{\\min}$, the misadjustment from the trace trick, and finally a single SNDR formula where $Q$ and $\\alpha$ fight each other.',
       statement: [
         {
           kind: 'text',

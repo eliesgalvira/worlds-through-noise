@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, ChevronDown, RotateCcw } from 'lucide-react'
+import { Button } from '@/components/ui/button.tsx'
 import { MathBlock, MathText } from '@/components/MathText.tsx'
 import { StatementFigure } from '@/course/StatementFigure.tsx'
 import type { ProblemPartRecord, WorkedProblemRecord } from '@/domain/types.ts'
@@ -26,13 +27,10 @@ function SolutionStep({
           <MathText text={step.body} />
         </p>
         {step.latex !== undefined ? (
-          <MathBlock
-            latex={step.latex}
-            className="mt-2 rounded-md border border-border bg-background px-4 py-2 text-[0.95rem]"
-          />
+          <MathBlock latex={step.latex} className="mt-2" />
         ) : null}
         {step.note !== undefined ? (
-          <p className="mt-2 text-xs leading-5 text-muted-foreground">
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
             <MathText text={step.note} />
           </p>
         ) : null}
@@ -77,40 +75,42 @@ function ProblemPart({ part }: { readonly part: ProblemPartRecord }) {
                 <MathText text={part.answer.sentence} />
               </p>
               {part.answer.latex !== undefined ? (
-                <MathBlock latex={part.answer.latex} className="mt-2" />
+                <MathBlock latex={part.answer.latex} boxed className="mt-2" />
               ) : null}
             </div>
           ) : null}
 
           <div className="mt-4 flex flex-wrap items-center gap-4">
             {!done ? (
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 data-sonda="revelar"
                 onClick={() => {
                   setRevealed((current) => current + 1)
                 }}
-                className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
-                <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                <ChevronDown className="size-4" aria-hidden="true" />
                 {revealed === 0
                   ? total === 1
                     ? 'Walk the solution — 1 step'
                     : `Walk the solution — ${String(total)} steps`
                   : `Next step (${String(revealed + 1)} of ${String(total)})`}
-              </button>
+              </Button>
             ) : null}
             {revealed > 0 ? (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => {
                   setRevealed(0)
                 }}
-                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
-                <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+                <RotateCcw className="size-3.5" aria-hidden="true" />
                 Hide and retry
-              </button>
+              </Button>
             ) : null}
           </div>
         </div>

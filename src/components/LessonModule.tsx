@@ -38,6 +38,12 @@ function LessonModule({ module, figure }: LessonModuleProps) {
       <div className="mt-8 max-w-3xl space-y-5">
         <ProseParagraph text={module.trap} />
         <ProseParagraph text={module.object} />
+        {/* Predict before the action text and the figure can give the
+            answer away. */}
+        <PredictionPrompt
+          question={module.prediction.question}
+          answer={<MathText text={module.prediction.answer} />}
+        />
         <ProseParagraph text={module.action} />
       </div>
 
@@ -66,10 +72,6 @@ function LessonModule({ module, figure }: LessonModuleProps) {
         id={`${module.id}-transfer`}
         className="mt-8 max-w-3xl scroll-mt-32 xl:scroll-mt-24 space-y-6"
       >
-        <PredictionPrompt
-          question={module.prediction.question}
-          answer={<MathText text={module.prediction.answer} />}
-        />
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-accent-ink">
             Transfer to the exam

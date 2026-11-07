@@ -135,7 +135,7 @@ function Plot({
   )
 }
 
-type Tone = 'default' | 'h0' | 'h1' | 'good' | 'bad'
+type Tone = 'default' | 'h0' | 'h1' | 'good' | 'bad' | 'estimate' | 'cursor'
 
 const TONE_CLASS: Readonly<Record<Tone, string>> = {
   default: 'text-foreground',
@@ -143,6 +143,8 @@ const TONE_CLASS: Readonly<Record<Tone, string>> = {
   h1: 'text-h1-ink',
   good: 'text-detection',
   bad: 'text-false-alarm',
+  estimate: 'text-estimate',
+  cursor: 'text-cursor',
 }
 
 type ReadoutRowProps = {
@@ -170,6 +172,15 @@ function ReadoutRow({ label, value, tone = 'default' }: ReadoutRowProps) {
   )
 }
 
+/** A group of controls that keeps a whole row of the control grid to itself. */
+function ControlRow({ children }: { readonly children: ReactNode }) {
+  return (
+    <div className="col-span-full flex w-full flex-wrap items-start gap-x-8 gap-y-4">
+      {children}
+    </div>
+  )
+}
+
 /** A sentence about the readouts, spanning the whole readout row. */
 function ReadoutNote({ children }: { readonly children: ReactNode }) {
   return (
@@ -179,14 +190,16 @@ function ReadoutNote({ children }: { readonly children: ReactNode }) {
   )
 }
 
+type LegendItem = {
+  readonly label: string
+  readonly swatchClass: string
+  readonly dash?: boolean
+  /** The swatch takes the shape of its mark: bars, points or a pointer. Default: a line. */
+  readonly mark?: 'square' | 'dot' | 'triangle'
+}
+
 type LegendProps = {
-  readonly items: ReadonlyArray<{
-    readonly label: string
-    readonly swatchClass: string
-    readonly dash?: boolean
-    /** Bars get a filled square instead of a line. */
-    readonly square?: boolean
-  }>
+  readonly items: ReadonlyArray<LegendItem>
 }
 
 function Legend({ items }: LegendProps) {
@@ -194,11 +207,7 @@ function Legend({ items }: LegendProps) {
     <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
       {items.map((item) => (
         <span key={item.label} className="inline-flex items-center gap-1.5">
-          {item.square === true ? (
-            <svg viewBox="0 0 10 10" className="size-2.5" aria-hidden="true">
-              <rect width="10" height="10" className={item.swatchClass} />
-            </svg>
-          ) : (
+          {item.mark === undefined ? (
             <svg viewBox="0 0 20 6" className="h-1.5 w-5" aria-hidden="true">
               <line
                 x1="1"
@@ -209,6 +218,16 @@ function Legend({ items }: LegendProps) {
                 strokeDasharray={item.dash === true ? '5 3' : undefined}
                 className={item.swatchClass}
               />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 10 10" className="size-2.5" aria-hidden="true">
+              {item.mark === 'square' ? (
+                <rect width="10" height="10" className={item.swatchClass} />
+              ) : item.mark === 'dot' ? (
+                <circle cx="5" cy="5" r="4.5" className={item.swatchClass} />
+              ) : (
+                <path d="M 0 1 H 10 L 5 9 Z" className={item.swatchClass} />
+              )}
             </svg>
           )}
           <MathText text={item.label} />
@@ -235,6 +254,34 @@ function AxisTicks({ y, ticks }: AxisTicksProps) {
             x={tick.x}
             y={y + 14}
             textAnchor="middle"
+            stroke="none"
+            className="font-mono plot-text-xs"
+          >
+            {tick.label}
+          </text>
+        </g>
+      ))}
+    </g>
+  )
+}
+
+type AxisTicksYProps = {
+  /** x of the vertical axis, in viewBox units. */
+  readonly x: number
+  readonly ticks: ReadonlyArray<{ readonly y: number; readonly label: string }>
+}
+
+/** Small tick marks with their numbers left of a vertical plot axis. */
+function AxisTicksY({ x, ticks }: AxisTicksYProps) {
+  return (
+    <g className="fill-muted-foreground stroke-muted-foreground">
+      {ticks.map((tick) => (
+        <g key={tick.label}>
+          <line x1={x - 4} y1={tick.y} x2={x} y2={tick.y} strokeWidth={1} />
+          <text
+            x={x - 6}
+            y={tick.y + 3}
+            textAnchor="end"
             stroke="none"
             className="font-mono plot-text-xs"
           >
@@ -291,8 +338,12 @@ function Hatch({
   )
 }
 
+export type { LegendItem }
+
 export {
   AxisTicks,
+  AxisTicksY,
+  ControlRow,
   FigureShell,
   Hatch,
   Legend,

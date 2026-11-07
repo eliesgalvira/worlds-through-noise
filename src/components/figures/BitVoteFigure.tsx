@@ -139,13 +139,13 @@ function BitVoteFigure() {
           {
             label: '$P_0 \\Pr(k \\mid \\mathcal{H}_0)$, bit 0',
             swatchClass: 'fill-h0',
-            square: true,
+            mark: 'square',
           },
           {
             label:
               '$P_1 C_{01} \\Pr(k \\mid \\mathcal{H}_1)$, bit 1, with $C_{10} = 1$',
             swatchClass: 'fill-h1',
-            square: true,
+            mark: 'square',
           },
         ]}
       />

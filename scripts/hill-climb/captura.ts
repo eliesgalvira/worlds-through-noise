@@ -174,11 +174,9 @@ async function runStep(page: Page, scope: string, paso: Paso): Promise<void> {
   if ('deslizar' in paso) {
     await setSlider(page, scope, paso.deslizar, paso.valor)
   } else {
-    const [tag, text] =
-      'pulsar' in paso ? ['button', paso.pulsar] : ['label', paso.marcar]
     await page
-      .locator(`${scope} ${tag}`)
-      .filter({ hasText: text })
+      .locator(`${scope} button`)
+      .filter({ hasText: paso.pulsar })
       .first()
       .click()
   }

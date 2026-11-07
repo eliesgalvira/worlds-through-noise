@@ -5,7 +5,7 @@ export const detectionLesson: LessonRecord = {
   ordinal: '02',
   title: 'Detection',
   thesis:
-    'A detector never discovers the truth. It spends a false-alarm budget where the evidence is strongest, and every formula in Tema 2 is bookkeeping for that purchase.',
+    'A detector never discovers the truth. It spends a false-alarm budget where the evidence is strongest, and every formula in Topic 2 is bookkeeping for that purchase.',
   intro: [
     'Radar, anemia screening, stored bits, covert transmissions: in every exam problem two machines could have dealt the trace you hold, and a rule must pick one while owning its mistakes. The likelihood ratio, the Q function, the matched filter and the chi-squared tail are all shadows of one picture — two overlapping clouds and a boundary you are free to move.',
     'This lesson builds the picture first. Each module hands you the clouds and makes you move the boundary. The Neyman-Pearson lemma then reads like a description of what your hands already did.',
@@ -397,7 +397,7 @@ export const detectionLesson: LessonRecord = {
       id: 'wp-codewords',
       source: 'Midterm, Oct 30 2025, Ex. 1 (60 %)',
       title: 'Codewords in colored noise',
-      why: 'One problem that runs the whole tema in order: Neyman–Pearson (D1–D2), the whitening metric $\\mathbf{C}^{-1}$ (D3), and then the eigen-design move from the Tema 1 terrain — the last two parts are where the exam separates students.',
+      why: 'One problem that runs the whole topic in order: Neyman–Pearson (D1–D2), the whitening metric $\\mathbf{C}^{-1}$ (D3), and then the eigen-design move from the Topic 1 terrain — the last two parts are where the exam separates students.',
       statement: [
         {
           kind: 'text',
@@ -556,7 +556,7 @@ export const detectionLesson: LessonRecord = {
           steps: [
             {
               title: 'Write the constrained cost',
-              body: 'Maximize the quadratic form on the unit sphere — this is walking the Tema 1 terrain along the circle $\\|\\mathbf{a}\\| = 1$.',
+              body: 'Maximize the quadratic form on the unit sphere — this is walking the Topic 1 terrain along the circle $\\|\\mathbf{a}\\| = 1$.',
               latex:
                 'L(\\mathbf{a}, \\mu) = \\mathbf{a}^T\\mathbf{C}^{-1}\\mathbf{a} - \\mu\\,(\\mathbf{a}^T\\mathbf{a} - 1)',
             },
@@ -593,7 +593,7 @@ export const detectionLesson: LessonRecord = {
             },
             {
               title: 'Say it in one sentence',
-              body: 'Separate the codewords along the direction where the noise is quietest. The detector $y = \\mathbf{a}^T\\mathbf{C}^{-1}\\mathbf{x}$ then listens only along that quiet axis. This is Tema 1’s “smallest eigenvalue is the noise floor” — cashed in for exam points.',
+              body: 'Separate the codewords along the direction where the noise is quietest. The detector $y = \\mathbf{a}^T\\mathbf{C}^{-1}\\mathbf{x}$ then listens only along that quiet axis. This is Topic 1’s “smallest eigenvalue is the noise floor” — cashed in for exam points.',
             },
           ],
           answer: {

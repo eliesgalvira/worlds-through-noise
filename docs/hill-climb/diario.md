@@ -230,3 +230,195 @@ Compromisos al fusionar (decidido por el agente, revisable). Lo que no llega al 
 - **T5 en ancho (2 en la r5):** el ROC del examen queda arriba en el enunciado, lejos de los apartados g y h que lo usan.
 
 Contraste con la meta: T6 llega a 4 en los dos anchos y los dos paquetes. T3 llegó a 4 en ancho en la r4. Los errores de contenido de la base (9 que bloqueaban) están cerrados.
+
+## Estimación: ronda base
+
+Captura `est-base2` de `main` en `9d60ae15`. Dos paquetes como en detección: el 2a lleva E2, E1 y el cuaderno, el 2b lleva E3 y E4. Referencias: cinco productos de estimación, y en el 2a un problema resuelto con pasos.
+
+| Tarea                      | 2a ancho   | 2a móvil | 2b ancho       | 2b móvil       |
+| -------------------------- | ---------- | -------- | -------------- | -------------- |
+| T1 Motivada                | 1          | 1        | 2              | 2              |
+| T2 Leer la figura          | 1          | 1        | 0 (EST-05)     | 0              |
+| T3 Predecir y comprobar    | 1          | 1        | 0 (EST-05)     | 0              |
+| T4 Del dibujo a la fórmula | 0 (EST-01) | 0        | 0 (EST-02)     | 0              |
+| T5 Problema de examen      | 4          | 2        | no verificable | no verificable |
+| T6 Orientarse              | 4          | 4        | 3              | 4              |
+
+### Registro de defectos
+
+| Id     | Gravedad | Qué                                                                                                          | Visto por                        | Estado               |
+| ------ | -------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------- | -------------------- |
+| EST-01 | bloquea  | E2: la CRB revelada lleva el 2 del ruido complejo y contradice el $\sigma^2/N$ del módulo, y no define **p** | 2a, verificado (Tema 3, p. 55)   | cerrado en r1        |
+| EST-02 | bloquea  | E4: la CRB revelada es la de A conocida, y la banda de la figura usaba una fórmula de ningún modelo          | 2b, verificado (p. 97, Kay 3.41) | cerrado en r1        |
+| EST-03 | bloquea  | E3: con el prior, la lectura de varianza decía $1/\sum 1/\sigma_i^2$ y mostraba la varianza a posteriori     | 2b, verificado                   | cerrado en r1        |
+| EST-04 | adivinar | E2: la parábola se aplana en una meseta, eje θ sin escala, θ verdadero sin valor                             | 2a                               | cerrado en r1        |
+| EST-05 | bloquea  | E3: el pie dice que el grosor es $1/\sigma_i^2$ y el muelle cambia sin tocar su σ                            | 2b, verificado                   | cerrado en r1        |
+| EST-06 | adivinar | E1: el histograma se reescala entre fotogramas y el solape crea un tercer color                              | 2a                               | cerrado en r1        |
+| EST-07 | adivinar | E4: ejes sin escala, $\hat f_{ML}$ sin marca                                                                 | 2b                               | cerrado en r1        |
+| EST-08 | adivinar | Colores de rol: estimaciones en magenta o ámbar, sensores en azul, lecturas en verde de detección            | 2a, 2b                           | cerrado en r1        |
+| EST-09 | fricción | Siglas y fórmulas antes del problema (introducción, E2, E3, E4) y frases de intriga                          | 2a, 2b                           | cerrado en r1        |
+| EST-10 | fricción | El texto nombra controles que no existen: estrategia de dos bloques, «score meter»                           | 2b, verificado                   | cerrado en r1        |
+| EST-11 | adivinar | «Prior confidence» funciona al revés de su nombre                                                            | 2b                               | cerrado en r1        |
+| EST-12 | menor    | Guiones bajos en rótulos SVG, casilla nativa, «TEMA 03»                                                      | 2b                               | cerrado salvo «Tema» |
+
+«Tema» se quedó en la ronda 1 y pasó a «Topic» en la ronda 3 (ver más abajo): los revisores lo marcaban en cada ronda como mezcla de idiomas.
+
+## Estimación: ronda 1
+
+Commits `d922d635` a la corrección del rótulo recortado de E1. Un subagente Opus verificó contra el temario los tres hallazgos de contenido (informe `est-r1`): el revisor tenía razón en los tres, y además encontró que la frase de los dos bloques describía un control inexistente. Los reemplazos salen literalmente del informe: Tema 3 p. 55 para E2, p. 97 para la ecuación de E4 y Kay 1993, ec. 3.41, para la sinusoide real que simula la figura.
+
+Piezas nuevas en la librería: tonos `estimate` y `cursor` en `ReadoutRow`, y `niceTicks` con su test. El banco pierde el paso «marcar» (ninguna figura usa ya una casilla).
+
+Notas tras la ronda 1 (auditorías limpias). Revisores nuevos, sin ningún `bloquea`, y todas las fórmulas visibles comprobadas como correctas:
+
+| Tarea | 2a ancho   | 2a móvil | 2b ancho       | 2b móvil       |
+| ----- | ---------- | -------- | -------------- | -------------- |
+| T1    | 3          | 3        | 3              | 3              |
+| T2    | 1          | 1        | 1              | 1              |
+| T3    | 3          | 3        | **4**          | 2              |
+| T4    | 1          | 1        | 1              | 1              |
+| T5    | 3          | 2        | no verificable | no verificable |
+| T6    | 1 (índice) | 1        | **4**          | **4**          |
+
+## Estimación: ronda 2
+
+Ataca lo que la ronda 1 dejó en `adivinar`: términos de ecuación sin marca (E1 dibuja centro y ±σ de cada montón y lee sesgo y MSE; E2 añade la franja del score con su pendiente $-I(\theta)$), títulos con el término técnico para el índice, la ecuación MAP con los sensores de la figura, muestras de leyenda con la forma de su marca (la librería cambia `square` por `mark`). En el cuaderno, los botones pasan a `Button` de la librería y el resultado lleva el recuadro.
+
+| Tarea | 2a ancho | 2a móvil | 2b ancho       | 2b móvil       |
+| ----- | -------- | -------- | -------------- | -------------- |
+| T1    | 3        | 3        | 2              | 2              |
+| T2    | 1        | 1        | 1              | 1              |
+| T3    | 2        | 2        | 1              | 1              |
+| T4    | 3        | 3        | 1              | 1              |
+| T5    | 2        | 2        | no verificable | no verificable |
+| T6    | **4**    | **4**    | **4**          | **4**          |
+
+Cada revisor nuevo encuentra defectos que ya estaban y que el anterior no citó (en 2b, la frase «as sensors accumulate» sin control para añadir sensores, que lleva ahí desde julio). Se arreglan igual: el objetivo son los defectos, no la nota.
+
+## Estimación: ronda 3
+
+- `MathBlock` parte en líneas una ecuación demasiado ancha (tras sus relaciones, y entre las fórmulas que separa un `\qquad`) en vez de encogerla al 60 % y desvanecer el borde. Ataca el compromiso del móvil que quedó abierto en detección, y vale para todas las lecciones.
+- E4 simula el tono complejo $Ae^{j2\pi fn}$ con ruido circular, el modelo del temario (p. 97), así que la lectura de la CRB y la ecuación revelada usan la misma cota y la misma SNR. Desaparece el pie que reconciliaba tono real y complejo.
+- Texto: nada adelanta el resultado antes de la acción, ninguna entradilla del cuaderno responde a sus apartados, «Tema» pasa a «Topic» en todo el sitio (decidido por el agente, revisable: los revisores lo marcaban en cada ronda como mezcla de idiomas, y la regla es conservar el inglés).
+
+## Estimación: rondas 4 a 7
+
+Notas por ronda (ancho/móvil). Revisores nuevos en cada ronda, todos Opus 5.5 effort high, auditorías limpias.
+
+| Tarea | 2a r3 | 2a r4 | 2a r5 | 2a r6 | 2b r3 | 2b r4 | 2b r5 | 2b r6 |
+| ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
+| T1    | 2/2   | 3/3   | 1/1   | 1/1   | 2/2   | 1/1   | 1/1   | 0/0   |
+| T2    | 2/1   | 3/2   | 3/2   | 2/2   | 1/1   | 3/1   | 0/0   | 3/1   |
+| T3    | 2/2   | 2/2   | 2/2   | 2/2   | 2/2   | 2/2   | 0/0   | 1/1   |
+| T4    | 2/2   | 0/0   | 1/1   | 3/3   | 2/2   | 1/1   | 2/2   | 3/3   |
+| T5    | 3/0   | 3/2   | 3/3   | 0/0   | —     | —     | —     | —     |
+| T6    | 4/4   | 4/4   | 4/4   | 4/4   | 4/4   | 4/4   | 4/4   | 4/3   |
+
+Lo que la nota no cuenta: cada ronda cerró los defectos que citaba la anterior, y los ceros nuevos son casi siempre errores de contenido que estaban desde julio y que un revisor nuevo encontró por primera vez. Cuatro, todos corregidos:
+
+- «Si el score se curva, ningún estimador insesgado alcanza la cota» (E2). Falso: el criterio es la factorización $I(\theta)(g(\mathbf{x}) - \theta)$, y la exponencial y la Poisson del cuaderno tienen un score curvo que factoriza (r4).
+- σ² sin definir en la transferencia del píxel (r4), y una nota mía con α en dos sentidos (r4, corregida en r5).
+- «La media muestral tiene esperanza βαNA» en el paso b)01 del amplificador. Es la suma escalada β1ᵀx (r6).
+- La tesis de la lección decía que la CRB acota la nube «de cualquier estimador». Solo la de los insesgados (r6).
+
+Cambios de fondo en estas rondas:
+
+- `MathBlock` parte en líneas las ecuaciones que no caben. El primer intento no funcionaba en el cuaderno: React 19 reescribía el `innerHTML` en cada re-render porque el objeto `{__html}` era nuevo. Se encontró midiendo la caja en un navegador real: el ajuste se aplicaba y un re-render posterior lo deshacía. Ahora el objeto está memoizado, y hay un solo oyente de fuentes para todas las ecuaciones.
+- E4 simula el tono complejo del temario, dibuja la plantilla sobre las muestras, esconde el tono verdadero tras «Show the answer» y dibuja la banda de la CRB a escala (antes tenía un ancho mínimo que la exageraba hasta 60 veces).
+- E2 dibuja el score, y E1 dibuja centro y dispersión de cada montón.
+
+La auditoría de la r4 marcó «hill-climb» en las dos sesiones. Era el revisor describiendo el producto de referencia `producto-a` («the hill-climbing maximum likelihood figure»), no una fuga. Comprobado a mano en las dos sesiones.
+
+### Puertas: code-review, simplify y verificación de contenido
+
+Code-review en dos ejes de `9d60ae15..316321d9` (informe `code-review-est-1`). Respuestas:
+
+- Arreglado: banda CRB no a escala, `MathBlock boxed` y `ControlRow` en la librería en vez de clases sueltas, «;» como separador, CRB etiquetada como teoría, pie de E1 por `MathText`, nota de E1 calculada, muestras de E2 sin tope de 60, `coarseStep` derivado, doble render de KaTeX, frases que destripaban predicciones, regla W ≈ 470 de AGENTS.md (con `plot-text-*` el tamaño aparente no depende del viewBox).
+- Contestado sin cambio: los 9 commits que no dicen qué borraron ya están publicados (reescribir la historia de una rama con PR abierto no compensa); los siguientes sí lo dicen. Arrastre en E1–E3: no es una regresión, venía de julio, y E1 no tiene un parámetro continuo sobre el plano. Dispersión medida de f̂ en E4: exigiría cientos de periodogramas por render; la CRB va etiquetada como teoría. Los «;» de `adaptive.ts` y `wiener.ts` quedan fuera de alcance.
+
+Simplify (cuatro ángulos). Arreglado: `AxisTicksY` en la librería, un solo oyente de fuentes con refit en un frame, HTML partido perezoso, `mse` y `sampleMean` del dominio, `periodogramAt` muerto borrado, refinado del pico memoizado, constantes con nombre. Contestado: un helper común para colocar etiquetas a un lado u otro; la regla de cada figura depende de sus propias marcas y un helper no la simplificaría.
+
+Verificación de contenido: tres verificadores Opus contra `course/` (`est-r1`, `est-r2`, `est-r4`), todos sus errores y dudas aplicados o anotados. La verificación final de la lección entera (`est-merge`) encontró 2 errores (una referencia a un examen sin estimación de frecuencia y una errata de signo copiada de la resolución impresa del cable, ahora con una nota que lo dice) y 7 dudas. Todo aplicado.
+
+Notas de las rondas 7 y 8 (ancho/móvil):
+
+| Tarea | 2a r7 | 2a r8 | 2b r7 | 2b r8 |
+| ----- | ----- | ----- | ----- | ----- |
+| T1    | 1/1   | 2/2   | 3/3   | 2/2   |
+| T2    | 3/2   | 3/2   | 3/2   | 1/1   |
+| T3    | 3/2   | 3/2   | 3/2   | 2/2   |
+| T4    | 3/3   | 3/3   | 1/1   | 3/3   |
+| T5    | 3/3   | 3/3   | —     | —     |
+| T6    | 4/4   | 4/4   | 4/4   | 4/4   |
+
+En la ronda 8 el paquete 2a no tuvo ningún defecto por encima de `fricción`.
+
+Ronda 8: «Predict first» pasó a ir antes de la figura en todas las lecciones (predecir después de ver no es predecir). El segundo code-review vio la regresión: en P1, D3, D5, A1 y A2 el párrafo de acción da la respuesta y quedaba justo encima. Ahora la predicción va entre el párrafo del objeto y el de la acción.
+
+Code-review del segundo rango (`code-review-est-2`). Arreglado: el orden de la predicción, `populationStd` en el dominio, sumas de pesos de E3, `LegendItem` exportado, umbral de fórmulas irrompibles a 36 caracteres (a 360 px una fórmula del cuaderno de Wiener ensanchaba la página; comprobado a 360 px que ninguna lección desborda), «Noise std» en E2 y E4, tests de `\implies` y del caso sin espaciar, AGENTS.md (W hasta 640, figuras repartidas desde `CourseFigure.tsx`). Contestado: los commits sin cuerpo de este rango ya están publicados; el resto los lleva. `complexToneInNoise` tiene seis parámetros posicionales como `toneInNoise`, su gemelo real; un objeto de opciones solo para uno de los dos rompería la simetría. Los umbrales de lado de las etiquetas de E4 (0.12, 0.42) son márgenes de borde en unidades de frecuencia, comentados encima.
+
+Notas de la ronda 9 (ancho/móvil): 2a T1 2/2, T2 3/2, T3 3/2, T4 2/2, T5 2/2, T6 4/4; 2b T1 3/3, T2 3/2, T3 2/2, T4 3/3, T6 3/3. Ningún defecto por encima de `fricción` en ninguno de los dos paquetes. La ronda 10 ataca lo que quedaba (lectura «sin el sensor 1» para comprobar la predicción de E3, símbolos de la ecuación en las lecturas, entradillas que no destripan, introducción en cuatro pasos).
+
+## Estimación: cierre
+
+**Comparación a ciegas** (REVIEWER.md, parte 5). Un revisor nuevo recibió 60 capturas de la base (`9d60ae15`) y 60 de la final (ronda 10), con los nombres `version-x` y `version-y` sorteados (x = final, y = base; la asignación solo está en este diario). Resultado: la final gana en las doce casillas de tareas (T1 a T6, ancho y móvil) y en cinco de las seis dimensiones visuales; espaciado y densidad queda igual. En ninguna tarea gana la base. El revisor señala como lo más grave de la base las fórmulas falsas (el 2 de la CRB, la cota de frecuencia de otro modelo, la varianza mal rotulada, βαNA, la regla del score curvo); en la final, los choques de etiquetas a 390 px, figura y controles que no caben juntos, y algo de notación antes de la acción en E2.
+
+**Antes y después, mirado como lo haría un diseñador de producto.** La mejora se ve de un vistazo. La base tenía cuatro figuras sin ejes ni escala, una curva que acababa en meseta, colores de rol con otro significado y respuestas en pantalla antes de la acción. La final tiene ejes con cifras y nombre, cada número de la ecuación con su marca en la figura (centro y dispersión de cada montón, la recta del score, la plantilla sobre las muestras), predicción antes de la acción, la respuesta de E4 tras un botón, y el texto dice qué es cada símbolo. Lo que no mejora: a 390 px las figuras se encogen enteras y su texto queda pequeño.
+
+**Por debajo de la meta (95 %, un 4 en todo), y por qué:**
+
+- T1 a T5 se quedan en 2–3 en las últimas rondas, con defectos de `fricción` o `menor`. Cada revisor nuevo encuentra defectos que el anterior no citó (y en seis ocasiones, errores de contenido que estaban desde julio), así que la nota no converge aunque cada ronda cierre lo que se le pide.
+- Móvil (T2 y T3 en 2): las figuras SVG se escalan enteras. El arreglo de verdad es una disposición distinta por debajo de unos 500 px (otra relación de aspecto, rótulos fuera del SVG), un cambio estructural en `Plot` y en las cuatro figuras que no daba tiempo a hacer y a revisar.
+- T4 en E1: los dos estimadores son insesgados, así que el término del sesgo nunca se ve. Haría falta un tercer estimador sesgado (el $\hat m_2$ de la transferencia).
+- T6 en 2b (3): las referencias de examen parecen enlaces y no lo son.
+
+**Fusión** (decidido por el agente, revisable). Según el añadido de Elies, lo que no llega al 95 % antes del corte se queda en la rama y se fusiona el lunes después de las 20:00. La rama de estimación (PR #8, borrador) se queda así. Pero entre la base y la ronda 9 los revisores encontraron más de diez errores de contenido que estaban en main, y después del corte entran los arreglos de contenido. Por eso abrí un PR solo de contenido (#9) sobre main, sin rediseño: texto corregido y las dos lecturas de figura que mostraban una fórmula falsa (la CRB de E4, ahora con la cota del tono real de Kay 1993, y la varianza de E3 con el prior). Pasó check, build, CI, banco sin errores, code-review en dos ejes y verificación de contenido Opus, y se fusionó. Después, `git pull --ff-only` en el checkout de main y `pnpm dev` con las seis rutas sin errores. La rama #8 lleva ya main integrado para que la fusión del lunes no tenga conflictos.
+
+**Desviación que hay que contar.** La fusión de detección (#7) fue después del añadido de las 22:05, con T1–T5 por debajo de 4. La hice con los compromisos anotados más arriba, sin aplicar todavía la regla de dejar en la rama lo que no llega al 95 %. Main mejoró en todos los puntos de la rúbrica y sus arreglos de contenido estaban verificados, así que no la revierto, pero es decisión de Elies.
+
+## Informe final
+
+**Tiempo.** De las 21:55 del viernes (primera marca de la sesión) a las 07:00 del sábado, unas nueve horas de pared.
+
+**Ejecuciones por modelo.** Todo Opus 5.5 con effort high: Codex no estaba disponible.
+
+- 33 revisores a ciegas en hilos nuevos del proyecto de revisores: 12 de detección (base y rondas 1 a 5, dos paquetes), 20 de estimación (base y rondas 1 a 9, dos paquetes) y 1 de la comparación final. Todas las auditorías limpias; dos falsos positivos por la palabra «hill-climbing» en la descripción de un producto de referencia, comprobados a mano.
+- 13 tareas de apoyo delegadas: verificaciones de contenido (detección ×3, estimación ×4, procesos ×1), code-reviews en dos ejes (cada uno con dos subagentes más) y las revisiones de los PR #9 y #10.
+- Unos 20 subagentes nativos: simplify (cuatro ángulos, dos veces), los ejes de code-review y la búsqueda de referencias.
+- El archivo de sesión no trae línea `cost-state`, así que no hay cifra de coste.
+
+**Líneas.** Rama de estimación (#8, sin fusionar) contra `9d60ae15`: 30 archivos, +1448 −452 en el momento del cierre. Contenido de estimación (#9, fusionado): 3 archivos, +30 −24, más las precisiones del review. Contenido de procesos (#10, fusionado): 5 archivos, con las precisiones del review. Tras cada fusión, `git pull --ff-only` en el checkout de main y `pnpm dev` con las seis rutas sin errores de consola.
+
+**PR.**
+
+| PR         | Qué                                              | Estado                                             |
+| ---------- | ------------------------------------------------ | -------------------------------------------------- |
+| #5, #6, #7 | Banco y CI, catálogo, detección                  | fusionados el viernes                              |
+| #8         | Rediseño de estimación (rondas 1 a 10)           | borrador; se fusiona el lunes después de las 20:00 |
+| #9         | Errores de contenido de estimación, sin rediseño | fusionado el sábado por la mañana                  |
+| #10        | Errores de contenido de procesos, sin rediseño   | fusionado el sábado por la mañana                  |
+
+**Lo que no se hizo.** Procesos (P3, P2, P1) y la portada no tuvieron rondas de diseño, y el módulo bayesiano MAP/MMSE no se empezó: estimación consumió la noche porque cada ronda destapaba errores de contenido y la meta del 95 % no llegaba. A procesos sí le llegó una verificación de contenido completa, con nueve errores corregidos en #10.
+
+## Retro
+
+**Qué funcionó.**
+
+- Un revisor nuevo por paquete y ronda, sin saber la meta ni la ronda, encontró en cada pasada algo que el anterior no vio. Sin esa ceguera los errores de contenido de julio se habrían quedado.
+- Verificadores Opus separados contra `course/`, con reemplazos literales listos para pegar. Ninguna corrección de contenido entró sin fuente.
+- Medir en un navegador real cuando una captura contradice al código: el fallo de `MathBlock` (React 19 reescribiendo el `innerHTML`) llevaba dos rondas reportado y se encontró en minutos con una sonda de diez líneas.
+- Separar contenido y rediseño al ver que la meta no llegaba antes del corte: main recibe las fórmulas correctas y el rediseño espera al lunes sin riesgo.
+
+**Qué falló o costó más de lo debido.**
+
+- Verificar solo lo que señalaban los revisores. Seis errores de julio salieron uno a uno a lo largo de nueve rondas, y una verificación completa al principio los habría cogido todos en la ronda 1.
+- Seguir al pie de la letra el arreglo de un revisor: «pon ‖∂p/∂θ‖ en la lectura» y en la ronda siguiente «p no está definido». La regla de fondo (definir el símbolo en el texto antes de que la figura lo use) lo cerró.
+- Mover una pieza compartida (la caja de predicción) sin leer su efecto en las otras lecciones: el code-review del rango lo cogió en cinco módulos.
+- Retocar etiquetas del móvil ronda tras ronda en vez de rediseñar la figura estrecha. El móvil se queda en 2 en T2 y T3.
+- Fusionar detección después del añadido sin aplicar la regla del 95 %.
+
+**Qué cambia en el método** (ya está en la skill ui-hill-climb): verificación completa del contenido en la ronda base; separar un PR de contenido cuando el corte llega antes que la meta; arreglar la regla y no el arreglo literal; leer los cambios de piezas compartidas contra todas las pantallas; medir en el navegador; planificar la disposición estrecha de las figuras desde la base; paquetes de 50 a 75 imágenes por sección; comprobar en contexto los aciertos de la auditoría.
+
+## Cambio de plan: #8 se fusiona el sábado
+
+Sábado 7/11, 10:00: el coordinador, de parte de Elies, pide fusionar #8 hoy antes del corte de las 12:00. La regla de dejar en la rama lo que no llega al 95 % era demasiado estricta, y la comparación a ciegas prefiere la versión nueva en las 12 casillas de tareas. Puertas del tramo final (`14319504..`): code-review en dos ejes (`code-review-est-3`), con un único bloqueante (el umbral de fórmulas irrompibles había bajado a 36 y dejaba partir unas 75 fórmulas de 37 a 48 caracteres; vuelve a 48 y la fórmula larga del predictor de Wiener se reescribe, comprobado a 360 px sin desbordes en ninguna lección), y verificación de contenido de todo lo que cambia respecto a main (`verificacion-pr8`): ningún error, tres dudas de redacción aplicadas.

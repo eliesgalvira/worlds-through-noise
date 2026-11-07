@@ -81,8 +81,10 @@ function PeriodogramFigure() {
   const xOf = (f: number) => LEFT + (f / 0.5) * (RIGHT - LEFT)
   const yOf = (s: number) => AXIS_Y - (s / maxSpec) * (AXIS_Y - TOP)
   // Zero sits on the frequency axis, which already labels it.
-  // At least 6 units wide, so the band and bracket stay visible at large N.
-  const bandW = Math.max(xOf(TRUE_FREQ + crbStd) - xOf(TRUE_FREQ - crbStd), 6)
+  // Drawn to scale. Below 6 units the bracket would be a smudge, so it
+  // becomes a single tick and the label says the band is narrower.
+  const bandW = xOf(TRUE_FREQ + crbStd) - xOf(TRUE_FREQ - crbStd)
+  const bandTooNarrow = bandW < 6
   const scoreTicks = niceTicks(maxSpec, 5).filter((tick) => tick > 0)
 
   return (
@@ -251,7 +253,11 @@ function PeriodogramFigure() {
           className="fill-truth/15"
         />
         <path
-          d={`M ${xOf(TRUE_FREQ) - bandW / 2} ${CRB_Y - 4} v 8 M ${xOf(TRUE_FREQ) - bandW / 2} ${CRB_Y} H ${xOf(TRUE_FREQ) + bandW / 2} M ${xOf(TRUE_FREQ) + bandW / 2} ${CRB_Y - 4} v 8`}
+          d={
+            bandTooNarrow
+              ? `M ${xOf(TRUE_FREQ)} ${CRB_Y - 4} v 8`
+              : `M ${xOf(TRUE_FREQ) - bandW / 2} ${CRB_Y - 4} v 8 M ${xOf(TRUE_FREQ) - bandW / 2} ${CRB_Y} H ${xOf(TRUE_FREQ) + bandW / 2} M ${xOf(TRUE_FREQ) + bandW / 2} ${CRB_Y - 4} v 8`
+          }
           className="stroke-truth"
           strokeWidth={1.4}
           fill="none"
@@ -262,6 +268,7 @@ function PeriodogramFigure() {
           className="fill-truth font-mono plot-text-xs"
         >
           true f ±<Sym base="σ" sub="CR" /> = {crbStd.toPrecision(2)}
+          {bandTooNarrow ? ', thinner than this tick' : ''}
         </text>
         <line
           x1={xOf(TRUE_FREQ)}

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
 import { MathText } from '@/components/MathText.tsx'
 import {
+  ControlRow,
   FigureShell,
   Legend,
   Plot,
@@ -54,7 +55,7 @@ function FusionSpringsFigure() {
 
   return (
     <FigureShell
-      title="Every measurement is a spring; the estimate is the balance point"
+      title="Every measurement is a spring, and the estimate is their balance point"
       instruction="Three sensors read the same hidden humidity with different noise. Each pulls the estimate toward its reading with stiffness $1/\sigma^2$. Slacken a sensor and watch the balance slide away from it — then switch on the prior: one more spring, anchored at old knowledge."
       controls={
         <>
@@ -78,7 +79,7 @@ function FusionSpringsFigure() {
           ))}
           {/* The prior row never moves: its slider stays in place, inert
               while the prior is off. */}
-          <div className="col-span-full flex w-full flex-wrap items-start gap-x-8 gap-y-4">
+          <ControlRow>
             <Button
               type="button"
               variant={priorOn ? 'secondary' : 'outline'}
@@ -103,7 +104,7 @@ function FusionSpringsFigure() {
               onValueChange={setPriorSigma}
               format={(v) => v.toFixed(1)}
             />
-          </div>
+          </ControlRow>
         </>
       }
       readout={

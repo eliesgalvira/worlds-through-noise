@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button.tsx'
+import { MathText } from '@/components/MathText.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
 import {
   FigureShell,
@@ -219,7 +220,9 @@ function EstimatorRaceFigure() {
             }
           />
           <ReadoutNote>
-            {kind === 'uniform'
+            {kind === 'uniform' &&
+            result !== null &&
+            mse(midStats) < mse(meanStats)
               ? 'Both noises have variance 1. The ranking flipped with the distribution: “best estimator” is a property of the pair.'
               : 'Both noises have variance 1.'}
           </ReadoutNote>
@@ -368,11 +371,9 @@ function EstimatorRaceFigure() {
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        Every bar counts real experiments: {RUNS} runs of N = {n} samples each,
-        no fitted curves.
-        {beyondAxis > 0
-          ? ` ${String(beyondAxis)} estimates fall beyond the axis.`
-          : ''}
+        <MathText
+          text={`Every bar counts real experiments: ${String(RUNS)} runs of $N = ${String(n)}$ samples each, no fitted curves.${beyondAxis > 0 ? ` ${String(beyondAxis)} estimates fall beyond the axis.` : ''}`}
+        />
       </p>
     </FigureShell>
   )

@@ -73,6 +73,8 @@ function CurvatureFigure() {
     return out
   }, [n, sigma, seed])
 
+  const peaksBeyond = peaks.filter((p) => p < T_MIN || p > T_MAX).length
+
   const xOf = (theta: number) =>
     LEFT + ((theta - T_MIN) / (T_MAX - T_MIN)) * (W - LEFT - 10)
   const yOf = (ll: number) => 36 + (Math.max(ll, floor) / floor) * (AXIS_Y - 40)
@@ -95,7 +97,7 @@ function CurvatureFigure() {
   return (
     <FigureShell
       title="Watch the landscape sharpen — information is curvature"
-      instruction="The curve is the log-likelihood of every candidate $\theta$, computed from the actual samples (dots). Its peak is $\hat{\theta}_{ML}$; its sharpness is Fisher information. Draw fresh samples and watch the peak wobble exactly as much as the flatness allows — then raise $N$."
+      instruction="The curve is the log-likelihood of every candidate $\theta$, computed from the actual samples (dots). Its peak is $\hat{\theta}_{ML}$. Its sharpness is Fisher information. Draw fresh samples and watch the peak wobble exactly as much as the flatness allows — then raise $N$."
       controls={
         <>
           <SliderControl
@@ -140,11 +142,11 @@ function CurvatureFigure() {
             tone="estimate"
           />
           <ReadoutRow
-            label="CRB std $\sigma/\sqrt{N}$"
+            label="CRB std $\sigma/\sqrt{N}$ (theory)"
             value={formatNumber(crbStd, 3)}
           />
           <ReadoutRow
-            label="Std of the 40 peaks (blue dots)"
+            label="Std of the 40 peaks (bottom strip)"
             value={formatNumber(
               Math.sqrt(
                 peaks.reduce((a, p) => {
@@ -335,7 +337,6 @@ function CurvatureFigure() {
         </text>
         {sample
           .filter((x) => x >= T_MIN && x <= T_MAX)
-          .slice(0, 60)
           .map((x, i) => (
             <circle
               key={i}
@@ -352,6 +353,7 @@ function CurvatureFigure() {
           className="fill-muted-foreground font-mono plot-text-xs"
         >
           peak positions over 40 re-runs
+          {peaksBeyond > 0 ? `, ${String(peaksBeyond)} beyond the axis` : ''}
         </text>
         <line
           x1={xOf(TRUTH - crbStd)}
@@ -369,16 +371,18 @@ function CurvatureFigure() {
         >
           shaded: true θ ±<Sym base="σ" sub="CR" />
         </text>
-        {peaks.map((p, i) => (
-          <circle
-            key={i}
-            cx={xOf(Math.min(Math.max(p, T_MIN), T_MAX))}
-            cy={AXIS_Y + 176}
-            r={2.4}
-            className="fill-estimate"
-            opacity={0.6}
-          />
-        ))}
+        {peaks
+          .filter((p) => p >= T_MIN && p <= T_MAX)
+          .map((p, i) => (
+            <circle
+              key={i}
+              cx={xOf(p)}
+              cy={AXIS_Y + 176}
+              r={2.4}
+              className="fill-estimate"
+              opacity={0.6}
+            />
+          ))}
       </Plot>
     </FigureShell>
   )

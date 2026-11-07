@@ -38,6 +38,8 @@ function MathText({ text, className }: MathTextProps) {
 
 type MathBlockProps = {
   readonly latex: string
+  /** Frame the equation, e.g. the result a worked solution arrives at. */
+  readonly boxed?: boolean
   readonly className?: string
 }
 
@@ -51,7 +53,7 @@ const MIN_EQUATION_SCALE = 0.6
  * solution step on a phone), it shrinks a little, then breaks into lines
  * after its relations. Only a piece still too wide at 60 % scrolls.
  */
-function MathBlock({ latex, className }: MathBlockProps) {
+function MathBlock({ latex, boxed = false, className }: MathBlockProps) {
   const boxRef = useRef<HTMLDivElement>(null)
   // One object per equation: React 19 rewrites innerHTML whenever this prop
   // is a new object, which would undo the fit below on every re-render.
@@ -80,7 +82,7 @@ function MathBlock({ latex, className }: MathBlockProps) {
       }
     }
     const fit = () => {
-      box.innerHTML = renderDisplayMath(latex)
+      box.innerHTML = html.__html
       shrink(WRAP_SCALE)
       const wrap = box.scrollWidth > box.clientWidth + 1
       box.toggleAttribute('data-wrapped', wrap)
@@ -112,13 +114,14 @@ function MathBlock({ latex, className }: MathBlockProps) {
       live = false
       document.fonts.removeEventListener('loadingdone', fit)
     }
-  }, [latex])
+  }, [latex, html])
 
   return (
     <div
       ref={boxRef}
       className={cn(
         'overflow-x-auto py-1 text-foreground data-overflow:mask-r-from-85% data-wrapped:leading-loose data-wrapped:[&_.base]:my-1',
+        boxed && 'rounded-md border border-border bg-background px-4 py-2',
         className,
       )}
       aria-label={latex}

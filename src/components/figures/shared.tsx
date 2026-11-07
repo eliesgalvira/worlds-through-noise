@@ -172,6 +172,15 @@ function ReadoutRow({ label, value, tone = 'default' }: ReadoutRowProps) {
   )
 }
 
+/** A group of controls that keeps a whole row of the control grid to itself. */
+function ControlRow({ children }: { readonly children: ReactNode }) {
+  return (
+    <div className="col-span-full flex w-full flex-wrap items-start gap-x-8 gap-y-4">
+      {children}
+    </div>
+  )
+}
+
 /** A sentence about the readouts, spanning the whole readout row. */
 function ReadoutNote({ children }: { readonly children: ReactNode }) {
   return (
@@ -301,6 +310,7 @@ function Hatch({
 
 export {
   AxisTicks,
+  ControlRow,
   FigureShell,
   Hatch,
   Legend,

@@ -30,7 +30,7 @@ export const currentCourse: CourseRecord = {
     {
       lesson: estimationLesson,
       navLabel: 'Estimation',
-      tagline: 'Judge the machine by its cloud; curvature sets the floor.',
+      tagline: 'Judge the machine by its cloud. Curvature sets the floor.',
       status: 'available',
     },
     {
@@ -86,7 +86,7 @@ export const currentCourse: CourseRecord = {
       },
       {
         lead: 'Close with the exam workbook.',
-        body: 'Each topic ends with real recent exam problems. Solve on paper first; the solution then unfolds one move at a time, so you can stop revealing the moment you see the way.',
+        body: 'Each topic ends with real recent exam problems. Solve on paper first. The solution then unfolds one move at a time, so you can stop revealing the moment you see the way.',
       },
     ],
   },

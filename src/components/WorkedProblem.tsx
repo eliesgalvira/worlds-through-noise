@@ -75,10 +75,7 @@ function ProblemPart({ part }: { readonly part: ProblemPartRecord }) {
                 <MathText text={part.answer.sentence} />
               </p>
               {part.answer.latex !== undefined ? (
-                <MathBlock
-                  latex={part.answer.latex}
-                  className="mt-2 rounded-md border border-accent bg-background px-4 py-2"
-                />
+                <MathBlock latex={part.answer.latex} boxed className="mt-2" />
               ) : null}
             </div>
           ) : null}

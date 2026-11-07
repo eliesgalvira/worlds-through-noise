@@ -22,7 +22,7 @@ Use `PRODUCT.md` for product intent and `DESIGN.md` for visual direction before 
 ## Figure conventions
 
 - Readouts must derive from the model or a real simulation running in the figure. If a quantity is theoretical (a CRB, a misadjustment formula), label it as theory and, where possible, show the measured value beside it.
-- SVG font sizes are in viewBox units: a `text-[10px]` label in a `viewBox` of width 250 renders twice as large on screen as in one of width 470. Keep full-width figures near W ≈ 470 and check adjacent figures for consistent apparent text size.
+- SVG text uses `plot-text-xs`, `plot-text-sm` or `plot-text`, which `Plot` scales through `--plot-px` so labels keep the same apparent size whatever the viewBox width. A raw pixel size in a viewBox would not: a `text-[10px]` label in a viewBox of width 250 renders twice as large as in one of width 470. Full-width figures sit near W ≈ 470 to 560; a wider viewBox gives a shorter plot.
 - Labels whose position depends on slider state can collide; check extreme slider values before calling a figure done.
 - Interactions should work by both slider and direct drag on the plot (`Plot`'s `onDragPoint`).
 

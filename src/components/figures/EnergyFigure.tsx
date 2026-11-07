@@ -197,12 +197,12 @@ function EnergyFigure() {
           x={xOf(threshold) + (labelLeft ? -4 : 4)}
           y={24}
           textAnchor={labelLeft ? 'end' : 'start'}
-          className="fill-threshold stroke-card font-mono plot-text-sm"
-          strokeWidth={3}
-          paintOrder="stroke"
+          className="fill-threshold plot-halo font-mono plot-text-sm"
         >
-          <tspan className="font-serif italic">γ</tspan>, jailer{' '}
-          <Sym base="P" sub="D" /> {formatPercentValue(pdJailer)}
+          <tspan className="font-serif italic">γ</tspan>
+          <tspan className="fill-detection">
+            , jailer <Sym base="P" sub="D" /> {formatPercentValue(pdJailer)}
+          </tspan>
         </text>
         <text
           x={W / 2}
@@ -224,15 +224,13 @@ function EnergyFigure() {
           x={xOf(1 + snr) + (powerLeft ? -4 : 4)}
           y={H - 50}
           textAnchor={powerLeft ? 'end' : 'start'}
-          className="fill-h1-ink stroke-card font-mono plot-text-sm"
-          strokeWidth={3}
-          paintOrder="stroke"
+          className="fill-h1-ink plot-halo font-mono plot-text-sm"
         >
           σ²+P
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        <MathText text="Densities and tails are exact $\chi^2_N$ computations. Every curve has area 1. The plot rescales heights so both fit. At $N = 2$ they are exponentials, and $P_D = P_{FA}^{\sigma_0^2/\sigma_1^2}$ exactly, with $\sigma_0^2 = \sigma_w^2$ and $\sigma_1^2 = \sigma_w^2 + P$." />
+        <MathText text="Densities and tails are exact $\chi^2_N$ computations. Both curves share one height scale, and the axis stops at $4\sigma^2$, so a wide $\mathcal{H}_1$ curve can run past it. At $N = 2$ they are exponentials, and $P_D = P_{FA}^{\sigma_0^2/\sigma_1^2}$ exactly, with $\sigma_0^2 = \sigma_w^2$ and $\sigma_1^2 = \sigma_w^2 + P$." />
       </p>
     </FigureShell>
   )

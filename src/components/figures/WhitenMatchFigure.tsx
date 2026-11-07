@@ -122,8 +122,9 @@ function WhitenMatchFigure() {
   const proj = shadow(theta, t)
   const span = Math.max(Math.abs(proj.mean) + 3.5 * proj.sd, 4)
   const sx = (v: number) => 20 + ((v + span) / (2 * span)) * (SHADOW_W - 40)
+  const shadowXs = linspace(-span, span, 160)
   const shadowPath = (center: number) =>
-    linspace(-span, span, 160)
+    shadowXs
       .map(
         (v, i) =>
           `${i === 0 ? 'M' : 'L'} ${sx(v).toFixed(1)} ${(SHADOW_H - 28 - normalPdf(v, center, proj.sd) * proj.sd * Math.sqrt(2 * Math.PI) * (SHADOW_H - 48)).toFixed(1)}`,
@@ -289,9 +290,7 @@ function WhitenMatchFigure() {
           <text
             x={CX + Math.cos(NOISE_ANGLE) * loudNow * scale + 4}
             y={CY - Math.sin(NOISE_ANGLE) * loudNow * scale}
-            className="fill-h0 stroke-card font-mono plot-text-xs"
-            strokeWidth={3}
-            paintOrder="stroke"
+            className="fill-h0 plot-halo font-mono plot-text-xs"
           >
             {whitened ? (
               'noise (1σ)'
@@ -340,9 +339,7 @@ function WhitenMatchFigure() {
             x={bestEnd.x + (bestEnd.x >= CX ? -4 : 4)}
             y={bestEnd.y + (bestEnd.y < CY ? 14 : -6)}
             textAnchor={bestEnd.x >= CX ? 'end' : 'start'}
-            className="fill-foreground stroke-card font-mono plot-text-xs"
-            strokeWidth={3}
-            paintOrder="stroke"
+            className="fill-foreground plot-halo font-mono plot-text-xs"
           >
             {whitened ? (
               'optimal h'
@@ -370,9 +367,7 @@ function WhitenMatchFigure() {
           <text
             x={CX + 46 * Math.cos(theta / 2)}
             y={CY - 46 * Math.sin(theta / 2) + 4}
-            className="fill-cursor stroke-card font-mono plot-text-sm"
-            strokeWidth={3}
-            paintOrder="stroke"
+            className="fill-cursor plot-halo font-mono plot-text-sm"
           >
             θ
           </text>
@@ -401,9 +396,7 @@ function WhitenMatchFigure() {
           <text
             x={meanPoint.x + 8}
             y={meanPoint.y - 6}
-            className="fill-h1-ink stroke-card font-mono plot-text-sm"
-            strokeWidth={3}
-            paintOrder="stroke"
+            className="fill-h1-ink plot-halo font-mono plot-text-sm"
           >
             {whitened ? 'Δμ (whitened)' : 'Δμ = Ap'}
           </text>

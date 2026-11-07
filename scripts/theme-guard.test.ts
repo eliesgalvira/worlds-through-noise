@@ -38,7 +38,10 @@ describe('copy guard', () => {
         .flatMap((line, index) => {
           const code = line.trim()
           const comment =
-            code.startsWith('//') || code.startsWith('*') || code.includes('/*')
+            code.startsWith('//') ||
+            code.startsWith('*') ||
+            code.startsWith('/*') ||
+            code.startsWith('{/*')
           return !comment && / · /.test(code)
             ? [`${path.slice(SRC.length)}:${String(index + 1)}`]
             : []

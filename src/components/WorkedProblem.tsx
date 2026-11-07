@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, ChevronDown, RotateCcw } from 'lucide-react'
 import { MathBlock, MathText } from '@/components/MathText.tsx'
+import { StatementFigure } from '@/course/StatementFigure.tsx'
 import type { ProblemPartRecord, WorkedProblemRecord } from '@/domain/types.ts'
 import { cn } from '@/lib/utils.ts'
 
@@ -122,15 +122,9 @@ function ProblemPart({ part }: { readonly part: ProblemPartRecord }) {
 type WorkedProblemProps = {
   readonly problem: WorkedProblemRecord
   readonly className?: string
-  /** Draws a figure the statement refers to, by its key. */
-  readonly renderFigure?: (key: string) => ReactNode
 }
 
-function WorkedProblem({
-  problem,
-  className,
-  renderFigure,
-}: WorkedProblemProps) {
+function WorkedProblem({ problem, className }: WorkedProblemProps) {
   return (
     <article
       id={problem.id}
@@ -158,9 +152,10 @@ function WorkedProblem({
         <div className="mt-2 space-y-3">
           {problem.statement.map((block, index) =>
             block.kind === 'figure' ? (
-              <div key={`${String(index)}-${block.key}`}>
-                {renderFigure?.(block.key)}
-              </div>
+              <StatementFigure
+                key={`${String(index)}-${block.key}`}
+                figureKey={block.key}
+              />
             ) : block.kind === 'math' ? (
               <MathBlock
                 key={`${String(index)}-${block.content.slice(0, 24)}`}

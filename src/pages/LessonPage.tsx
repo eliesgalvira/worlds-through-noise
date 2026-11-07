@@ -5,7 +5,6 @@ import { LessonModule } from '@/components/LessonModule.tsx'
 import { MathText } from '@/components/MathText.tsx'
 import { StickyLessonNav } from '@/components/StickyLessonNav.tsx'
 import { CourseFigure } from '@/course/CourseFigure.tsx'
-import { StatementFigure } from '@/course/StatementFigure.tsx'
 import { lessonNeighbors } from '@/course/catalog.ts'
 import { currentCourse } from '@/course/current-course.ts'
 import type { LessonRecord } from '@/domain/types.ts'
@@ -71,7 +70,6 @@ function LessonPage({ lesson }: LessonPageProps) {
           <LessonAssessmentSection
             lesson={lesson}
             labels={labels}
-            renderFigure={(key) => <StatementFigure figureKey={key} />}
             {...(next !== undefined ? { next } : {})}
           />
         </main>

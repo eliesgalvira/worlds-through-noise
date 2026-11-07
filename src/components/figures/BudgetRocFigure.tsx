@@ -180,9 +180,7 @@ function BudgetRocFigure() {
             x={xOf(0)}
             y={yOf(peak) + 16}
             textAnchor="middle"
-            className="fill-h0 stroke-card font-mono plot-text-sm"
-            strokeWidth={3}
-            paintOrder="stroke"
+            className="fill-h0 plot-halo font-mono plot-text-sm"
           >
             H0
           </text>
@@ -190,9 +188,7 @@ function BudgetRocFigure() {
             x={xOf(separation)}
             y={yOf(peak) + 16}
             textAnchor="middle"
-            className="fill-h1-ink stroke-card font-mono plot-text-sm"
-            strokeWidth={3}
-            paintOrder="stroke"
+            className="fill-h1-ink plot-halo font-mono plot-text-sm"
           >
             H1
           </text>
@@ -206,9 +202,7 @@ function BudgetRocFigure() {
           <text
             x={xOf(gamma) + 4}
             y={AXIS - 6}
-            className="fill-false-alarm stroke-card font-mono plot-text-sm"
-            strokeWidth={3}
-            paintOrder="stroke"
+            className="fill-false-alarm plot-halo font-mono plot-text-sm"
           >
             α {formatPercentValue(alpha)}
           </text>
@@ -279,9 +273,7 @@ function BudgetRocFigure() {
           <text
             x={rocX(alpha) + 8}
             y={rocY(pd) + 14}
-            className="fill-cursor stroke-card font-mono plot-text-sm"
-            strokeWidth={3}
-            paintOrder="stroke"
+            className="fill-cursor plot-halo font-mono plot-text-sm"
           >
             ({formatNumber(alpha, 2)}, {formatNumber(pd, 2)})
           </text>

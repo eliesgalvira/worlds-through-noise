@@ -1,5 +1,6 @@
 import { SliderControl } from '@/components/SliderControl.tsx'
 import { MathText } from '@/components/MathText.tsx'
+import { cn } from '@/lib/utils.ts'
 import {
   FigureShell,
   Legend,
@@ -196,23 +197,12 @@ function BitVoteFigure() {
             {errorWeight(k) > 0.04 * maxPmf ? (
               <text
                 x={(decideOne[k] ?? false) ? xOf(k) - 8 : xOf(k) + 8}
-                y={
-                  H -
-                  36 -
-                  barH(
-                    (decideOne[k] ?? false)
-                      ? (weight0[k] ?? 0)
-                      : (weight1[k] ?? 0),
-                  )
-                }
+                y={H - 36 - barH(errorWeight(k))}
                 textAnchor="middle"
-                className={
-                  (decideOne[k] ?? false)
-                    ? 'fill-false-alarm stroke-card font-mono plot-text-xs'
-                    : 'fill-h1-ink stroke-card font-mono plot-text-xs'
-                }
-                strokeWidth={3}
-                paintOrder="stroke"
+                className={cn(
+                  'plot-halo font-mono plot-text-xs',
+                  (decideOne[k] ?? false) ? 'fill-false-alarm' : 'fill-h1-ink',
+                )}
               >
                 error
               </text>

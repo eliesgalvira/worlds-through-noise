@@ -263,18 +263,14 @@ function TwoWorldsFigure() {
           x={xOf(threshold) - 6}
           y={H - 42}
           textAnchor="end"
-          className="fill-false-alarm stroke-card font-mono plot-text-sm"
-          strokeWidth={3}
-          paintOrder="stroke"
+          className="fill-false-alarm plot-halo font-mono plot-text-sm"
         >
           <Sym base="P" sub="FA" /> {formatPercentValue(pFalseAlarm)}
         </text>
         <text
           x={xOf(threshold) + 6}
           y={H - 42}
-          className="fill-h1-ink stroke-card font-mono plot-text-sm"
-          strokeWidth={3}
-          paintOrder="stroke"
+          className="fill-h1-ink plot-halo font-mono plot-text-sm"
         >
           <Sym base="P" sub="M" /> {formatPercentValue(pMiss)}
         </text>

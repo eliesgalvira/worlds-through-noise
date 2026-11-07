@@ -20,14 +20,15 @@ export function renderDisplayMath(latex: string): string {
   })
 }
 
+/** A spaced ≈ or ⇒ step, e.g. "\\;\\approx\\;", which starts a new wrapped line. */
+const STEP_RELATION =
+  /\\;\s*\\(approx|Rightarrow|Longrightarrow|implies)\s*\\;/g
+
 /**
  * A display equation laid out as display-size inline math for a box too
  * narrow for it: each formula a \\qquad separates starts a new line, so do
  * the ≈ and ⟹ steps, and the browser may break a long line after a relation.
  */
-/** A spaced ≈ or ⇒ step, e.g. "\\;\\approx\\;", which starts a new wrapped line. */
-const STEP_RELATION =
-  /\\;\s*\\(approx|Rightarrow|Longrightarrow|implies)\s*\\;/g
 
 export function renderWrappedMath(latex: string): string {
   return katex.renderToString(

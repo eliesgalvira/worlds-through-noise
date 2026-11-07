@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import type { ComponentProps } from 'react'
 import { Button } from '@/components/ui/button.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
 import { MathText } from '@/components/MathText.tsx'
@@ -11,6 +10,7 @@ import {
   ReadoutRow,
   Sym,
 } from '@/components/figures/shared.tsx'
+import type { LegendItem } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
 import { sampleMean } from '@/domain/math/estimation.ts'
 
@@ -28,7 +28,7 @@ const MAX_WEIGHT = 1 / (SIGMA_MIN * SIGMA_MIN)
 const READING_Y = 40
 
 /** Legend entry for the prior anchor, shown only while the prior is on. */
-const PRIOR_LEGEND: ComponentProps<typeof Legend>['items'] = [
+const PRIOR_LEGEND: ReadonlyArray<LegendItem> = [
   {
     label: 'prior anchor $\\mu_\\theta$',
     swatchClass: 'fill-prior',
@@ -44,19 +44,17 @@ function FusionSpringsFigure() {
   const weights = sigmas.map((s) => 1 / (s * s))
   const priorWeight = priorOn ? 1 / (priorSigma * priorSigma) : 0
 
-  const numerator =
-    SENSOR_READINGS.reduce((acc, x, i) => acc + x * (weights[i] ?? 0), 0) +
-    PRIOR_MEAN * priorWeight
-  const totalWeight = weights.reduce((a, b) => a + b, 0) + priorWeight
-  const estimate = numerator / totalWeight
+  // Each sensor's pull, summed once: weighted readings and total stiffness.
+  const dataPull = SENSOR_READINGS.reduce(
+    (acc, x, i) => acc + x * (weights[i] ?? 0),
+    0,
+  )
+  const dataWeight = weights.reduce((a, b) => a + b, 0)
+  const totalWeight = dataWeight + priorWeight
+  const estimate = (dataPull + PRIOR_MEAN * priorWeight) / totalWeight
   const variance = 1 / totalWeight
-
-  const dataOnly =
-    SENSOR_READINGS.reduce((acc, x, i) => acc + x * (weights[i] ?? 0), 0) /
-    weights.reduce((a, b) => a + b, 0)
-  const alpha =
-    weights.reduce((a, b) => a + b, 0) /
-    (weights.reduce((a, b) => a + b, 0) + priorWeight)
+  const dataOnly = dataPull / dataWeight
+  const alpha = dataWeight / totalWeight
 
   const xOf = (v: number) => 10 + ((v - X_MIN) / (X_MAX - X_MIN)) * (W - 20)
   // The θ̂ label goes on the side with fewer springs, and left of the

@@ -30,9 +30,18 @@ describe('renderWrappedMath', () => {
   })
 
   it('starts a new line at each spaced approx or implies step', () => {
-    for (const step of ['\\approx', '\\Rightarrow', '\\Longrightarrow']) {
+    for (const step of [
+      '\\approx',
+      '\\Rightarrow',
+      '\\Longrightarrow',
+      '\\implies',
+    ]) {
       const html = renderWrappedMath(`a \\;${step}\\; b`)
       expect(html).toContain('newline')
     }
+  })
+
+  it('keeps an unspaced approx on the same line', () => {
+    expect(renderWrappedMath('a \\approx b')).not.toContain('newline')
   })
 })

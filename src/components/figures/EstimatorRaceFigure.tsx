@@ -12,7 +12,12 @@ import {
   AxisTicks,
 } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
-import { bias, mse } from '@/domain/math/estimation.ts'
+import {
+  bias,
+  mse,
+  populationStd,
+  sampleMean,
+} from '@/domain/math/estimation.ts'
 import { gaussian, makeRng } from '@/domain/math/kernel.ts'
 
 const TRUTH = 0.5
@@ -61,10 +66,7 @@ function runRace(kind: NoiseKind, n: number, seed: number): RaceResult {
 }
 
 function stats(values: ReadonlyArray<number>): { mean: number; sd: number } {
-  const mean = values.reduce((a, b) => a + b, 0) / values.length
-  const variance =
-    values.reduce((a, b) => a + (b - mean) * (b - mean), 0) / values.length
-  return { mean, sd: Math.sqrt(variance) }
+  return { mean: sampleMean(values), sd: populationStd(values) }
 }
 
 /** MSE of a pile of estimates around the truth, from its measured stats. */

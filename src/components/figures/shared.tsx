@@ -190,14 +190,16 @@ function ReadoutNote({ children }: { readonly children: ReactNode }) {
   )
 }
 
+type LegendItem = {
+  readonly label: string
+  readonly swatchClass: string
+  readonly dash?: boolean
+  /** The swatch takes the shape of its mark: bars, points or a pointer. Default: a line. */
+  readonly mark?: 'square' | 'dot' | 'triangle'
+}
+
 type LegendProps = {
-  readonly items: ReadonlyArray<{
-    readonly label: string
-    readonly swatchClass: string
-    readonly dash?: boolean
-    /** The swatch takes the shape of its mark: bars, points or a pointer. Default: a line. */
-    readonly mark?: 'square' | 'dot' | 'triangle'
-  }>
+  readonly items: ReadonlyArray<LegendItem>
 }
 
 function Legend({ items }: LegendProps) {
@@ -335,6 +337,8 @@ function Hatch({
     </defs>
   )
 }
+
+export type { LegendItem }
 
 export {
   AxisTicks,

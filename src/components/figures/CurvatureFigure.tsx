@@ -14,6 +14,7 @@ import {
 } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
 import { linspace } from '@/domain/math/distributions.ts'
+import { populationStd } from '@/domain/math/estimation.ts'
 import { gaussianVector, makeRng } from '@/domain/math/kernel.ts'
 
 const TRUTH = 1
@@ -78,11 +79,7 @@ function CurvatureFigure() {
   }, [n, sigma, seed])
 
   const peaksBeyond = peaks.filter((p) => p < T_MIN || p > T_MAX).length
-  const peakMean = peaks.reduce((a, b) => a + b, 0) / peaks.length
-  const peakStd = Math.sqrt(
-    peaks.reduce((a, p) => a + (p - peakMean) * (p - peakMean), 0) /
-      peaks.length,
-  )
+  const peakStd = populationStd(peaks)
 
   const xOf = (theta: number) =>
     LEFT + ((theta - T_MIN) / (T_MAX - T_MIN)) * (W - LEFT - 10)

@@ -38,12 +38,13 @@ function LessonModule({ module, figure }: LessonModuleProps) {
       <div className="mt-8 max-w-3xl space-y-5">
         <ProseParagraph text={module.trap} />
         <ProseParagraph text={module.object} />
-        <ProseParagraph text={module.action} />
-        {/* Predict before the figure can show the answer. */}
+        {/* Predict before the action text and the figure can give the
+            answer away. */}
         <PredictionPrompt
           question={module.prediction.question}
           answer={<MathText text={module.prediction.answer} />}
         />
+        <ProseParagraph text={module.action} />
       </div>
 
       <div

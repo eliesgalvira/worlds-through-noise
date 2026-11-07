@@ -18,7 +18,7 @@ type MathTextProps = {
  * (a break inside "(1 − α)" or after "i =" garbles them). Longer ones may,
  * or they would push a phone layout wider than the screen.
  */
-const NOWRAP_MAX_CHARS = 48
+const NOWRAP_MAX_CHARS = 36
 
 /** Renders prose whose $…$ spans become inline KaTeX. */
 function MathText({ text, className }: MathTextProps) {

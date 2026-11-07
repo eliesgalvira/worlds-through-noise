@@ -48,6 +48,14 @@ export function variance(values: ReadonlyArray<number>): number {
   return total / (values.length - 1)
 }
 
+/** Spread of a pile of simulated estimates around its own mean (divides by n). */
+export function populationStd(values: ReadonlyArray<number>): number {
+  const mean = sampleMean(values)
+  return Math.sqrt(
+    values.reduce((acc, v) => acc + (v - mean) * (v - mean), 0) / values.length,
+  )
+}
+
 export function mse(biasValue: number, varianceValue: number): number {
   return biasValue * biasValue + varianceValue
 }

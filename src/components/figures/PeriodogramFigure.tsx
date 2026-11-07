@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import type { ComponentProps } from 'react'
 import { Button } from '@/components/ui/button.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
 import {
@@ -11,6 +10,7 @@ import {
   ReadoutRow,
   Sym,
 } from '@/components/figures/shared.tsx'
+import type { LegendItem } from '@/components/figures/shared.tsx'
 import { formatNumber, niceTicks } from '@/components/figures/figure-utils.ts'
 import { linspace } from '@/domain/math/distributions.ts'
 import {
@@ -40,7 +40,7 @@ const STRIP_SAMPLES = 48
 const CRB_Y = 76
 
 /** Legend entries for the marks that appear with the answer. */
-const ANSWER_LEGEND: ComponentProps<typeof Legend>['items'] = [
+const ANSWER_LEGEND: ReadonlyArray<LegendItem> = [
   {
     label: 'peak $\\hat{f}_{ML}$',
     swatchClass: 'fill-estimate',
@@ -168,7 +168,7 @@ function PeriodogramFigure() {
             format={(v) => `N = ${v.toFixed(0)}`}
           />
           <SliderControl
-            label="Noise level"
+            label="Noise std"
             variable="σ"
             value={sigma}
             min={0.3}

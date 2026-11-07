@@ -76,9 +76,9 @@ function FusionSpringsFigure() {
               format={(v) => v.toFixed(1)}
             />
           ))}
-          {/* The prior row never moves: first on narrow screens, next to the
-              figure, and its slider stays in place, inert while the prior is off. */}
-          <div className="col-span-full flex w-full flex-wrap items-start gap-x-8 gap-y-4 max-lg:order-first">
+          {/* The prior row never moves: its slider stays in place, inert
+              while the prior is off. */}
+          <div className="col-span-full flex w-full flex-wrap items-start gap-x-8 gap-y-4">
             <Button
               type="button"
               variant={priorOn ? 'secondary' : 'outline'}
@@ -121,12 +121,10 @@ function FusionSpringsFigure() {
             }
             value={formatNumber(variance, 3)}
           />
-          {priorOn ? (
-            <ReadoutRow
-              label="Data share $\alpha$"
-              value={formatNumber(alpha, 2)}
-            />
-          ) : null}
+          <ReadoutRow
+            label="Data share $\alpha$"
+            value={priorOn ? formatNumber(alpha, 2) : '—'}
+          />
         </>
       }
     >
@@ -137,7 +135,7 @@ function FusionSpringsFigure() {
             swatchClass: 'fill-muted-foreground',
             mark: 'dot',
           },
-          { label: 'spring', swatchClass: 'stroke-muted-foreground' },
+          { label: 'spring', swatchClass: 'stroke-muted-foreground/60' },
           { label: 'prior anchor', swatchClass: 'fill-prior', mark: 'dot' },
           {
             label: 'balance point $\\hat{\\theta}$',

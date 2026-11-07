@@ -24,7 +24,7 @@ const AXIS_Y = 214
 const T_MIN = -1.5
 const T_MAX = 3.5
 /** Centre line of the score strip, and the score that fills half its height. */
-const SCORE_Y = AXIS_Y + 80
+const SCORE_Y = AXIS_Y + 86
 const SCORE_MAX = 20
 /** Half height of the score strip. */
 const SCORE_HALF = 26
@@ -60,9 +60,6 @@ function CurvatureFigure() {
   const scoreTo = Math.min(sampleMean + scoreReach, T_MAX)
   const scoreY = (theta: number) =>
     SCORE_Y - ((information * (sampleMean - theta)) / SCORE_MAX) * SCORE_HALF
-  // The truth label and the CRB label each sit on the side away from the
-  // other mark, so neither crosses the other's line.
-  const peakRight = sampleMean >= TRUTH
   const beyondAxis = sample.filter((x) => x < T_MIN || x > T_MAX).length
 
   // Wobble strip: peak positions over 40 independent hypothetical samples.
@@ -78,7 +75,7 @@ function CurvatureFigure() {
 
   const xOf = (theta: number) =>
     LEFT + ((theta - T_MIN) / (T_MAX - T_MIN)) * (W - LEFT - 10)
-  const yOf = (ll: number) => 30 + (Math.max(ll, floor) / floor) * (AXIS_Y - 34)
+  const yOf = (ll: number) => 36 + (Math.max(ll, floor) / floor) * (AXIS_Y - 40)
 
   // The parabola leaves the frame below the floor: stop the stroke there
   // instead of drawing a flat line along the bottom edge.
@@ -209,15 +206,15 @@ function CurvatureFigure() {
           opacity={0.7}
         />
         <text
-          x={xOf(TRUTH) + (peakRight ? -4 : 4)}
-          y={AXIS_Y - 6}
-          textAnchor={peakRight ? 'end' : 'start'}
-          className="plot-halo fill-truth font-mono plot-text-xs"
+          x={xOf(TRUTH)}
+          y={AXIS_Y + 28}
+          textAnchor="middle"
+          className="fill-truth font-mono plot-text-xs"
         >
           θ = {TRUTH}
         </text>
         <g className="fill-muted-foreground stroke-muted-foreground">
-          <text x={12} y={12} stroke="none" className="font-mono plot-text-xs">
+          <text x={12} y={16} stroke="none" className="font-mono plot-text-xs">
             ln f − peak
           </text>
           {[0, -5, -10].map((tick) => (
@@ -247,13 +244,8 @@ function CurvatureFigure() {
           strokeWidth={4}
         />
         <text
-          x={
-            peakRight
-              ? xOf(sampleMean + crbStd) + 5
-              : xOf(sampleMean - crbStd) - 5
-          }
+          x={xOf(sampleMean + crbStd) + 5}
           y={yOf(0) - 7}
-          textAnchor={peakRight ? 'start' : 'end'}
           className="plot-halo fill-estimate font-mono plot-text-xs"
         >
           ±<Sym base="σ" sub="CR" />
@@ -360,6 +352,22 @@ function CurvatureFigure() {
           className="fill-muted-foreground font-mono plot-text-xs"
         >
           peak positions over 40 re-runs
+        </text>
+        <line
+          x1={xOf(TRUTH - crbStd)}
+          y1={AXIS_Y + 176}
+          x2={xOf(TRUTH + crbStd)}
+          y2={AXIS_Y + 176}
+          className="stroke-estimate/25"
+          strokeWidth={10}
+        />
+        <text
+          x={W - 10}
+          y={AXIS_Y + 164}
+          textAnchor="end"
+          className="fill-estimate font-mono plot-text-xs"
+        >
+          shaded: true θ ±<Sym base="σ" sub="CR" />
         </text>
         {peaks.map((p, i) => (
           <circle

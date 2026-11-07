@@ -118,7 +118,7 @@ function MathBlock({ latex, className }: MathBlockProps) {
     <div
       ref={boxRef}
       className={cn(
-        'overflow-x-auto py-1 text-foreground data-overflow:mask-r-from-85% data-wrapped:leading-loose',
+        'overflow-x-auto py-1 text-foreground data-overflow:mask-r-from-85% data-wrapped:leading-loose data-wrapped:[&_.base]:my-1',
         className,
       )}
       aria-label={latex}

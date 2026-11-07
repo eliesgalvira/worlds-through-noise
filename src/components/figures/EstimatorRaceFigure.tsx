@@ -15,9 +15,13 @@ import { gaussian, makeRng } from '@/domain/math/kernel.ts'
 const TRUTH = 0.5
 const RUNS = 500
 const W = 470
-const H = 280
+const H = 230
 /** The estimate axis; piles grow up from it. */
 const AXIS_Y = H - 40
+/** Fixed rows for the two brackets, above the tallest a pile may grow. */
+const MEAN_ROW = 32
+const MID_ROW = 64
+const PILE_CEILING = 80
 /** Generous width of one monospace label character, in viewBox units. */
 const LABEL_CHAR_W = 9
 const X_MIN = -0.3
@@ -85,14 +89,15 @@ function EstimatorRaceFigure() {
   // Empty until the first run: the student predicts before seeing a pile.
   const [result, setResult] = useState<RaceResult | null>(null)
 
-  const bins = 46
+  const bins = 80
   const meanHist = histogramOf(result?.means ?? [], bins)
   const midHist = histogramOf(result?.midranges ?? [], bins)
   // One fixed count scale for every N and noise, so a pile only changes
   // when its estimator does. A pile taller than the frame is clipped and
   // prints the count of its tallest bar.
   const maxCount = RUNS * 0.2
-  const barH = (count: number) => Math.min(count / maxCount, 1) * (AXIS_Y - 104)
+  const barH = (count: number) =>
+    Math.min(count / maxCount, 1) * (AXIS_Y - PILE_CEILING)
   const clippedPeak = (hist: ReadonlyArray<number>) => {
     const peak = Math.max(...hist)
     return peak > maxCount ? [{ count: peak, i: hist.indexOf(peak) }] : []
@@ -107,22 +112,24 @@ function EstimatorRaceFigure() {
   const xOf = (v: number) => 10 + ((v - X_MIN) / (X_MAX - X_MIN)) * (W - 20)
   const slotW = (W - 20) / bins
 
-  // The two brackets sit in two rows just above the taller pile.
-  const pilesTop = AXIS_Y - barH(Math.max(...meanHist, ...midHist))
-  const midY = Math.max(pilesTop - 14, 76)
-  const meanY = midY - 32
+  const beyondAxis =
+    result === null
+      ? 0
+      : [...result.means, ...result.midranges].filter(
+          (v) => v < X_MIN || v > X_MAX,
+        ).length
   const bracketRows = [
     {
       name: 'sample mean',
       stat: meanStats,
-      y: meanY,
+      y: MEAN_ROW,
       stroke: 'stroke-estimate',
       fill: 'fill-estimate',
     },
     {
       name: 'midrange',
       stat: midStats,
-      y: midY,
+      y: MID_ROW,
       stroke: 'stroke-muted-foreground',
       fill: 'fill-muted-foreground',
     },
@@ -271,7 +278,7 @@ function EstimatorRaceFigure() {
             <text
               key={`${className}${i}`}
               x={10 + (i + 1) * slotW + 3}
-              y={110}
+              y={PILE_CEILING + 6}
               className={`plot-halo font-mono plot-text-xs ${className}`}
             >
               {count} runs, off scale ↑
@@ -289,10 +296,9 @@ function EstimatorRaceFigure() {
         />
         {result === null ? (
           <text
-            x={W / 2}
-            y={AXIS_Y - 60}
-            textAnchor="middle"
-            className="fill-muted-foreground font-mono plot-text-sm"
+            x={14}
+            y={AXIS_Y - 50}
+            className="plot-halo fill-muted-foreground font-mono plot-text-sm"
           >
             Predict, then run the experiments
           </text>
@@ -364,6 +370,9 @@ function EstimatorRaceFigure() {
       <p className="mt-2 text-center text-xs text-muted-foreground">
         Every bar counts real experiments: {RUNS} runs of N = {n} samples each,
         no fitted curves.
+        {beyondAxis > 0
+          ? ` ${String(beyondAxis)} estimates fall beyond the axis.`
+          : ''}
       </p>
     </FigureShell>
   )

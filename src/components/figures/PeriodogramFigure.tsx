@@ -25,7 +25,9 @@ const H = 300
 const LEFT = 40
 const RIGHT = W - 16
 const AXIS_Y = H - 46
-const TOP = 16
+const TOP = 40
+/** Row of the CRB bracket, above the peak marker. */
+const CRB_Y = 14
 
 function PeriodogramFigure() {
   const [n, setN] = useState(48)
@@ -40,7 +42,12 @@ function PeriodogramFigure() {
     return complexToneInNoise(rng, n, AMPLITUDE, TRUE_FREQ, sigma, 1.1)
   }, [n, sigma, seed])
 
-  const frequencies = useMemo(() => linspace(0.005, 0.495, 220), [])
+  // About eight points per 1/N, so the drawn peak reaches the score the
+  // readouts report even at the largest N.
+  const frequencies = useMemo(
+    () => linspace(0.005, 0.495, Math.max(220, Math.ceil(0.49 * 8 * n))),
+    [n],
+  )
   const spectrum = useMemo(
     () => frequencies.map((f) => complexPeriodogramAt(signal, f)),
     [signal, frequencies],
@@ -52,7 +59,7 @@ function PeriodogramFigure() {
   )
   // The display grid is coarser than the main lobe at large N: refine the
   // peak on a fine grid around the best grid point before reading it out.
-  const coarseStep = 0.49 / 219
+  const coarseStep = 0.49 / (frequencies.length - 1)
   const peak = linspace(
     (frequencies[peakIndex] ?? 0) - coarseStep,
     (frequencies[peakIndex] ?? 0) + coarseStep,
@@ -74,8 +81,8 @@ function PeriodogramFigure() {
   const xOf = (f: number) => LEFT + (f / 0.5) * (RIGHT - LEFT)
   const yOf = (s: number) => AXIS_Y - (s / maxSpec) * (AXIS_Y - TOP)
   // Zero sits on the frequency axis, which already labels it.
-  // At least 3 units wide, so the band stays visible at large N.
-  const bandW = Math.max(xOf(TRUE_FREQ + crbStd) - xOf(TRUE_FREQ - crbStd), 3)
+  // At least 6 units wide, so the band and bracket stay visible at large N.
+  const bandW = Math.max(xOf(TRUE_FREQ + crbStd) - xOf(TRUE_FREQ - crbStd), 6)
   const scoreTicks = niceTicks(maxSpec, 5).filter((tick) => tick > 0)
 
   return (
@@ -156,7 +163,7 @@ function PeriodogramFigure() {
           />
           <ReadoutRow
             label="CRB std of $\hat{f}$ (theory)"
-            value={formatNumber(crbStd, 5)}
+            value={crbStd.toPrecision(2)}
           />
         </>
       }
@@ -165,7 +172,7 @@ function PeriodogramFigure() {
         items={[
           {
             label: 'periodogram $|X(f)|^2/N$',
-            swatchClass: 'stroke-foreground',
+            swatchClass: 'stroke-muted-foreground',
           },
           { label: 'your candidate', swatchClass: 'stroke-cursor' },
           {
@@ -229,7 +236,7 @@ function PeriodogramFigure() {
           ))}
           <text
             x={LEFT + 8}
-            y={TOP - 4}
+            y={TOP - 14}
             stroke="none"
             className="font-mono plot-text-xs"
           >
@@ -243,13 +250,18 @@ function PeriodogramFigure() {
           height={AXIS_Y - TOP}
           className="fill-truth/15"
         />
+        <path
+          d={`M ${xOf(TRUE_FREQ) - bandW / 2} ${CRB_Y - 4} v 8 M ${xOf(TRUE_FREQ) - bandW / 2} ${CRB_Y} H ${xOf(TRUE_FREQ) + bandW / 2} M ${xOf(TRUE_FREQ) + bandW / 2} ${CRB_Y - 4} v 8`}
+          className="stroke-truth"
+          strokeWidth={1.4}
+          fill="none"
+        />
         <text
-          x={xOf(TRUE_FREQ) - bandW / 2 - 4}
-          y={TOP + 22}
-          textAnchor="end"
-          className="plot-halo fill-truth font-mono plot-text-xs"
+          x={xOf(TRUE_FREQ) + bandW / 2 + 5}
+          y={CRB_Y + 4}
+          className="fill-truth font-mono plot-text-xs"
         >
-          ±<Sym base="σ" sub="CR" /> {formatNumber(crbStd, 4)}
+          true f ±<Sym base="σ" sub="CR" /> = {crbStd.toPrecision(2)}
         </text>
         <line
           x1={xOf(TRUE_FREQ)}
@@ -269,7 +281,7 @@ function PeriodogramFigure() {
             )
             .join(' ')}
           fill="none"
-          className="stroke-foreground"
+          className="stroke-muted-foreground"
           strokeWidth={1.6}
         />
         <path
@@ -300,8 +312,8 @@ function PeriodogramFigure() {
           strokeWidth={1.5}
         />
         <text
-          x={xOf(candidate) + (candidate > 0.4 ? -9 : 9)}
-          y={yOf(candidateScore) - 6}
+          x={xOf(candidate) + (candidate > 0.4 ? -6 : 6)}
+          y={TOP + 12}
           textAnchor={candidate > 0.4 ? 'end' : 'start'}
           className="plot-halo fill-cursor font-mono plot-text-sm"
         >

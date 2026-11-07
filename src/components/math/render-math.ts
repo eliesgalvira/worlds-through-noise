@@ -22,12 +22,15 @@ export function renderDisplayMath(latex: string): string {
 
 /**
  * A display equation laid out as display-size inline math for a box too
- * narrow for it: each formula a \\qquad separates starts a new line, and
- * the browser may break a long one after a relation or operator.
+ * narrow for it: each formula a \\qquad separates starts a new line, so do
+ * the ≈ and ⟹ steps, and the browser may break a long line after a relation.
  */
 export function renderWrappedMath(latex: string): string {
   return katex.renderToString(
-    `\\displaystyle ${latex.replaceAll('\\qquad', '\\\\')}`,
+    `\\displaystyle ${latex
+      .replaceAll('\\qquad', '\\\\')
+      .replaceAll('\\;\\approx\\;', '\\\\ \\approx ')
+      .replaceAll('\\;\\Longrightarrow\\;', '\\\\ \\Longrightarrow ')}`,
     { displayMode: false, throwOnError: false, strict: 'ignore' },
   )
 }

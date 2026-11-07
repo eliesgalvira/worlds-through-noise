@@ -15,7 +15,7 @@ export const estimationLesson: LessonRecord = {
       id: 'E1',
       title: 'Bias, variance, mean squared error',
       question: 'What do bias, variance and MSE actually describe?',
-      trap: 'An estimator is a formula $\\hat{\\theta}(\\mathbf{x})$ that turns observed data $\\mathbf{x}$ into a guess for an unknown parameter $\\theta$ — and its output looks like an answer. It is not. It is one draw from a random variable, because the data it ate were random, and a single lucky draw can make a terrible estimator look brilliant. Bias and variance stay abstract penalties until you see the cloud of outputs they actually measure.',
+      trap: 'An estimator is a formula $\\hat{\\theta}(\\mathbf{x})$ that turns observed data $\\mathbf{x}$ into a guess for an unknown parameter $\\theta$. Its output is one draw from a random variable, because the data it ate were random, and a single lucky draw can make a terrible estimator look brilliant. Bias and variance describe the cloud of outputs over many experiments.',
       object:
         'So judge machines, not numbers. Take two competing estimators of the same hidden mean: the sample mean, and the “midrange,” $(\\max + \\min)/2$, which averages only the largest and smallest observations. Feed both the same experiment hundreds of times. Each machine piles up a histogram of its outputs. Bias is where a pile is centered relative to the truth. Variance is the pile’s width. The mean squared error (MSE) charges for both at once.',
       action:
@@ -50,13 +50,13 @@ export const estimationLesson: LessonRecord = {
       title: 'Cramér–Rao bound: information is curvature',
       question:
         'What limits every unbiased estimator, and when does the perfect one exist?',
-      trap: 'Every estimate built from noisy data wobbles from one experiment to the next. The Cramér–Rao bound (CRB) is a floor on that wobble: no unbiased estimator can have a variance below it. Its formula, an expectation of a squared derivative of a logarithm, then inverted, is hard to picture. So is the test for an efficient estimator, one whose variance actually touches the floor. Both are read off one curve.',
+      trap: 'Every estimate built from noisy data wobbles from one experiment to the next. The Cramér–Rao bound (CRB) is a floor on that wobble: no unbiased estimator can have a variance below it. Its formula, an expectation of a squared derivative of a logarithm, then inverted, is hard to picture. So is the test for an efficient estimator, one whose variance actually touches the floor. Both are read off the likelihood $f(\\mathbf{x}; \\theta)$, drawn as a function of $\\theta$.',
       object:
-        'That curve is the likelihood $f(\\mathbf{x}; \\theta)$, drawn as a function of $\\theta$ for the data you actually observed: how plausible each candidate value of $\\theta$ makes them. The peak of this landscape is the maximum-likelihood (ML) estimate. The sharpness near the peak is how confidently the data votes: a knife-edge peak pins $\\theta$ down, a broad hill leaves it loose. The strip under the landscape draws its slope, the score $\\partial \\ln f/\\partial\\theta$: zero at the peak, and steeper the sharper the peak. Fisher information is the average curvature of this landscape drawn on a log scale, and the CRB is its inverse: flat landscape, poor floor.',
+        'Draw the likelihood for the data you actually observed: it says how plausible each candidate value of $\\theta$ makes them. The peak of this landscape is the maximum-likelihood (ML) estimate. The sharpness near the peak is how confidently the data votes: a knife-edge peak pins $\\theta$ down, a broad hill leaves it loose. The strip under the landscape draws its slope, the score $\\partial \\ln f/\\partial\\theta$: zero at the peak, and steeper the sharper the peak. Fisher information is the average curvature of this landscape drawn on a log scale, and the CRB is its inverse: flat landscape, poor floor.',
       action:
-        'In the figure, draw fresh samples and watch the landscape rebuild — the peak wobbles from draw to draw, and the size of the wobble matches the flatness. Raise $N$: each new sample multiplies another factor into the likelihood, the landscape sharpens, and the wobble’s variance shrinks like $1/N$ (its width like $1/\\sqrt{N}$). Raise the noise $\\sigma$ and it flattens again. You are watching the Cramér–Rao bound operate live.',
+        'In the figure, draw fresh samples and watch the landscape rebuild — the peak wobbles from draw to draw, and the size of the wobble matches the flatness. Raise $N$: each new sample multiplies another factor into the likelihood, the landscape sharpens, and the wobble’s variance shrinks like $1/N$ (its width like $1/\\sqrt{N}$). Raise the noise $\\sigma$ and it flattens again.',
       payoff:
-        'The landscape also shows when an efficient estimator exists. The strip under it draws the score, the slope of the log-likelihood. For the Gaussian mean the score is a straight line through the peak whose slope never depends on the data. When the score has that rigid shape, the peak position $\\bar{x}$ carries all the information, and the estimator that reads it achieves the bound. When the score bends — as it does for phase, frequency, or power $P = A^2/2$ — no unbiased estimator reaches the floor. ML still finds the peak, and presses against the floor asymptotically.',
+        'The landscape also shows when an efficient estimator exists. The strip under it draws the score, the slope of the log-likelihood. For the Gaussian mean the score is a straight line through the peak, $\\frac{N}{\\sigma^2}(\\bar{x} - \\theta)$: it factors as $I(\\theta)\\,(g(\\mathbf{x}) - \\theta)$ with $g(\\mathbf{x}) = \\bar{x}$ free of $\\theta$, so the sample mean reaches the bound. What matters is the factorization, not the straightness: a curved score can still factor, as for the exponential mean and the Poisson rate in the workbook. When the score cannot be written that way, as for phase, frequency or power $P = A^2/2$, no unbiased estimator reaches the floor. ML still finds the peak, and presses against the floor asymptotically.',
       equations: [
         {
           sentence:
@@ -124,17 +124,17 @@ export const estimationLesson: LessonRecord = {
           latex:
             '\\hat\\theta_{MAP} = \\frac{\\sum_i x_i/\\sigma_i^2 + \\mu_\\theta/\\sigma_\\theta^2}{\\sum_i 1/\\sigma_i^2 + 1/\\sigma_\\theta^2}, \\qquad \\sigma^2_{\\theta|\\mathbf{x}} = \\frac{1}{\\sum_i 1/\\sigma_i^2 + 1/\\sigma_\\theta^2}',
           caption:
-            "The second fraction is the posterior variance the figure reads out. The June-2026 final has one pixel $x_0$ with noise variance $\\sigma_0^2$: $\\sigma_\\theta^2 \\gg \\sigma_0^2$ trusts the data, $\\sigma_0^2 \\gg \\sigma_\\theta^2$ trusts the prior. It writes $x_0/\\alpha + \\mu_\\theta/\\beta$ with $\\alpha = 1 + \\sigma_0^2/\\sigma_\\theta^2$, the inverse of the figure's data share.",
+            "The second fraction is the posterior variance the figure reads out. The June-2026 final has one pixel $x_0$ with noise variance $\\sigma_0^2$: $\\sigma_\\theta^2 \\gg \\sigma_0^2$ trusts the data, $\\sigma_0^2 \\gg \\sigma_\\theta^2$ trusts the prior. The exam writes the answer as $x_0/k + \\mu_\\theta/m$ (it names these $\\alpha$ and $\\beta$) with $k = 1 + \\sigma_0^2/\\sigma_\\theta^2$ and $m = 1 + \\sigma_\\theta^2/\\sigma_0^2$, so $x_0/k = \\alpha x_0$ with the figure's data share $\\alpha$.",
         },
       ],
       prediction: {
         question:
           'Eight good pixels and one broken one. How much estimation variance does the broken pixel contribute?',
         answer:
-          'Almost none is lost by keeping it: its weight $1/\\sigma_0^2 \\approx 0$ makes the fusion converge to the 8-pixel average with variance $\\sigma^2/8$. Fusion degrades gracefully.',
+          'Almost none is lost by keeping it: its weight $1/\\sigma_0^2 \\approx 0$ makes the fusion converge to the 8-pixel average with variance $\\sigma^2/8$, where $\\sigma^2$ is the noise variance of each good pixel. Fusion degrades gracefully.',
       },
       transfer:
-        'Final Jun 2026, Ex. 1: defective pixel — do (a) single pixel, (b) 9-pixel fusion, (c) the two limits $\\sigma_0^2 = \\sigma^2$ and $\\sigma_0^2 \\gg \\sigma^2$, (d–e) MAP with a $N(\\mu_\\theta, \\sigma_\\theta^2)$ prior. All five parts are spring diagrams.',
+        'Final Jun 2026, Ex. 1: defective pixel, with $\\sigma^2$ the noise variance of each good pixel and $\\sigma_0^2$ that of the broken one. Do (a) single pixel, (b) 9-pixel fusion, (c) the two limits $\\sigma_0^2 = \\sigma^2$ and $\\sigma_0^2 \\gg \\sigma^2$, (d–e) MAP with a $N(\\mu_\\theta, \\sigma_\\theta^2)$ prior. All five parts are spring diagrams.',
       examRefs: [
         'Final Jun 2026, Ex. 1: defective pixel fusion + MAP',
         'Final Jun 2025, Ex. 2: greenhouse sensors of unequal quality',
@@ -152,7 +152,7 @@ export const estimationLesson: LessonRecord = {
       action:
         'In the figure, slide the candidate $f$ across the band and watch the dot on the curve, whose height is the score: the landscape $|X(f)|^2$ rises to a peak at the hidden tone. Add noise and watch spurious ripples start to compete. Then raise $N$ and watch the main peak narrow. Frequency’s CRB shrinks like $1/N^3$, not $1/N$, because a longer record makes the template far more sensitive to small frequency errors.',
       payoff:
-        'Compressed likelihood explains the recipe: maximize over the easy parameter first ($\\hat{A}_{ML} = \\mathbf{s}(f)^H\\mathbf{x}/N$ for each candidate $f$), substitute it back, and the leftover function of $f$ alone is the periodogram. Frequency enters the model nonlinearly, so the score does not factor and no efficient estimator exists for finite $N$: ML reaches the CRB only asymptotically, at high enough SNR.',
+        'Compressed likelihood explains the recipe: maximize over the easy parameter first ($\\hat{A}_{ML} = \\mathbf{s}(f)^H\\mathbf{x}/N$ for each candidate $f$), substitute it back, and the leftover function of $f$ alone is the periodogram. For frequency the score does not factor, so no efficient estimator exists for finite $N$: ML reaches the CRB only asymptotically, at high enough SNR.',
       equations: [
         {
           sentence:
@@ -216,7 +216,7 @@ export const estimationLesson: LessonRecord = {
               title: 'Push the gain through the model',
               body: 'Since $x(n) = \\alpha A + A\\,w(n)$ is a linear transformation of a Gaussian, it stays Gaussian — but notice that $A$ scales the mean and the standard deviation simultaneously.',
               latex:
-                'E\\{x(n)\\} = \\alpha A, \\qquad \\sigma_x^2 = A^2\\sigma^2 \\;\\Longrightarrow\\; f(x(n); A) = \\frac{1}{\\sqrt{2\\pi\\sigma^2}\\,A}\\, e^{-\\frac{(x(n) - \\alpha A)^2}{2A^2\\sigma^2}}',
+                'E\\{x(n)\\} = \\alpha A, \\qquad \\sigma_x^2 = A^2\\sigma^2 \\;\\Longrightarrow\\; f(x(n); A) = \\frac{1}{\\sqrt{2\\pi\\sigma^2}\\,A}\\, \\exp\\left(-\\frac{(x(n) - \\alpha A)^2}{2A^2\\sigma^2}\\right)',
             },
             {
               title: 'Stack the samples',
@@ -318,7 +318,7 @@ export const estimationLesson: LessonRecord = {
               title: 'Compare its variance against the bound',
               body: 'Both scale as $A^2/N$, so the ratio is clean — and strictly greater than 1 for every $\\alpha$.',
               latex:
-                '\\frac{\\operatorname{Var}(\\hat{A})}{\\sigma^2_{CR}(A)} = \\frac{\\frac{A^2\\sigma^2}{N\\alpha^2}}{\\frac{A^2}{N(\\alpha^2/\\sigma^2 + 2)}} = 1 + \\frac{2\\sigma^2}{\\alpha^2} > 1',
+                '\\frac{\\operatorname{Var}(\\hat{A})}{\\sigma^2_{CR}(A)} = \\frac{A^2\\sigma^2}{N\\alpha^2} \\cdot \\frac{N(\\alpha^2/\\sigma^2 + 2)}{A^2} = 1 + \\frac{2\\sigma^2}{\\alpha^2} > 1',
             },
             {
               title: 'Explain the gap',

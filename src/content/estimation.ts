@@ -876,7 +876,7 @@ export const estimationLesson: LessonRecord = {
             },
             {
               title: 'Differentiate and recognize the whitened match',
-              body: 'The gradient condition gives $\\mathbf{h} \\propto \\mathbf{C}_w^{-1}\\mathbf{s}$ — the whitening-then-matching direction of D3, now discovered by an estimation argument. The constraint sets the scale.',
+              body: 'The gradient condition gives $\\mathbf{h} \\propto \\mathbf{C}_w^{-1}\\mathbf{s}$ — the whitening-then-matching direction of the Detection lesson, now discovered by an estimation argument. The constraint sets the scale.',
               latex:
                 '2\\mathbf{C}_w\\mathbf{h} - \\lambda\\mathbf{s} = \\mathbf{0} \\;\\Longrightarrow\\; \\mathbf{h}_{opt} = \\frac{\\mathbf{C}_w^{-1}\\mathbf{s}}{\\mathbf{s}^T\\mathbf{C}_w^{-1}\\mathbf{s}}, \\qquad \\hat{A}(\\mathbf{x}) = \\frac{\\mathbf{s}^T\\mathbf{C}_w^{-1}\\mathbf{x}}{\\mathbf{s}^T\\mathbf{C}_w^{-1}\\mathbf{s}}',
             },

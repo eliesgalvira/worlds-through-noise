@@ -225,12 +225,11 @@ function EstimatorRaceFigure() {
           clippedPeak(hist).map(({ count, i }) => (
             <text
               key={`${className}${i}`}
-              x={10 + (i + 0.5) * slotW}
-              y={36}
-              textAnchor="middle"
+              x={10 + (i + 1) * slotW + 3}
+              y={48}
               className={`plot-halo font-mono plot-text-xs ${className}`}
             >
-              {count}↑
+              {count} ↑
             </text>
           )),
         )}

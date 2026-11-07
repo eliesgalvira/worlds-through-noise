@@ -263,14 +263,18 @@ function TwoWorldsFigure() {
           x={xOf(threshold) - 6}
           y={H - 42}
           textAnchor="end"
-          className="fill-false-alarm font-mono plot-text-sm"
+          className="fill-false-alarm stroke-card font-mono plot-text-sm"
+          strokeWidth={3}
+          paintOrder="stroke"
         >
           <Sym base="P" sub="FA" /> {formatPercentValue(pFalseAlarm)}
         </text>
         <text
           x={xOf(threshold) + 6}
           y={H - 42}
-          className="fill-h1-ink font-mono plot-text-sm"
+          className="fill-h1-ink stroke-card font-mono plot-text-sm"
+          strokeWidth={3}
+          paintOrder="stroke"
         >
           <Sym base="P" sub="M" /> {formatPercentValue(pMiss)}
         </text>
@@ -326,7 +330,7 @@ function TwoWorldsFigure() {
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        <MathText text="Red: healthy patients called anemic, $P_{FA}$. Amber: anemic patients missed, $P_M$. Both are computed from $N(m, \sigma^2/N)$." />
+        <MathText text="Red: healthy patients called anemic, $P_{FA}$. Amber: anemic patients missed, $P_M$. Both are computed from $\mathcal{N}(m, \sigma^2/N)$. Every curve has area 1. The plot rescales its height so both fit." />
       </p>
     </FigureShell>
   )

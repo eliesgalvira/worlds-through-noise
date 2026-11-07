@@ -473,12 +473,20 @@ async function shootView(page: Page, width: number, state: State, id: string) {
   await page.evaluate((figureId) => {
     const el = document.getElementById(`${figureId}-figure`)
     // Everything pinned to the top of the window: header and phone nav.
+    // Where each bar sits once stuck: its CSS top plus its height, whether
+    // or not it has stuck yet at the current scroll.
     const offset = Math.max(
       0,
       ...Array.from(document.querySelectorAll('.sticky'))
-        .map((bar) => bar.getBoundingClientRect())
-        .filter((box) => box.height > 0 && box.top < 120)
-        .map((box) => box.bottom),
+        .filter((bar) => bar instanceof HTMLElement && bar.offsetHeight > 0)
+        .map((bar) => {
+          const top = Number.parseFloat(getComputedStyle(bar).top)
+          const height = bar instanceof HTMLElement ? bar.offsetHeight : 0
+          // Horizontal bars only: the desktop contents column is sticky too.
+          return Number.isFinite(top) && top < 120 && height < 150
+            ? top + height
+            : 0
+        }),
     )
     if (el !== null) {
       window.scrollTo(

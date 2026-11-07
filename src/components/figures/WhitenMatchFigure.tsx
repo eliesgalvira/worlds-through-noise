@@ -77,7 +77,7 @@ function deflection(theta: number, t: number): number {
 }
 
 const SHADOW_W = 300
-const SHADOW_H = 220
+const SHADOW_H = 300
 
 function WhitenMatchFigure() {
   const [whiten, setWhiten] = useState(0)
@@ -175,12 +175,12 @@ function WhitenMatchFigure() {
           />
           <SliderControl
             label="Whitening"
-            variable="C⁻ᵗ/²"
+            variable="t"
             value={whiten}
             min={0}
             max={100}
             step={1}
-            meaning="Applies $\mathbf{C}_w^{-1/2}$ step by step: 0% is the raw colored noise, 100% makes it white (round)."
+            meaning="Applies $\mathbf{C}_w^{-t/2}$ with $t$ from 0 to 1: 0% is the raw colored noise, 100% makes it white (round)."
             onValueChange={setWhiten}
             format={(v) => `${v.toFixed(0)}%`}
           />
@@ -203,7 +203,7 @@ function WhitenMatchFigure() {
             value={formatNumber(d2, 2)}
           />
           <ReadoutRow
-            label="Best possible: $d_M^2 = \Delta\boldsymbol{\mu}^T\mathbf{C}^{-1}\Delta\boldsymbol{\mu}$"
+            label="Best possible $d_M^2$"
             value={formatNumber(best.value, 2)}
           />
           <ReadoutRow
@@ -230,7 +230,6 @@ function WhitenMatchFigure() {
           {
             label: 'optimal $\\mathbf{h}$ for this picture',
             swatchClass: 'stroke-foreground',
-            dash: true,
           },
         ]}
       />
@@ -335,7 +334,7 @@ function WhitenMatchFigure() {
             y2={bestEnd.y}
             className="stroke-foreground"
             strokeWidth={1.4}
-            strokeDasharray="5 4"
+            opacity={0.8}
           />
           <text
             x={bestEnd.x + (bestEnd.x >= CX ? -4 : 4)}
@@ -369,9 +368,11 @@ function WhitenMatchFigure() {
             strokeWidth={1.5}
           />
           <text
-            x={CX + 40 * Math.cos(theta / 2)}
-            y={CY - 40 * Math.sin(theta / 2) + 4}
-            className="fill-cursor font-mono plot-text-sm"
+            x={CX + 46 * Math.cos(theta / 2)}
+            y={CY - 46 * Math.sin(theta / 2) + 4}
+            className="fill-cursor stroke-card font-mono plot-text-sm"
+            strokeWidth={3}
+            paintOrder="stroke"
           >
             θ
           </text>
@@ -453,12 +454,12 @@ function WhitenMatchFigure() {
             textAnchor="middle"
             className="fill-foreground font-mono plot-text-sm"
           >
-            SNR = {formatNumber(d2, 2)}
+            <Sym base="SNR" sub="y" /> = {formatNumber(d2, 2)}
           </text>
         </Plot>
       </div>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        <MathText text="The shadow's separation is (difference of means)² / variance of $y$ in the picture shown. With no whitening that is $SNR_y = (\mathbf{h}^T A\mathbf{p})^2 / \mathbf{h}^T\mathbf{C}_w\mathbf{h}$. Drag on the cloud to aim $\mathbf{h}$." />
+        <MathText text="The shadow's separation is $(\Delta m_y)^2/\sigma_y^2$ in the picture shown. With no whitening that is $SNR_y = (\mathbf{h}^T A\mathbf{p})^2 / \mathbf{h}^T\mathbf{C}_w\mathbf{h}$. Drag on the cloud to aim $\mathbf{h}$." />
       </p>
     </FigureShell>
   )

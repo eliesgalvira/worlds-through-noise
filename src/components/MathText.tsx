@@ -75,7 +75,7 @@ function MathBlock({ latex, className }: MathBlockProps) {
       // Still too wide at the smallest size: fade the right edge so the eye
       // knows the equation goes on and the box scrolls.
       box.toggleAttribute(
-        'data-desborda',
+        'data-overflow',
         box.scrollWidth > box.clientWidth + 1,
       )
     }
@@ -98,7 +98,7 @@ function MathBlock({ latex, className }: MathBlockProps) {
     <div
       ref={boxRef}
       className={cn(
-        'overflow-x-auto py-1 text-foreground data-desborda:mask-r-from-85%',
+        'overflow-x-auto py-1 text-foreground data-overflow:mask-r-from-85%',
         className,
       )}
       aria-label={latex}

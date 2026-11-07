@@ -18,7 +18,7 @@ export const detectionLesson: LessonRecord = {
         'Why do even good detectors make mistakes — and why does averaging help?',
       trap: 'A binary detector chooses between two hypotheses — call them $\\mathcal{H}_0$ (nothing there) and $\\mathcal{H}_1$ (something there) — using a rule like “decide $\\mathcal{H}_1$ if $x > \\gamma$,” where $\\gamma$ is a threshold. Written that way, it sounds as if the detector knows something. It knows nothing about the trace in front of it: both hypotheses can produce every value of $x$. Worse, the reflex “large $x$ means signal present” is a trap the exams exploit deliberately — in the anemia screen below, the sick population has the LOWER blood-ferritin mean, so the correct rule points the other way.',
       object:
-        'Picture two dealing machines and the piles of numbers they produce. Under $\\mathcal{H}_0$ the machine deals from a Gaussian centered at $m_0$. Under $\\mathcal{H}_1$, from one centered at $m_1$. Where the two piles overlap, a single number is honestly compatible with both machines, and that overlap region is where every false alarm and every miss is manufactured. A detector is nothing more than a boundary drawn through this picture.',
+        'Picture two dealing machines and the piles of numbers they produce. Under $\\mathcal{H}_0$ the machine deals from a Gaussian centered at $m_0$, and $\\mathcal{H}_1$ from one centered at $m_1$. Where the two piles overlap, a single number is honestly compatible with both machines, and that overlap region is where every false alarm and every miss is manufactured. A detector is nothing more than a boundary drawn through this picture.',
       action:
         'In the figure, draw a patient and see where their number lands: near a peak the call is easy. Inside the overlap the number by itself cannot settle it. Then raise $N$, the count of daily samples averaged before deciding, and watch both piles tighten around their means by a factor $\\sqrt{N}$ — the overlap drains away. Notice what did NOT happen: no single sample became more informative. You stacked weak evidence until the piles separated.',
       payoff:
@@ -138,9 +138,9 @@ export const detectionLesson: LessonRecord = {
       title: 'Detecting loudness',
       question:
         'What can a detector do when the signal itself is unknown — only its power distinguishes the hypotheses?',
-      trap: 'Sometimes the detector does not know the waveform at all — only that, if a transmission is happening, the received power rises from the noise floor $\\sigma_w^2$ to $\\sigma_w^2 + P$. The only thing left to measure is energy, $y = \\sum |x(n)|^2$, and its thresholds come from chi-squared tables, which look like a whole separate theory. On top of that sits the covert-communications result — the weakest power the jailer (an eavesdropper who only measures received power) can notice shrinks only like $1/\\sqrt{N}$, while the weakest power the intended receiver can decode shrinks like $1/N$ — which looks like a paradox until you see where each factor comes from.',
+      trap: 'Sometimes the detector does not know the waveform at all — only that, if a transmission is happening, the received power rises from the noise floor $\\sigma_w^2$ to $\\sigma_w^2 + P$. The only thing left to measure is energy, $y = \\sum |x(n)|^2$, and its thresholds come from chi-squared tables, which look like a whole separate theory. On top of that sits the covert-communications result — the weakest power the jailer (an eavesdropper who only measures received power) can notice shrinks only like $1/\\sqrt{N}$, while the weakest power the intended receiver can decode shrinks like $1/N$.',
       object:
-        'Picture two loudness gauges. Under $\\mathcal{H}_0$ the measured average power settles near $\\sigma_w^2$. Under $\\mathcal{H}_1$, near $\\sigma_w^2 + P$. Each gauge reading is a random bump — chi-squared is just the honest name for the distribution of a sum of squared Gaussians — skewed and wide when few samples have been summed, tightening like $\\sqrt{N}$ as samples accumulate.',
+        'Picture two loudness gauges. Under $\\mathcal{H}_0$ the measured average power settles near $\\sigma_w^2$, and under $\\mathcal{H}_1$ near $\\sigma_w^2 + P$. Each gauge reading is a random bump — chi-squared is just the honest name for the distribution of a sum of squared Gaussians — skewed and wide when few samples have been summed, tightening like $\\sqrt{N}$ as samples accumulate.',
       action:
         'Slide $N$ in the figure and watch the two bumps separate — slowly. Their centers stay a fixed distance $P$ apart while their widths shrink like $1/\\sqrt{N}$, so distinguishability grows only like $\\sqrt{N/2}\\,(P/\\sigma_w^2)$. Compare that with a known waveform (D1, D3), where distinguishability is $\\sqrt{N P/\\sigma_w^2}$: at low SNR $\\sqrt{P/\\sigma_w^2}$ is far larger than $P/\\sigma_w^2$. Then set $P$ below the $\\sigma_w^2 N^{-1/2}$ waterline and watch the bumps refuse to separate: the transmission has become statistically invisible.',
       payoff:
@@ -148,7 +148,7 @@ export const detectionLesson: LessonRecord = {
       equations: [
         {
           sentence:
-            'With only power to go on, the NP test is the measured energy against a chi-squared tail.',
+            'With only power to go on, the Neyman–Pearson (NP) test compares the measured energy with a chi-squared tail.',
           latex:
             'y = \\sum_{n=0}^{N-1} x^2(n), \\qquad P_D = Q_{\\chi^2_N}\\!\\left(\\frac{Q_{\\chi^2_N}^{-1}(P_{FA})}{1 + \\mathrm{SNR}}\\right)',
           caption:
@@ -179,13 +179,13 @@ export const detectionLesson: LessonRecord = {
       title: 'Priors put a thumb on the scale',
       question:
         'What changes when hypotheses have prior probabilities and mistakes have prices?',
-      trap: 'So far the hypotheses were treated as equals. But often you know beforehand that one is more probable — the prior probabilities $P_0$ and $P_1$ — and that the two kinds of mistake carry different prices, written $C_{ij}$ for the cost of deciding $i$ when the truth was $j$. The resulting criteria, MAP (choose the hypothesis most probable AFTER seeing the data) and minimum Bayes risk, look like a second theory of detection with its own threshold formula to memorize: $\\gamma = \\frac{P_0(C_{10} - C_{00})}{P_1(C_{01} - C_{11})}$. It is the same theory with weights on the scale.',
+      trap: 'So far the hypotheses were treated as equals. But often you know beforehand that one is more probable — the prior probabilities $P_0$ and $P_1$ — and that the two kinds of mistake carry different prices, written $C_{ij}$ for the cost of deciding $i$ when the truth was $j$. The resulting criteria, MAP (choose the hypothesis most probable AFTER seeing the data) and minimum Bayes risk, look like a second theory of detection with its own threshold formula to memorize: $\\eta = \\frac{P_0(C_{10} - C_{00})}{P_1(C_{01} - C_{11})}$, a threshold on the likelihood ratio as in D1. It is the same theory with weights on the scale.',
       object:
         'Make it concrete: a single bit is stored five times on an unreliable disk that flips each copy independently with probability $\\varepsilon$. The detector reads the five copies and counts the ones — the count $k$ is the entire evidence. The prior $\\Pr(\\text{bit} = 1)$ and the two mistake prices are weights placed on the two pans of a scale BEFORE the evidence arrives. The count then tips it.',
       action:
         'In the figure, move the prior and watch the decision threshold on the count slide: at $P_1 = 0.5$ the rule is a plain majority vote. Make ones rare and suddenly three ones out of five is no longer convincing. Make missing a one expensive and the threshold slides back the other way. The error probability is computed exactly as you move — and the minimum-error rule is the one your hands settle on.',
       payoff:
-        'The unification is the payoff: Neyman–Pearson, MAP and minimum Bayes risk are one detector with three stories about where the threshold sits. NP fixes it by a false-alarm budget, MAP by the prior odds, Bayes risk by prior odds times the price ratio — and the likelihood-ratio side of the test never changes. On the exam, phrases like “equally likely bits” or “a miss costs ten times more” are nothing but instructions for where to put $\\gamma$.',
+        'The unification is the payoff: Neyman–Pearson, MAP and minimum Bayes risk are one detector with three stories about where the threshold sits. NP fixes it by a false-alarm budget, MAP by the prior odds, Bayes risk by prior odds times the price ratio — and the likelihood-ratio side of the test never changes. On the exam, phrases like “equally likely bits” or “a miss costs ten times more” are nothing but instructions for where to put $\\eta$.',
       equations: [
         {
           sentence:
@@ -226,7 +226,7 @@ export const detectionLesson: LessonRecord = {
         {
           kind: 'text',
           content:
-            'A health campaign screens for anemia. Positive individuals ($\\mathcal{H}_1$) have blood ferritin modeled as Gaussian $N(m_1, \\sigma^2)$. Negative individuals ($\\mathcal{H}_0$) as $N(m_0, \\sigma^2)$, with $m_0 > m_1$. Each decision uses $N$ i.i.d. samples $\\{x_1, \\dots, x_N\\}$ taken on $N$ consecutive days.',
+            'A health campaign screens for anemia. Positive individuals ($\\mathcal{H}_1$) have blood ferritin modeled as Gaussian $N(m_1, \\sigma^2)$, and negative individuals ($\\mathcal{H}_0$) as $N(m_0, \\sigma^2)$, with $m_0 > m_1$. Each decision uses $N$ i.i.d. samples $\\{x_1, \\dots, x_N\\}$ taken on $N$ consecutive days.',
         },
         { kind: 'figure', key: 'anemia-roc' },
       ],

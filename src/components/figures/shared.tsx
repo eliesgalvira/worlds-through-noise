@@ -184,6 +184,8 @@ type LegendProps = {
     readonly label: string
     readonly swatchClass: string
     readonly dash?: boolean
+    /** Bars get a filled square instead of a line. */
+    readonly square?: boolean
   }>
 }
 
@@ -192,17 +194,23 @@ function Legend({ items }: LegendProps) {
     <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
       {items.map((item) => (
         <span key={item.label} className="inline-flex items-center gap-1.5">
-          <svg viewBox="0 0 20 6" className="h-1.5 w-5" aria-hidden="true">
-            <line
-              x1="1"
-              y1="3"
-              x2="19"
-              y2="3"
-              strokeWidth="2.5"
-              strokeDasharray={item.dash === true ? '3 3' : undefined}
-              className={item.swatchClass}
-            />
-          </svg>
+          {item.square === true ? (
+            <svg viewBox="0 0 10 10" className="size-2.5" aria-hidden="true">
+              <rect width="10" height="10" className={item.swatchClass} />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 20 6" className="h-1.5 w-5" aria-hidden="true">
+              <line
+                x1="1"
+                y1="3"
+                x2="19"
+                y2="3"
+                strokeWidth="2.5"
+                strokeDasharray={item.dash === true ? '3 3' : undefined}
+                className={item.swatchClass}
+              />
+            </svg>
+          )}
           <MathText text={item.label} />
         </span>
       ))}

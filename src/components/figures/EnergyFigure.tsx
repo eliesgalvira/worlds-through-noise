@@ -70,6 +70,11 @@ function EnergyFigure() {
   const h0Path = pathOf(h0Density)
   const h1Path = pathOf(h1Density)
   const threshold = gamma / dof
+  // Labels flip to the left of their mark when the right side has no room
+  // or when the power mark sits right next to the threshold.
+  const labelLeft = xOf(threshold) > W * 0.55
+  const powerLeft =
+    xOf(1 + snr) < xOf(threshold) && xOf(threshold) - xOf(1 + snr) < 70
 
   return (
     <FigureShell
@@ -117,12 +122,11 @@ function EnergyFigure() {
           <ReadoutRow
             label="Jailer's $P_D$ (energy detector)"
             value={`${formatPercentValue(pdJailer)}${pdJailer - alpha < 0.02 ? ' ≈ α' : ''}`}
-            tone="h1"
+            tone="good"
           />
           <ReadoutRow
             label="Receiver's $P_D$ (knows waveform)"
             value={formatPercentValue(pdReceiver)}
-            tone="good"
           />
           <ReadoutRow
             label="$P_{FA}$ (both)"
@@ -190,13 +194,15 @@ function EnergyFigure() {
           ticks={[0, 1, 2, 3, 4].map((v) => ({ x: xOf(v), label: String(v) }))}
         />
         <text
-          x={xOf(threshold) + 4}
+          x={xOf(threshold) + (labelLeft ? -4 : 4)}
           y={24}
+          textAnchor={labelLeft ? 'end' : 'start'}
           className="fill-threshold stroke-card font-mono plot-text-sm"
           strokeWidth={3}
           paintOrder="stroke"
         >
-          γ, jailer <Sym base="P" sub="D" /> {formatPercentValue(pdJailer)}
+          <tspan className="font-serif italic">γ</tspan>, jailer{' '}
+          <Sym base="P" sub="D" /> {formatPercentValue(pdJailer)}
         </text>
         <text
           x={W / 2}
@@ -215,8 +221,9 @@ function EnergyFigure() {
           strokeWidth={1.5}
         />
         <text
-          x={xOf(1 + snr) + 4}
+          x={xOf(1 + snr) + (powerLeft ? -4 : 4)}
           y={H - 50}
+          textAnchor={powerLeft ? 'end' : 'start'}
           className="fill-h1-ink stroke-card font-mono plot-text-sm"
           strokeWidth={3}
           paintOrder="stroke"
@@ -225,7 +232,7 @@ function EnergyFigure() {
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        <MathText text="Densities and tails are exact $\chi^2_N$ computations. At $N = 2$ they are exponentials, and $P_D = P_{FA}^{\sigma_0^2/\sigma_1^2}$ exactly, with $\sigma_0^2 = \sigma_w^2$ and $\sigma_1^2 = \sigma_w^2 + P$." />
+        <MathText text="Densities and tails are exact $\chi^2_N$ computations. Every curve has area 1. The plot rescales heights so both fit. At $N = 2$ they are exponentials, and $P_D = P_{FA}^{\sigma_0^2/\sigma_1^2}$ exactly, with $\sigma_0^2 = \sigma_w^2$ and $\sigma_1^2 = \sigma_w^2 + P$." />
       </p>
     </FigureShell>
   )

@@ -61,6 +61,9 @@ function BitVoteFigure() {
   const weight0 = pmf0.map((q) => p0 * q)
   const weight1 = pmf1.map((q) => costRatio * p1 * q)
   const maxPmf = Math.max(...weight0, ...weight1, 1e-9)
+  // The bar that counts as an error at k: blue where the rule says 1.
+  const errorWeight = (k: number) =>
+    (decideOne[k] ?? false) ? (weight0[k] ?? 0) : (weight1[k] ?? 0)
   const slot = (W - 40) / (COPIES + 1)
   const xOf = (k: number) => 20 + k * slot + slot / 2
   const barH = (p: number) => (p / maxPmf) * (H - 70)
@@ -122,18 +125,16 @@ function BitVoteFigure() {
             label="Total error probability"
             value={formatPercentValue(pError)}
           />
+          <ReadoutRow label="Bayes risk" value={formatNumber(risk, 3)} />
           <ReadoutRow
-            label="Bayes risk of this rule (a false 1 costs 1)"
-            value={formatNumber(risk, 3)}
-            tone="good"
-          />
-          <ReadoutRow
-            label="Bayes risk of majority vote"
+            label="Bayes risk, majority vote"
             value={formatNumber(majorityRisk, 3)}
           />
-          <ReadoutNote>
-            <MathText text="With $P_1 = 0.5$ and equal costs the boundary sits at majority vote, $k \geq 3$." />
-          </ReadoutNote>
+          {priorPct === 50 && costRatio === 1 ? (
+            <ReadoutNote>
+              <MathText text="With $P_1 = 0.5$ and equal costs the boundary sits at majority vote, $k \geq 3$." />
+            </ReadoutNote>
+          ) : null}
         </>
       }
     >
@@ -141,11 +142,13 @@ function BitVoteFigure() {
         items={[
           {
             label: '$P_0 \\Pr(k \\mid b{=}0)$',
-            swatchClass: 'stroke-h0',
+            swatchClass: 'fill-h0',
+            square: true,
           },
           {
             label: '$P_1 C_{01} \\Pr(k \\mid b{=}1)$, with $C_{10} = 1$',
-            swatchClass: 'stroke-h1',
+            swatchClass: 'fill-h1',
+            square: true,
           },
         ]}
       />
@@ -190,6 +193,30 @@ function BitVoteFigure() {
               strokeWidth={(decideOne[k] ?? false) ? 0 : 2.5}
               opacity={0.85}
             />
+            {errorWeight(k) > 0.04 * maxPmf ? (
+              <text
+                x={(decideOne[k] ?? false) ? xOf(k) - 8 : xOf(k) + 8}
+                y={
+                  H -
+                  36 -
+                  barH(
+                    (decideOne[k] ?? false)
+                      ? (weight0[k] ?? 0)
+                      : (weight1[k] ?? 0),
+                  )
+                }
+                textAnchor="middle"
+                className={
+                  (decideOne[k] ?? false)
+                    ? 'fill-false-alarm stroke-card font-mono plot-text-xs'
+                    : 'fill-h1-ink stroke-card font-mono plot-text-xs'
+                }
+                strokeWidth={3}
+                paintOrder="stroke"
+              >
+                error
+              </text>
+            ) : null}
             <text
               x={xOf(k)}
               y={H - 16}
@@ -202,8 +229,9 @@ function BitVoteFigure() {
         ))}
         {firstOne >= 0 ? (
           <text
-            x={20 + firstOne * slot + 6}
+            x={firstOne === COPIES ? W - 22 : 20 + firstOne * slot + 6}
             y={24}
+            textAnchor={firstOne === COPIES ? 'end' : 'start'}
             className="fill-foreground font-mono plot-text-sm"
           >
             decide 1 →

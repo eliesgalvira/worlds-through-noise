@@ -145,7 +145,7 @@ function BudgetRocFigure() {
           <path
             d={tail(0, gamma)}
             className="fill-false-alarm"
-            opacity={0.55}
+            opacity={0.85}
           />
           <path
             d={density(0)}
@@ -173,7 +173,8 @@ function BudgetRocFigure() {
             y={20}
             className="fill-threshold font-mono plot-text-sm"
           >
-            γ = {formatNumber(gamma, 2)}
+            <tspan className="font-serif italic">γ</tspan> threshold{' '}
+            {formatNumber(gamma, 2)}
           </text>
           <text
             x={xOf(0)}
@@ -209,14 +210,14 @@ function BudgetRocFigure() {
             strokeWidth={3}
             paintOrder="stroke"
           >
-            α
+            α {formatPercentValue(alpha)}
           </text>
           <text
             x={xOf(separation) + 10}
             y={(AXIS + 12) / 2}
             className="fill-detection font-mono plot-text-sm"
           >
-            <Sym base="P" sub="D" />
+            <Sym base="P" sub="D" /> {formatPercentValue(pd)}
           </text>
           <text
             x={W / 2}

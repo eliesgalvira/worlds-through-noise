@@ -108,7 +108,7 @@ function CurvatureFigure() {
   return (
     <FigureShell
       title="Watch the landscape sharpen — information is curvature"
-      instruction="The curve is the log-likelihood of every candidate $\theta$, computed from the actual samples (dots). Its peak is $\hat{\theta}_{ML}$. Its sharpness is Fisher information. Draw fresh samples and watch the peak wobble exactly as much as the flatness allows — then raise $N$."
+      instruction="The curve is the log-likelihood of every candidate $\theta$, computed from the actual samples (dots). Its peak is $\hat{\theta}_{ML}$. Its sharpness is Fisher information. Draw fresh samples and watch the peak wobble about as much as the flatness allows — then raise $N$."
       controls={
         <>
           <SliderControl

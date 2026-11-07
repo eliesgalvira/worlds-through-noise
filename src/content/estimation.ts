@@ -7,7 +7,7 @@ export const estimationLesson: LessonRecord = {
   thesis:
     'An estimator is a machine you must judge by its cloud of outputs, never by one lucky number — and the Cramér-Rao bound says how tight that cloud can be for any unbiased estimator.',
   intro: [
-    'Topic 3 has one skeleton: model the data $f(\\mathbf{x}; \\theta)$, ask how much the data even knows about $\\theta$ (the Cramér–Rao bound, CRB), try to build the estimator that extracts all of it (an efficient or maximum-likelihood, ML, estimator), and, when prior knowledge exists, add it as one more measurement.',
+    'Topic 3 has one skeleton: model the data $f(\\mathbf{x}; \\theta)$, ask how much the data even knows about $\\theta$ (the Cramér–Rao bound, CRB), look for the estimator that extracts all of it (the efficient estimator when it exists, otherwise the maximum-likelihood, ML, estimator, which reaches the bound as $N$ grows), and, when prior knowledge exists, add it through a prior density (a Gaussian prior acts as one more measurement).',
     'Exams walk this skeleton in order — “find the pdf, find the CRB, does the efficient estimator exist, find the ML, is it consistent” — so this lesson does too, with the objects made visible at each step.',
   ],
   modules: [
@@ -39,7 +39,7 @@ export const estimationLesson: LessonRecord = {
           'The midrange: its spread is about 0.01, against 0.06 for the sample mean. Bounded noise lets the largest and smallest samples pin the center down, so the ranking flips.',
       },
       transfer:
-        'Classic collection exercise: for $\\hat{m}_2 = \\frac{1}{N+1}\\sum x_i$, find bias and variance and check consistency. Picture the pile: slightly off-center, slightly narrower — then confirm with algebra.',
+        'Slides example (T3 p. 15): for $\\hat{m}_2 = \\frac{1}{N+1}\\sum x_i$, find bias and variance and check consistency. Picture the pile: slightly off-center, slightly narrower — then confirm with algebra.',
       examRefs: [
         'Slides T3 §2: sample mean vs midrange under uniform and Gaussian noise',
         'Midterm Apr 2026, Ex. 1(b–c): unbiasedness conditions for proposed estimators',
@@ -131,7 +131,7 @@ export const estimationLesson: LessonRecord = {
         question:
           'Eight good pixels and one broken one. How much does keeping the broken pixel cost the fused estimate?',
         answer:
-          'Almost none is lost by keeping it: its weight $1/\\sigma_0^2 \\approx 0$ makes the fusion converge to the 8-pixel average with variance $\\sigma^2/8$, where $\\sigma^2$ is the noise variance of each good pixel. Fusion degrades gracefully.',
+          'None: keeping it can only help. Its weight $1/\\sigma_0^2 \\approx 0$ makes the fusion converge to the 8-pixel average, with variance just under $\\sigma^2/8$, where $\\sigma^2$ is the noise variance of each good pixel. Fusion degrades gracefully.',
       },
       transfer:
         'Final Jun 2026, Ex. 1: defective pixel, with $\\sigma^2$ the noise variance of each good pixel and $\\sigma_0^2$ that of the broken one. Do (a) single pixel, (b) 9-pixel fusion, (c) the two limits $\\sigma_0^2 = \\sigma^2$ and $\\sigma_0^2 \\gg \\sigma^2$, (d–e) MAP with a $N(\\mu_\\theta, \\sigma_\\theta^2)$ prior. All five parts are spring diagrams.',
@@ -180,7 +180,7 @@ export const estimationLesson: LessonRecord = {
       examRefs: [
         'Slides T3: ML frequency estimation, known and unknown amplitude',
         'Slides T3: block-splitting frequency estimation exercise (variance ratio 4)',
-        'Final Jan 2025: joint amplitude/frequency estimation with compressed likelihood',
+        'Final Jan 2023, Ex. 3: ML frequency of a complex exponential from its phases, and its CRB',
       ],
     },
   ],
@@ -680,7 +680,7 @@ export const estimationLesson: LessonRecord = {
               title: 'Let the MSE go to zero',
               body: 'Efficiency gives unbiasedness plus variance equal to the bound $\\lambda/N$. The MSE is then $\\lambda/N \\to 0$ as $N \\to \\infty$.',
               latex:
-                'ECM\\{\\hat{\\lambda}_{ML}\\} = \\operatorname{var}\\{\\hat{\\lambda}_{ML}\\} = \\frac{\\lambda}{N} \\xrightarrow{N \\to \\infty} 0',
+                'MSE\\{\\hat{\\lambda}_{ML}\\} = \\operatorname{var}\\{\\hat{\\lambda}_{ML}\\} = \\frac{\\lambda}{N} \\xrightarrow{N \\to \\infty} 0',
             },
           ],
           answer: {
@@ -836,7 +836,7 @@ export const estimationLesson: LessonRecord = {
               body: 'The vectors stack the $N$ samples of each signal. Stationary colored noise makes $\\mathbf{C}_w$ Toeplitz: entry $(i, j)$ is the autocorrelation at lag $i - j$.',
               latex:
                 '\\mathbf{C}_w = \\begin{bmatrix} c_w(0) & c_w(-1) & \\cdots & c_w(-N{+}1) \\\\ c_w(1) & c_w(0) & & \\vdots \\\\ \\vdots & & \\ddots & \\\\ c_w(N{-}1) & \\cdots & & c_w(0) \\end{bmatrix}',
-              note: 'This is the P2 object $r_w(m)$ arranged into the P3 terrain — the same matrix the whole course keeps walking on.',
+              note: 'With zero-mean noise $c_w(m)$ is the autocorrelation $r_w(m)$ of the Processes lesson, arranged into its correlation-matrix terrain — the same matrix the whole course keeps walking on.',
             },
           ],
           answer: {
@@ -858,7 +858,7 @@ export const estimationLesson: LessonRecord = {
           ],
           answer: {
             sentence:
-              'Bias is controlled by $\\mathbf{h}^T\\mathbf{s}$, price by $\\mathbf{h}^T\\mathbf{C}_w\\mathbf{h}$ — a constrained walk on the P3 terrain is coming.',
+              'Bias is controlled by $\\mathbf{h}^T\\mathbf{s}$, price by $\\mathbf{h}^T\\mathbf{C}_w\\mathbf{h}$ — a constrained walk on the noise covariance terrain is coming.',
           },
         },
         {
@@ -1078,7 +1078,8 @@ export const estimationLesson: LessonRecord = {
               title: 'Re-run the simplification with p = [1, 1]ᵀ',
               body: 'The general expressions hold, but now $\\mathbf{p}$ is parallel to $\\mathbf{q}$ instead of orthogonal: $\\mathbf{p}^T\\mathbf{C}_x^{-1} = \\frac{1}{\\sigma_v^2 + 2\\sigma_w^2}[1, 1]$, and the estimator becomes the average of the wire sum.',
               latex:
-                '\\hat{A}_{ML} = \\frac{1}{N}\\sum_{n}\\frac{x_1(n) + x_2(n)}{2}, \\qquad \\frac{x_1 + x_2}{2} = A + w(n) + \\frac{v_1 - v_2}{2}',
+                '\\hat{A}_{ML} = \\frac{1}{N}\\sum_{n}\\frac{x_1(n) + x_2(n)}{2}, \\qquad \\frac{x_1 + x_2}{2} = A + w(n) + \\frac{v_1 + v_2}{2}',
+              note: 'The printed solution writes $(v_1 - v_2)/2$, a slip carried over from part (c). With $x_2 = A + w + v_2$ the half-sum has $+$. The variance is the same either way.',
             },
             {
               title: 'Price the lost orthogonality',

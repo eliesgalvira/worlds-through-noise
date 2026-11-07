@@ -7,13 +7,13 @@ export const estimationLesson: LessonRecord = {
   thesis:
     'An estimator is a machine you must judge by its cloud of outputs, never by one lucky number — and the Cramér-Rao bound is the physics of how tight that cloud can ever be.',
   intro: [
-    'Tema 3 has one skeleton: model the data $f(\\mathbf{x}; \\theta)$, ask how much the data even knows about $\\theta$ (the Cramér–Rao bound), try to build the estimator that extracts all of it (an efficient or maximum-likelihood estimator), and, when prior knowledge exists, add it as one more measurement.',
+    'Tema 3 has one skeleton: model the data $f(\\mathbf{x}; \\theta)$, ask how much the data even knows about $\\theta$ (the Cramér–Rao bound, CRB), try to build the estimator that extracts all of it (an efficient or maximum-likelihood, ML, estimator), and, when prior knowledge exists, add it as one more measurement.',
     'Exams walk this skeleton in order — “find the pdf, find the CRB, does the efficient estimator exist, find the ML, is it consistent” — so this lesson does too, with the objects made visible at each step.',
   ],
   modules: [
     {
       id: 'E1',
-      title: 'Judge the machine, not the number',
+      title: 'Bias, variance, MSE: judge the machine',
       question: 'What do bias, variance and MSE actually describe?',
       trap: 'An estimator is a formula $\\hat{\\theta}(\\mathbf{x})$ that turns observed data $\\mathbf{x}$ into a guess for an unknown parameter $\\theta$ — and its output looks like an answer. It is not. It is one draw from a random variable, because the data it ate were random, and a single lucky draw can make a terrible estimator look brilliant. Bias and variance stay abstract penalties until you see the cloud of outputs they actually measure.',
       object:
@@ -47,7 +47,7 @@ export const estimationLesson: LessonRecord = {
     },
     {
       id: 'E2',
-      title: 'Information is curvature',
+      title: 'Cramér–Rao bound: information is curvature',
       question:
         'What limits every unbiased estimator, and when does the perfect one exist?',
       trap: 'Every estimate built from noisy data wobbles from one experiment to the next. The Cramér–Rao bound (CRB) is a floor on that wobble: no unbiased estimator can have a variance below it. Its formula, an expectation of a squared derivative of a logarithm, then inverted, is hard to picture. So is the test for an efficient estimator, one whose variance actually touches the floor. Both are read off one curve.',
@@ -97,7 +97,7 @@ export const estimationLesson: LessonRecord = {
     },
     {
       id: 'E3',
-      title: 'Precision votes',
+      title: 'Fusion and MAP: precision votes',
       question:
         'How should unequal-quality measurements be combined — and what is a prior, really?',
       trap: 'Three sensors of unequal quality measure the same humidity $\\theta$, each with independent Gaussian noise of its own standard deviation $\\sigma_i$. Averaging them equally wastes the good ones. Separately, old knowledge may say $\\theta$ is usually near $\\mu_\\theta$, with spread $\\sigma_\\theta$. Students memorize the best fusion of the sensors and the MAP estimate (maximum a posteriori: the most probable value once data and prior are combined) as two different results. Both are one weighted average.',
@@ -114,15 +114,15 @@ export const estimationLesson: LessonRecord = {
           latex:
             '\\hat\\theta = \\frac{\\sum_i x_i/\\sigma_i^2}{\\sum_i 1/\\sigma_i^2}, \\qquad \\mathrm{Var}(\\hat\\theta) = \\frac{1}{\\sum_i 1/\\sigma_i^2}',
           caption:
-            'BLUE form: $\\mathbf{h}_{opt} = \\mathbf{C}^{-1}\\mathbf{1}/(\\mathbf{1}^T\\mathbf{C}^{-1}\\mathbf{1})$. Adding any sensor, however bad, never hurts.',
+            'BLUE form: $\\mathbf{h}_{opt} = \\mathbf{C}^{-1}\\mathbf{1}/(\\mathbf{1}^T\\mathbf{C}^{-1}\\mathbf{1})$, with $\\mathbf{C}$ the covariance matrix of the sensor noises, $\\mathbf{1}$ a vector of ones and $\\mathbf{h}_{opt}$ the fusion weights. With independent sensors $\\mathbf{C}$ is diagonal and this is the formula above. Adding any sensor, however bad, never hurts.',
         },
         {
           sentence:
             'MAP is the same balance with the prior seated as one extra measurement.',
           latex:
-            '\\hat\\theta_{MAP} = \\frac{x_0/\\sigma_0^2 + \\mu_\\theta/\\sigma_\\theta^2}{1/\\sigma_0^2 + 1/\\sigma_\\theta^2}',
+            '\\hat\\theta_{MAP} = \\frac{\\sum_i x_i/\\sigma_i^2 + \\mu_\\theta/\\sigma_\\theta^2}{\\sum_i 1/\\sigma_i^2 + 1/\\sigma_\\theta^2}, \\qquad \\sigma^2_{\\theta|\\mathbf{x}} = \\frac{1}{\\sum_i 1/\\sigma_i^2 + 1/\\sigma_\\theta^2}',
           caption:
-            '$\\sigma_\\theta^2 \\gg \\sigma_0^2$: trust the data. $\\sigma_0^2 \\gg \\sigma_\\theta^2$: trust the prior. The June-2026 final asks exactly this.',
+            'The second fraction is the posterior variance the figure reads out. The June-2026 final has one pixel $x_0$ of variance $\\sigma_0^2$: $\\sigma_\\theta^2 \\gg \\sigma_0^2$ trusts the data, $\\sigma_0^2 \\gg \\sigma_\\theta^2$ trusts the prior.',
         },
       ],
       prediction: {
@@ -141,7 +141,7 @@ export const estimationLesson: LessonRecord = {
     },
     {
       id: 'E4',
-      title: 'The best explanation, found by a detector bank',
+      title: 'ML frequency: a detector bank',
       question:
         'What does maximum likelihood do when no efficient estimator exists — and what does it cost to transform parameters?',
       trap: 'A tone of unknown frequency $f$, amplitude $A$ and phase is buried in noise, and you have $N$ samples $x(n)$. Which frequency is it? The maximum-likelihood (ML) answer is a recipe: take the Fourier transform $X(f)$ of the samples, square its magnitude (the periodogram) and pick the peak. A second rule comes with it: ML is invariant, so squaring the amplitude estimate gives the ML estimate of the power $P = A^2/2$. Both get memorized without a reason, until an exam asks why that power estimate is biased.',
@@ -164,7 +164,7 @@ export const estimationLesson: LessonRecord = {
           latex:
             '\\sigma^2_{CR(f)} = \\frac{6}{4\\pi^2\\, \\mathrm{SNR}\\; N(N-1)(N+1)} \\;\\approx\\; \\frac{3}{2\\pi^2\\,\\mathrm{SNR}\\,N^3}, \\qquad \\mathrm{SNR} = \\frac{|A|^2}{\\sigma^2}',
           caption:
-            'This is the complex tone $A e^{j2\\pi f n}$ in complex noise of power $\\sigma^2$. With $A$ known the bound is about 4 times lower, $3/(4\\pi^2\\,\\mathrm{SNR}\\,N(N-1)(2N-1))$. Either way the $1/N^3$ is why splitting the data into blocks is a bad idea for frequency estimation.',
+            "This is the complex tone $A e^{j2\\pi f n}$ in complex noise of power $\\sigma^2$. The figure's tone is real, $A\\cos(2\\pi f n + \\phi)$ in real noise, and its bound is $12/((2\\pi)^2\\,\\eta\\,N(N^2-1))$ with $\\eta = A^2/(2\\sigma^2)$ (Kay 1993, eq. 3.41), the formula behind its CRB readout. With $A$ known the bound is about 4 times lower, $3/(4\\pi^2\\,\\mathrm{SNR}\\,N(N-1)(2N-1))$. Either way the $1/N^3$ is why splitting the data into blocks is a bad idea for frequency estimation.",
         },
       ],
       prediction: {
@@ -176,7 +176,7 @@ export const estimationLesson: LessonRecord = {
       transfer:
         'Slides exercise: two ML frequency estimates from half-blocks, averaged, versus one full-block estimate. Show the variance ratio $\\approx 4$ and explain it with the $N^3$ law rather than algebra.',
       examRefs: [
-        'Slides T3 ML2/ML3: frequency estimation, known and unknown amplitude',
+        'Slides T3: ML frequency estimation, known and unknown amplitude',
         'Slides T3: block-splitting frequency estimation exercise (variance ratio 4)',
         'Final Jan 2025: joint amplitude/frequency estimation with compressed likelihood',
       ],

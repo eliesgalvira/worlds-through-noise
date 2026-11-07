@@ -126,6 +126,10 @@ function PeriodogramFigure() {
             value={formatNumber(TRUE_FREQ, 3)}
           />
           <ReadoutRow
+            label="Tone $A = 1$: SNR $\eta = A^2/(2\sigma^2)$"
+            value={formatNumber(snr, 2)}
+          />
+          <ReadoutRow
             label="CRB std of $\hat{f}$ (theory, $\propto N^{-3/2}$)"
             value={formatNumber(crbStd, 5)}
           />
@@ -142,13 +146,13 @@ function PeriodogramFigure() {
           {
             label: 'peak $\\hat{f}_{ML}$',
             swatchClass: 'fill-estimate',
-            square: true,
+            mark: 'triangle',
           },
           { label: 'true tone', swatchClass: 'stroke-truth', dash: true },
           {
             label: 'true tone $\\pm$ CRB std',
             swatchClass: 'fill-truth/15',
-            square: true,
+            mark: 'square',
           },
         ]}
       />

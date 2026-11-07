@@ -54,24 +54,6 @@ function FusionSpringsFigure() {
       instruction="Three sensors read the same hidden humidity with different noise. Each pulls the estimate toward its reading with stiffness $1/\sigma^2$. Slacken a sensor and watch the balance slide away from it — then switch on the prior: one more spring, anchored at old knowledge."
       controls={
         <>
-          {SENSOR_READINGS.map((reading, index) => (
-            <SliderControl
-              key={reading}
-              label={`Sensor ${index + 1} noise (reads ${reading})`}
-              variable={`σ${index + 1}`}
-              value={sigmas[index] ?? 1}
-              min={0.8}
-              max={12}
-              step={0.1}
-              meaning={
-                index === 0 ? 'Stiff spring: small $\\sigma$ pulls hard.' : ''
-              }
-              onValueChange={(v) => {
-                setSigmas((prev) => prev.map((s, i) => (i === index ? v : s)))
-              }}
-              format={(v) => v.toFixed(1)}
-            />
-          ))}
           <Button
             type="button"
             variant={priorOn ? 'default' : 'outline'}
@@ -96,6 +78,24 @@ function FusionSpringsFigure() {
               format={(v) => v.toFixed(1)}
             />
           ) : null}
+          {SENSOR_READINGS.map((reading, index) => (
+            <SliderControl
+              key={reading}
+              label={`Sensor ${index + 1} noise (reads ${reading})`}
+              variable={`σ${index + 1}`}
+              value={sigmas[index] ?? 1}
+              min={0.8}
+              max={12}
+              step={0.1}
+              meaning={
+                index === 0 ? 'Stiff spring: small $\\sigma$ pulls hard.' : ''
+              }
+              onValueChange={(v) => {
+                setSigmas((prev) => prev.map((s, i) => (i === index ? v : s)))
+              }}
+              format={(v) => v.toFixed(1)}
+            />
+          ))}
         </>
       }
       readout={
@@ -108,14 +108,14 @@ function FusionSpringsFigure() {
           <ReadoutRow
             label={
               priorOn
-                ? 'Posterior variance $1/(\\sum 1/\\sigma_i^2 + 1/\\sigma_\\theta^2)$'
+                ? 'Posterior variance $\\sigma^2_{\\theta|\\mathbf{x}}$'
                 : 'Estimator variance $1/\\sum 1/\\sigma_i^2$'
             }
             value={formatNumber(variance, 3)}
           />
           {priorOn ? (
             <ReadoutRow
-              label="Data share $\alpha$ in $\hat{\theta} = \alpha\hat{\theta}_{ML} + (1-\alpha)\mu_\theta$"
+              label="Data share $\alpha$"
               value={formatNumber(alpha, 2)}
             />
           ) : null}
@@ -128,13 +128,16 @@ function FusionSpringsFigure() {
       <Legend
         items={[
           {
-            label: 'sensor readings (springs)',
-            swatchClass: 'stroke-foreground',
+            label: 'sensor reading $x_i$',
+            swatchClass: 'fill-muted-foreground',
+            mark: 'dot',
           },
-          { label: 'prior anchor', swatchClass: 'stroke-prior' },
+          { label: 'spring', swatchClass: 'stroke-muted-foreground' },
+          { label: 'prior anchor', swatchClass: 'fill-prior', mark: 'dot' },
           {
             label: 'balance point $\\hat{\\theta}$',
-            swatchClass: 'stroke-estimate',
+            swatchClass: 'fill-estimate',
+            mark: 'dot',
           },
         ]}
       />
@@ -180,21 +183,21 @@ function FusionSpringsFigure() {
                 y1={y}
                 x2={xOf(estimate)}
                 y2={H - 62}
-                className="stroke-foreground"
+                className="stroke-muted-foreground"
                 strokeWidth={springWidth(weights[index] ?? 0)}
-                opacity={0.45}
+                opacity={0.6}
               />
               <circle
                 cx={xOf(reading)}
                 cy={y}
                 r={5}
-                className="fill-foreground stroke-card"
+                className="fill-muted-foreground stroke-card"
                 strokeWidth={1.5}
               />
               <text
                 x={xOf(reading) + 9}
                 y={y + 4}
-                className="fill-foreground font-mono plot-text-sm"
+                className="fill-muted-foreground font-mono plot-text-sm"
               >
                 <Sym base="x" sub={String(index + 1)} /> = {reading}
               </text>
@@ -220,8 +223,9 @@ function FusionSpringsFigure() {
               strokeWidth={1.5}
             />
             <text
-              x={xOf(PRIOR_MEAN) + 9}
+              x={xOf(PRIOR_MEAN) - 9}
               y={H - 10}
+              textAnchor="end"
               className="fill-prior font-mono plot-text-sm"
             >
               <Sym base="μ" sub="θ" /> = {PRIOR_MEAN}
@@ -229,15 +233,25 @@ function FusionSpringsFigure() {
           </g>
         ) : null}
         {priorOn ? (
-          <circle
-            cx={xOf(dataOnly)}
-            cy={H - 60}
-            r={4}
-            fill="none"
-            className="stroke-estimate"
-            strokeWidth={1.4}
-            strokeDasharray="2 2"
-          />
+          <g>
+            <circle
+              cx={xOf(dataOnly)}
+              cy={H - 60}
+              r={6}
+              fill="none"
+              className="stroke-estimate"
+              strokeWidth={1.6}
+              strokeDasharray="3 2"
+            />
+            <text
+              x={xOf(dataOnly)}
+              y={H - 72}
+              textAnchor="middle"
+              className="plot-halo fill-estimate font-mono plot-text-xs"
+            >
+              data only = {formatNumber(dataOnly, 1)}
+            </text>
+          </g>
         ) : null}
         <circle
           cx={xOf(estimate)}
@@ -248,7 +262,7 @@ function FusionSpringsFigure() {
         />
         <text
           x={xOf(estimate)}
-          y={H - 72}
+          y={H - 28}
           textAnchor="middle"
           className="plot-halo fill-estimate font-mono plot-text"
         >
@@ -259,7 +273,7 @@ function FusionSpringsFigure() {
         <MathText
           text={
             priorOn
-              ? 'Thicker spring, larger weight $1/\\sigma^2$, on a fixed scale. The dashed ring is where the data alone balance.'
+              ? 'Thicker spring, larger weight $1/\\sigma^2$, on a fixed scale. The dashed ring is where the sensors alone balance.'
               : 'Thicker spring, larger weight $1/\\sigma_i^2$, on a fixed scale.'
           }
         />

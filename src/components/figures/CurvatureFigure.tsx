@@ -8,6 +8,7 @@ import {
   Plot,
   ReadoutRow,
   ReadoutNote,
+  Sym,
 } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
 import { linspace } from '@/domain/math/distributions.ts'
@@ -15,11 +16,14 @@ import { gaussianVector, makeRng } from '@/domain/math/kernel.ts'
 
 const TRUTH = 1
 const W = 470
-const H = 320
+const H = 400
 /** Bottom of the curve area, where the θ axis runs. */
 const AXIS_Y = 214
 const T_MIN = -1.5
 const T_MAX = 3.5
+/** Centre line of the score strip, and the score that fills half its height. */
+const SCORE_Y = AXIS_Y + 80
+const SCORE_MAX = 50
 
 function CurvatureFigure() {
   const [n, setN] = useState(5)
@@ -44,6 +48,18 @@ function CurvatureFigure() {
   const floor = -14
 
   const crbStd = sigma / Math.sqrt(n)
+  // Score of the Gaussian mean, (N/σ²)(x̄ − θ): a straight line whose slope
+  // is minus the Fisher information. Drawn only where it fits the strip.
+  const information = n / (sigma * sigma)
+  const scoreReach = SCORE_MAX / information
+  const scoreFrom = Math.max(sampleMean - scoreReach, T_MIN)
+  const scoreTo = Math.min(sampleMean + scoreReach, T_MAX)
+  const scoreY = (theta: number) =>
+    SCORE_Y - ((information * (sampleMean - theta)) / SCORE_MAX) * 22
+  const outside = {
+    left: sample.filter((x) => x < T_MIN).length,
+    right: sample.filter((x) => x > T_MAX).length,
+  }
 
   // Wobble strip: peak positions over 40 independent hypothetical samples.
   const peaks = useMemo(() => {
@@ -138,6 +154,10 @@ function CurvatureFigure() {
               3,
             )}
           />
+          <ReadoutRow
+            label="Score slope $-N/\sigma^2 = -I(\theta)$"
+            value={formatNumber(-information, 1)}
+          />
           <ReadoutNote>
             The measured wobble tracks the theoretical floor because this
             estimator is efficient: its score is a straight line through the
@@ -153,8 +173,18 @@ function CurvatureFigure() {
             swatchClass: 'stroke-foreground',
           },
           {
-            label: 'peak $\\hat{\\theta}_{ML}$ and its CRB width',
-            swatchClass: 'stroke-estimate',
+            label: 'peak $\\hat{\\theta}_{ML}$',
+            swatchClass: 'fill-estimate',
+            mark: 'dot',
+          },
+          {
+            label: '$\\hat{\\theta}_{ML} \\pm \\sigma_{CR}$',
+            swatchClass: 'stroke-estimate/55',
+          },
+          {
+            label: 'samples',
+            swatchClass: 'fill-muted-foreground',
+            mark: 'dot',
           },
           { label: 'true $\\theta$', swatchClass: 'stroke-truth', dash: true },
         ]}
@@ -162,7 +192,7 @@ function CurvatureFigure() {
       <Plot
         viewW={W}
         viewH={H}
-        ariaLabel="Log-likelihood landscape with CRB width and peak wobble strip"
+        ariaLabel="Log-likelihood landscape with its score, CRB width and peak wobble strip"
       >
         <line
           x1={xOf(TRUTH)}
@@ -181,13 +211,30 @@ function CurvatureFigure() {
         >
           true θ = {TRUTH}
         </text>
-        <text
-          x={12}
-          y={20}
-          className="fill-muted-foreground font-mono plot-text-xs"
-        >
-          ln f(x;θ), peak at 0
-        </text>
+        <g className="fill-muted-foreground stroke-muted-foreground">
+          <text x={12} y={12} stroke="none" className="font-mono plot-text-xs">
+            ln f(x;θ) minus its peak
+          </text>
+          {[0, -5, -10].map((tick) => (
+            <g key={tick}>
+              <line
+                x1={10}
+                y1={yOf(tick)}
+                x2={16}
+                y2={yOf(tick)}
+                strokeWidth={1}
+              />
+              <text
+                x={19}
+                y={yOf(tick) + 3}
+                stroke="none"
+                className="font-mono plot-text-xs"
+              >
+                {tick === 0 ? '0' : `−${String(-tick)}`}
+              </text>
+            </g>
+          ))}
+        </g>
         <path
           d={curvePath}
           fill="none"
@@ -196,13 +243,19 @@ function CurvatureFigure() {
         />
         <line
           x1={xOf(sampleMean - crbStd)}
-          y1={yOf(-0.5)}
+          y1={yOf(0) - 10}
           x2={xOf(sampleMean + crbStd)}
-          y2={yOf(-0.5)}
-          className="stroke-estimate"
+          y2={yOf(0) - 10}
+          className="stroke-estimate/55"
           strokeWidth={4}
-          opacity={0.55}
         />
+        <text
+          x={xOf(sampleMean + crbStd) + 5}
+          y={yOf(0) - 7}
+          className="plot-halo fill-estimate font-mono plot-text-xs"
+        >
+          ±<Sym base="σ" sub="CR" />
+        </text>
         <circle
           cx={xOf(sampleMean)}
           cy={yOf(0)}
@@ -210,16 +263,6 @@ function CurvatureFigure() {
           className="fill-estimate stroke-card"
           strokeWidth={1.5}
         />
-        {sample.slice(0, 60).map((x, i) => (
-          <circle
-            key={i}
-            cx={xOf(Math.min(Math.max(x, T_MIN), T_MAX))}
-            cy={AXIS_Y + 52}
-            r={2.4}
-            className="fill-truth"
-            opacity={0.55}
-          />
-        ))}
         <line
           x1={10}
           y1={AXIS_Y}
@@ -243,30 +286,91 @@ function CurvatureFigure() {
         >
           candidate θ
         </text>
+        <text
+          x={12}
+          y={AXIS_Y + 46}
+          className="fill-muted-foreground font-mono plot-text-xs"
+        >
+          score ∂ln f/∂θ, zero at the peak
+        </text>
+        <line
+          x1={10}
+          y1={SCORE_Y}
+          x2={W - 10}
+          y2={SCORE_Y}
+          className="stroke-border"
+          strokeWidth={1}
+        />
+        <line
+          x1={xOf(scoreFrom)}
+          y1={scoreY(scoreFrom)}
+          x2={xOf(scoreTo)}
+          y2={scoreY(scoreTo)}
+          className="stroke-foreground"
+          strokeWidth={1.6}
+        />
+        <circle
+          cx={xOf(sampleMean)}
+          cy={SCORE_Y}
+          r={3}
+          className="fill-estimate"
+        />
+        <text
+          x={12}
+          y={AXIS_Y + 128}
+          className="fill-muted-foreground font-mono plot-text-xs"
+        >
+          samples
+        </text>
+        {sample
+          .filter((x) => x >= T_MIN && x <= T_MAX)
+          .slice(0, 60)
+          .map((x, i) => (
+            <circle
+              key={i}
+              cx={xOf(x)}
+              cy={AXIS_Y + 142}
+              r={2.4}
+              className="fill-muted-foreground"
+              opacity={0.7}
+            />
+          ))}
+        {outside.left > 0 ? (
+          <text
+            x={12}
+            y={AXIS_Y + 146}
+            className="fill-muted-foreground font-mono plot-text-xs"
+          >
+            ◂ {outside.left}
+          </text>
+        ) : null}
+        {outside.right > 0 ? (
+          <text
+            x={W - 12}
+            y={AXIS_Y + 146}
+            textAnchor="end"
+            className="fill-muted-foreground font-mono plot-text-xs"
+          >
+            {outside.right} ▸
+          </text>
+        ) : null}
+        <text
+          x={12}
+          y={AXIS_Y + 164}
+          className="fill-muted-foreground font-mono plot-text-xs"
+        >
+          peak positions over 40 re-runs
+        </text>
         {peaks.map((p, i) => (
           <circle
             key={i}
             cx={xOf(Math.min(Math.max(p, T_MIN), T_MAX))}
-            cy={AXIS_Y + 94}
+            cy={AXIS_Y + 176}
             r={2.4}
             className="fill-estimate"
             opacity={0.6}
           />
         ))}
-        <text
-          x={12}
-          y={AXIS_Y + 42}
-          className="fill-muted-foreground font-mono plot-text-xs"
-        >
-          samples
-        </text>
-        <text
-          x={12}
-          y={AXIS_Y + 84}
-          className="fill-muted-foreground font-mono plot-text-xs"
-        >
-          peak positions over 40 re-runs
-        </text>
       </Plot>
     </FigureShell>
   )

@@ -15,7 +15,9 @@ import { gaussian, makeRng } from '@/domain/math/kernel.ts'
 const TRUTH = 0.5
 const RUNS = 500
 const W = 470
-const H = 260
+const H = 280
+/** The estimate axis; piles grow up from it. */
+const AXIS_Y = H - 40
 const X_MIN = -0.3
 const X_MAX = 1.3
 
@@ -56,6 +58,10 @@ function stats(values: ReadonlyArray<number>): { mean: number; sd: number } {
   return { mean, sd: Math.sqrt(variance) }
 }
 
+function mse({ mean, sd }: { mean: number; sd: number }): number {
+  return sd * sd + (mean - TRUTH) * (mean - TRUTH)
+}
+
 function histogramOf(
   values: ReadonlyArray<number>,
   bins: number,
@@ -85,7 +91,7 @@ function EstimatorRaceFigure() {
   // when its estimator does. A pile taller than the frame is clipped and
   // prints the count of its tallest bar.
   const maxCount = RUNS * 0.3
-  const barH = (count: number) => Math.min(count / maxCount, 1) * (H - 70)
+  const barH = (count: number) => Math.min(count / maxCount, 1) * (AXIS_Y - 80)
   const clippedPeak = (hist: ReadonlyArray<number>) => {
     const peak = Math.max(...hist)
     return peak > maxCount ? [{ count: peak, i: hist.indexOf(peak) }] : []
@@ -105,7 +111,7 @@ function EstimatorRaceFigure() {
   return (
     <FigureShell
       title="Race two estimators over 500 repeated experiments"
-      instruction="Both machines estimate the same hidden mean (ink line) from the same data. The piles are their actual outputs over 500 fresh experiments — bias is a shifted pile, variance is a wide one. Now switch the noise from Gaussian to uniform and run again."
+      instruction="Both machines estimate the same hidden mean (dashed line) from the same data. The piles are their outputs over 500 fresh experiments. The bracket above each pile marks its center and its spread $\pm\sigma$: bias is how far the center sits from the truth. Now switch the noise from Gaussian to uniform and run again."
       controls={
         <>
           <div className="flex flex-wrap gap-2">
@@ -161,18 +167,17 @@ function EstimatorRaceFigure() {
       readout={
         <>
           <ReadoutRow
-            label="Sample mean: $\sigma$ of its pile"
-            value={formatNumber(meanStats.sd, 3)}
-            tone="h0"
+            label="Sample mean: bias $b$, spread $\sigma$"
+            value={`${formatNumber(meanStats.mean - TRUTH, 3)}, ${formatNumber(meanStats.sd, 3)}`}
+            tone="estimate"
           />
           <ReadoutRow
-            label="Midrange: $\sigma$ of its pile"
-            value={formatNumber(midStats.sd, 3)}
-            tone="h1"
+            label="Midrange: bias $b$, spread $\sigma$"
+            value={`${formatNumber(midStats.mean - TRUTH, 3)}, ${formatNumber(midStats.sd, 3)}`}
           />
           <ReadoutRow
-            label="Winner (this model)"
-            value={meanStats.sd < midStats.sd ? 'sample mean' : 'midrange'}
+            label="Lower MSE $= \sigma^2 + b^2$"
+            value={mse(meanStats) < mse(midStats) ? 'sample mean' : 'midrange'}
           />
           <ReadoutNote>
             Both noises have variance 1. The ranking flips with the distribution
@@ -183,12 +188,20 @@ function EstimatorRaceFigure() {
     >
       <Legend
         items={[
-          { label: 'sample mean pile', swatchClass: 'fill-h0', square: true },
+          {
+            label: 'sample mean pile',
+            swatchClass: 'fill-estimate/60',
+            mark: 'square',
+          },
           {
             label: 'midrange $(\\max{+}\\min)/2$ pile (outline)',
-            swatchClass: 'stroke-h1',
+            swatchClass: 'stroke-foreground',
           },
-          { label: 'hidden truth $\\theta$', swatchClass: 'stroke-truth' },
+          {
+            label: 'hidden truth $\\theta$',
+            swatchClass: 'stroke-truth',
+            dash: true,
+          },
         ]}
       />
       <Plot
@@ -200,52 +213,87 @@ function EstimatorRaceFigure() {
           <rect
             key={`m${i}`}
             x={10 + i * slotW}
-            y={H - 30 - barH(count)}
+            y={AXIS_Y - barH(count)}
             width={slotW * 0.9}
             height={barH(count)}
-            className="fill-h0"
-            opacity={0.6}
+            className="fill-estimate/60"
           />
         ))}
         <path
           d={midHist
             .map(
               (count, i) =>
-                `${i === 0 ? 'M' : 'L'} ${(10 + i * slotW).toFixed(1)} ${(H - 30 - barH(count)).toFixed(1)} H ${(10 + (i + 1) * slotW).toFixed(1)}`,
+                `${i === 0 ? 'M' : 'L'} ${(10 + i * slotW).toFixed(1)} ${(AXIS_Y - barH(count)).toFixed(1)} H ${(10 + (i + 1) * slotW).toFixed(1)}`,
             )
             .join(' ')}
           fill="none"
-          className="stroke-h1"
-          strokeWidth={2}
+          className="stroke-foreground"
+          strokeWidth={1.6}
         />
         {[
-          { hist: meanHist, className: 'fill-h0' },
-          { hist: midHist, className: 'fill-h1-ink' },
+          { hist: meanHist, className: 'fill-estimate' },
+          { hist: midHist, className: 'fill-foreground' },
         ].flatMap(({ hist, className }) =>
           clippedPeak(hist).map(({ count, i }) => (
             <text
               key={`${className}${i}`}
               x={10 + (i + 1) * slotW + 3}
-              y={48}
+              y={88}
               className={`plot-halo font-mono plot-text-xs ${className}`}
             >
-              {count} ↑
+              {count} runs, off scale ↑
             </text>
           )),
         )}
+        {[
+          {
+            stat: meanStats,
+            y: 46,
+            stroke: 'stroke-estimate',
+            fill: 'fill-estimate',
+          },
+          {
+            stat: midStats,
+            y: 64,
+            stroke: 'stroke-foreground',
+            fill: 'fill-foreground',
+          },
+        ].map(({ stat, y, stroke, fill }) => {
+          const left = xOf(Math.max(stat.mean - stat.sd, X_MIN))
+          const right = xOf(Math.min(stat.mean + stat.sd, X_MAX))
+          const center = xOf(stat.mean)
+          return (
+            <g key={stroke}>
+              <path
+                d={`M ${left} ${y - 4} V ${y + 4} M ${left} ${y} H ${right} M ${right} ${y - 4} V ${y + 4} M ${center} ${y - 6} V ${y + 6}`}
+                className={stroke}
+                strokeWidth={1.6}
+                fill="none"
+              />
+              <text
+                x={Math.min(right + 5, W - 70)}
+                y={y + 4}
+                className={`plot-halo font-mono plot-text-xs ${fill}`}
+              >
+                ±σ = {formatNumber(stat.sd, 3)}
+              </text>
+            </g>
+          )
+        })}
         <line
           x1={xOf(TRUTH)}
-          y1={12}
+          y1={24}
           x2={xOf(TRUTH)}
-          y2={H - 26}
+          y2={AXIS_Y}
           className="stroke-truth"
-          strokeWidth={2}
+          strokeWidth={1.6}
+          strokeDasharray="4 4"
         />
         <line
           x1={10}
-          y1={H - 30}
+          y1={AXIS_Y}
           x2={W - 10}
-          y2={H - 30}
+          y2={AXIS_Y}
           className="stroke-muted-foreground"
           strokeWidth={1}
         />
@@ -257,24 +305,24 @@ function EstimatorRaceFigure() {
           θ = 0.5
         </text>
         <AxisTicks
-          y={H - 30}
-          ticks={[-0.25, 0, 0.25, 0.5, 0.75, 1, 1.25].map((v) => ({
+          y={AXIS_Y}
+          ticks={[0, 0.25, 0.5, 0.75, 1].map((v) => ({
             x: xOf(v),
             label: String(v),
           }))}
         />
         <text
           x={W - 12}
-          y={H - 4}
+          y={H - 6}
           textAnchor="end"
           className="fill-muted-foreground font-mono plot-text-sm"
         >
-          estimate θ̂ (experiments per bin ↑)
+          estimate θ̂ (bar height: experiments per bin)
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        Every bar is a real experiment: {RUNS} runs × N samples, no fitted
-        curves anywhere.
+        Every bar counts real experiments: {RUNS} runs of N = {n} samples each,
+        no fitted curves.
       </p>
     </FigureShell>
   )

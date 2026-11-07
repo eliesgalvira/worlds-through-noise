@@ -186,8 +186,8 @@ type LegendProps = {
     readonly label: string
     readonly swatchClass: string
     readonly dash?: boolean
-    /** Bars get a filled square instead of a line. */
-    readonly square?: boolean
+    /** The swatch takes the shape of its mark: bars, points or a pointer. Default: a line. */
+    readonly mark?: 'square' | 'dot' | 'triangle'
   }>
 }
 
@@ -196,11 +196,7 @@ function Legend({ items }: LegendProps) {
     <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
       {items.map((item) => (
         <span key={item.label} className="inline-flex items-center gap-1.5">
-          {item.square === true ? (
-            <svg viewBox="0 0 10 10" className="size-2.5" aria-hidden="true">
-              <rect width="10" height="10" className={item.swatchClass} />
-            </svg>
-          ) : (
+          {item.mark === undefined ? (
             <svg viewBox="0 0 20 6" className="h-1.5 w-5" aria-hidden="true">
               <line
                 x1="1"
@@ -211,6 +207,16 @@ function Legend({ items }: LegendProps) {
                 strokeDasharray={item.dash === true ? '5 3' : undefined}
                 className={item.swatchClass}
               />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 10 10" className="size-2.5" aria-hidden="true">
+              {item.mark === 'square' ? (
+                <rect width="10" height="10" className={item.swatchClass} />
+              ) : item.mark === 'dot' ? (
+                <circle cx="5" cy="5" r="4.5" className={item.swatchClass} />
+              ) : (
+                <path d="M 0 1 H 10 L 5 9 Z" className={item.swatchClass} />
+              )}
             </svg>
           )}
           <MathText text={item.label} />

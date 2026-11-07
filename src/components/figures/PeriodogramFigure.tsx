@@ -20,14 +20,19 @@ import {
 const TRUE_FREQ = 0.21
 const AMPLITUDE = 1
 const W = 470
-const H = 300
-/** Left edge of the plot, leaving room for the score ticks. */
+const H = 372
+/** Left edge of the plot, leaving room for the match ticks. */
 const LEFT = 40
 const RIGHT = W - 16
 const AXIS_Y = H - 46
-const TOP = 40
+const TOP = 112
+/** Strip of samples and template above the periodogram. */
+const STRIP_Y = 40
+const STRIP_HALF = 22
+/** Samples shown in the strip: enough to see the oscillation. */
+const STRIP_SAMPLES = 48
 /** Row of the CRB bracket, above the peak marker. */
-const CRB_Y = 14
+const CRB_Y = 86
 
 function PeriodogramFigure() {
   const [n, setN] = useState(48)
@@ -42,7 +47,7 @@ function PeriodogramFigure() {
     return complexToneInNoise(rng, n, AMPLITUDE, TRUE_FREQ, sigma, 1.1)
   }, [n, sigma, seed])
 
-  // About eight points per 1/N, so the drawn peak reaches the score the
+  // About eight points per 1/N, so the drawn peak reaches the value the
   // readouts report even at the largest N.
   const frequencies = useMemo(
     () => linspace(0.005, 0.495, Math.max(220, Math.ceil(0.49 * 8 * n))),
@@ -79,18 +84,33 @@ function PeriodogramFigure() {
   const crbStd = Math.sqrt(6 / (4 * Math.PI * Math.PI * snr * n * (n * n - 1)))
 
   const xOf = (f: number) => LEFT + (f / 0.5) * (RIGHT - LEFT)
+  // The strip: real parts of the first samples and of the candidate's
+  // template e^{j2πfn}, on one shared vertical scale.
+  const shown = Math.min(n, STRIP_SAMPLES)
+  const stripX = (k: number) => LEFT + (k / (shown - 1)) * (RIGHT - LEFT)
+  const stripScale =
+    STRIP_HALF /
+    Math.max(...signal.re.slice(0, shown).map((v) => Math.abs(v)), 1)
+  const templatePath = Array.from({ length: (shown - 1) * 4 + 1 }, (_, i) => {
+    const k = i / 4
+    return `${i === 0 ? 'M' : 'L'} ${stripX(k).toFixed(1)} ${(STRIP_Y - Math.cos(2 * Math.PI * candidate * k) * stripScale).toFixed(1)}`
+  }).join(' ')
   const yOf = (s: number) => AXIS_Y - (s / maxSpec) * (AXIS_Y - TOP)
   // Zero sits on the frequency axis, which already labels it.
-  // Drawn to scale. Below 6 units the bracket would be a smudge, so it
+  // Drawn to scale. Below 12 units the bracket would read as a letter, so it
   // becomes a single tick and the label says the band is narrower.
   const bandW = xOf(TRUE_FREQ + crbStd) - xOf(TRUE_FREQ - crbStd)
-  const bandTooNarrow = bandW < 6
-  const scoreTicks = niceTicks(maxSpec, 5).filter((tick) => tick > 0)
+  const bandTooNarrow = bandW < 12
+  // The candidate's and the peak's labels face away from each other, and
+  // turn inward near the plot edges.
+  const matchLabelLeft = candidate < fMl ? candidate > 0.12 : candidate > 0.42
+  const peakLabelLeft = candidate > fMl ? fMl > 0.08 : fMl > 0.44
+  const matchTicks = niceTicks(maxSpec, 5).filter((tick) => tick > 0)
 
   return (
     <FigureShell
       title="Sweep a detector bank across the band"
-      instruction="Each candidate frequency proposes a template. The dot's height is the score $|X(f)|^2/N$ of your noisy samples against that template, with $X(f) = \sum x(n)e^{-j2\pi f n}$. Slide the candidate to find the hidden tone, then raise $N$ and watch the peak narrow."
+      instruction="Each candidate frequency proposes a template. The strip on top lays that template over your first samples. The dot's height is their match $|X(f)|^2/N$, with $X(f) = \sum x(n)e^{-j2\pi f n}$. Slide the candidate to find the hidden tone, then raise $N$ and watch the peak narrow."
       controls={
         <>
           <SliderControl
@@ -141,7 +161,7 @@ function PeriodogramFigure() {
       readout={
         <>
           <ReadoutRow
-            label="Score at your candidate"
+            label="Match at your candidate"
             value={formatNumber(candidateScore, 2)}
             tone="cursor"
           />
@@ -199,6 +219,44 @@ function PeriodogramFigure() {
           setCandidatePct(Math.min(99, Math.max(1, (f / 0.5) * 100)))
         }}
       >
+        <text
+          x={LEFT}
+          y={12}
+          className="fill-muted-foreground font-mono plot-text-xs"
+        >
+          first {shown} samples, real part
+        </text>
+        <text
+          x={RIGHT}
+          y={12}
+          textAnchor="end"
+          className="fill-cursor font-mono plot-text-xs"
+        >
+          template at your f
+        </text>
+        <line
+          x1={LEFT}
+          y1={STRIP_Y}
+          x2={RIGHT}
+          y2={STRIP_Y}
+          className="stroke-border"
+          strokeWidth={1}
+        />
+        <path
+          d={templatePath}
+          fill="none"
+          className="stroke-cursor/70"
+          strokeWidth={1.4}
+        />
+        {signal.re.slice(0, shown).map((v, k) => (
+          <circle
+            key={k}
+            cx={stripX(k)}
+            cy={STRIP_Y - v * stripScale}
+            r={2.2}
+            className="fill-muted-foreground"
+          />
+        ))}
         <line
           x1={LEFT}
           y1={AXIS_Y}
@@ -216,7 +274,7 @@ function PeriodogramFigure() {
         />
         <g className="fill-muted-foreground stroke-muted-foreground">
           <line x1={LEFT} y1={TOP} x2={LEFT} y2={AXIS_Y} strokeWidth={1} />
-          {scoreTicks.map((tick) => (
+          {matchTicks.map((tick) => (
             <g key={tick}>
               <line
                 x1={LEFT - 4}
@@ -242,7 +300,7 @@ function PeriodogramFigure() {
             stroke="none"
             className="font-mono plot-text-xs"
           >
-            score
+            match |X(f)|²/N
           </text>
         </g>
         <rect
@@ -296,9 +354,9 @@ function PeriodogramFigure() {
           className="fill-estimate"
         />
         <text
-          x={xOf(fMl) + (fMl > 0.4 ? -8 : 8)}
+          x={xOf(fMl) + (peakLabelLeft ? -8 : 8)}
           y={yOf(maxSpec) + 4}
-          textAnchor={fMl > 0.4 ? 'end' : 'start'}
+          textAnchor={peakLabelLeft ? 'end' : 'start'}
           className="plot-halo fill-estimate font-mono plot-text-sm"
         >
           <Sym base="f̂" sub="ML" />
@@ -319,12 +377,12 @@ function PeriodogramFigure() {
           strokeWidth={1.5}
         />
         <text
-          x={xOf(candidate) + (candidate > 0.4 ? -6 : 6)}
+          x={xOf(candidate) + (matchLabelLeft ? -6 : 6)}
           y={TOP + 12}
-          textAnchor={candidate > 0.4 ? 'end' : 'start'}
+          textAnchor={matchLabelLeft ? 'end' : 'start'}
           className="plot-halo fill-cursor font-mono plot-text-sm"
         >
-          score {formatNumber(candidateScore, 2)}
+          match {formatNumber(candidateScore, 2)}
         </text>
         <text
           x={(LEFT + RIGHT) / 2}
@@ -332,7 +390,7 @@ function PeriodogramFigure() {
           textAnchor="middle"
           className="fill-muted-foreground font-mono plot-text-sm"
         >
-          candidate frequency f (drag anywhere)
+          candidate frequency f, cycles/sample (drag anywhere)
         </text>
       </Plot>
     </FigureShell>

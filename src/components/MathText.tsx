@@ -13,6 +13,13 @@ type MathTextProps = {
   readonly className?: string
 }
 
+/**
+ * Inline formulas up to this many LaTeX characters never break across lines
+ * (a break inside "(1 − α)" or after "i =" garbles them). Longer ones may,
+ * or they would push a phone layout wider than the screen.
+ */
+const NOWRAP_MAX_CHARS = 48
+
 /** Renders prose whose $…$ spans become inline KaTeX. */
 function MathText({ text, className }: MathTextProps) {
   const segments = parseInlineMath(text)
@@ -22,6 +29,9 @@ function MathText({ text, className }: MathTextProps) {
         segment.kind === 'math' ? (
           <span
             key={`${String(index)}-${segment.content}`}
+            className={cn(
+              segment.content.length <= NOWRAP_MAX_CHARS && 'whitespace-nowrap',
+            )}
             dangerouslySetInnerHTML={{
               __html: renderInlineMath(segment.content),
             }}

@@ -16,13 +16,13 @@ import { gaussian, makeRng } from '@/domain/math/kernel.ts'
 const TRUTH = 0.5
 const RUNS = 500
 const W = 470
-const H = 230
+const H = 240
 /** The estimate axis; piles grow up from it. */
-const AXIS_Y = H - 40
+const AXIS_Y = H - 44
 /** Fixed rows for the two brackets, above the tallest a pile may grow. */
-const MEAN_ROW = 32
-const MID_ROW = 64
-const PILE_CEILING = 80
+const MEAN_ROW = 40
+const MID_ROW = 72
+const PILE_CEILING = 86
 /** Generous width of one monospace label character, in viewBox units. */
 const LABEL_CHAR_W = 9
 const X_MIN = -0.3
@@ -145,14 +145,15 @@ function EstimatorRaceFigure() {
   return (
     <FigureShell
       title="Race two estimators over 500 repeated experiments"
-      instruction="Both machines estimate the same hidden mean (dashed line) from the same data. The piles are their outputs over 500 fresh experiments. The bracket above each pile marks its center and its spread $\pm\sigma$: bias is how far the center sits from the truth. Now switch the noise from Gaussian to uniform and run again."
+      instruction="Both machines estimate the same hidden mean (dashed line) from the same data. The piles are their outputs over 500 fresh experiments. The bracket above each pile marks its center and its spread $\pm\sigma_{\hat{\theta}}$: bias is how far the center sits from the truth. Now switch the noise from Gaussian to uniform and run again."
       controls={
         <>
           <div className="flex flex-wrap gap-2">
             <Button
               type="button"
               size="sm"
-              variant={kind === 'gaussian' ? 'default' : 'outline'}
+              variant={kind === 'gaussian' ? 'secondary' : 'outline'}
+              aria-pressed={kind === 'gaussian'}
               onClick={() => {
                 setKind('gaussian')
                 rerun('gaussian', n)
@@ -163,7 +164,8 @@ function EstimatorRaceFigure() {
             <Button
               type="button"
               size="sm"
-              variant={kind === 'uniform' ? 'default' : 'outline'}
+              variant={kind === 'uniform' ? 'secondary' : 'outline'}
+              aria-pressed={kind === 'uniform'}
               onClick={() => {
                 setKind('uniform')
                 rerun('uniform', n)
@@ -188,7 +190,6 @@ function EstimatorRaceFigure() {
           />
           <Button
             type="button"
-            variant="outline"
             size="sm"
             onClick={() => {
               rerun(kind, n)
@@ -201,16 +202,16 @@ function EstimatorRaceFigure() {
       readout={
         <>
           <ReadoutRow
-            label="Sample mean: $b$, $\sigma$ (measured)"
+            label="Sample mean: $b$, $\sigma_{\hat{\theta}}$ (measured)"
             value={readout(meanStats)}
             tone="estimate"
           />
           <ReadoutRow
-            label="Midrange: $b$, $\sigma$ (measured)"
+            label="Midrange: $b$, $\sigma_{\hat{\theta}}$ (measured)"
             value={readout(midStats)}
           />
           <ReadoutRow
-            label="Lower MSE $= \sigma^2 + b^2$"
+            label="Lower MSE $= \sigma_{\hat{\theta}}^2 + b^2$"
             value={
               result === null
                 ? '—'
@@ -303,22 +304,19 @@ function EstimatorRaceFigure() {
             y={AXIS_Y - 50}
             className="plot-halo fill-muted-foreground font-mono plot-text-sm"
           >
-            Predict, then run the experiments
+            Predict, then run
           </text>
         ) : (
           bracketRows.map(({ name, stat, y, stroke, fill }) => {
             const left = xOf(Math.max(stat.mean - stat.sd, X_MIN))
             const right = xOf(Math.min(stat.mean + stat.sd, X_MAX))
             const center = xOf(stat.mean)
-            const label = `${name} ±σ = ${formatNumber(stat.sd, 3)}`
-            // Beside the bracket when there is room, else above it.
-            const labelW = label.length * LABEL_CHAR_W
-            const place: { x: number; y: number; anchor: 'start' | 'end' } =
-              left - labelW - 6 >= 10
-                ? { x: left - 6, y: y + 4, anchor: 'end' }
-                : right + labelW + 6 <= W - 10
-                  ? { x: right + 6, y: y + 4, anchor: 'start' }
-                  : { x: 12, y: y - 9, anchor: 'start' }
+            const label = `${name} spread ±${formatNumber(stat.sd, 3)}`
+            // Always above the bracket's left end, pulled in to fit the plot.
+            const labelX = Math.min(
+              Math.max(left, 12),
+              W - 10 - label.length * LABEL_CHAR_W,
+            )
             return (
               <g key={stroke}>
                 <path
@@ -328,9 +326,8 @@ function EstimatorRaceFigure() {
                   fill="none"
                 />
                 <text
-                  x={place.x}
-                  y={place.y}
-                  textAnchor={place.anchor}
+                  x={labelX}
+                  y={y - 9}
                   className={`plot-halo font-mono plot-text-xs ${fill}`}
                 >
                   {label}
@@ -344,12 +341,12 @@ function EstimatorRaceFigure() {
           y1={AXIS_Y}
           x2={W - 10}
           y2={AXIS_Y}
-          className="stroke-muted-foreground"
+          className="stroke-border"
           strokeWidth={1}
         />
         <text
           x={xOf(TRUTH) + 6}
-          y={20}
+          y={16}
           className="fill-truth font-mono plot-text-sm"
         >
           θ = 0.5
@@ -372,7 +369,7 @@ function EstimatorRaceFigure() {
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
         <MathText
-          text={`Every bar counts real experiments: ${String(RUNS)} runs of $N = ${String(n)}$ samples each, no fitted curves.${beyondAxis > 0 ? ` ${String(beyondAxis)} estimates fall beyond the axis.` : ''}`}
+          text={`Every bar counts real experiments: ${String(RUNS)} runs of $N = ${String(n)}$ samples each, no fitted curves.${beyondAxis > 0 ? ` ${String(beyondAxis)} ${beyondAxis === 1 ? 'estimate falls' : 'estimates fall'} beyond the axis.` : ''}`}
         />
       </p>
     </FigureShell>

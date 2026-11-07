@@ -90,7 +90,7 @@ export const INTERACCIONES: Readonly<Record<string, Interaccion>> = {
     pasos: [
       [deslizar('Sample size', 10)],
       [deslizar('Sample size', 100)],
-      [deslizar('Noise level', 2.5)],
+      [deslizar('Noise std', 2.5)],
     ],
   },
   E3: {

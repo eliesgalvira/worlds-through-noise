@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button.tsx'
+import { MathText } from '@/components/MathText.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
 import {
   AxisTicks,
@@ -15,10 +16,10 @@ import { linspace } from '@/domain/math/distributions.ts'
 import { gaussianVector, makeRng } from '@/domain/math/kernel.ts'
 
 const TRUTH = 1
-const W = 560
+const W = 640
 /** Left margin for the vertical-axis numbers, clear of the curve. */
 const LEFT = 40
-const H = 400
+const H = 404
 /** Bottom of the curve area, where the θ axis runs. */
 const AXIS_Y = 214
 const T_MIN = -1.5
@@ -74,9 +75,16 @@ function CurvatureFigure() {
   }, [n, sigma, seed])
 
   const peaksBeyond = peaks.filter((p) => p < T_MIN || p > T_MAX).length
+  const peakMean = peaks.reduce((a, b) => a + b, 0) / peaks.length
+  const peakStd = Math.sqrt(
+    peaks.reduce((a, p) => a + (p - peakMean) * (p - peakMean), 0) /
+      peaks.length,
+  )
 
   const xOf = (theta: number) =>
     LEFT + ((theta - T_MIN) / (T_MAX - T_MIN)) * (W - LEFT - 10)
+  // The CRB label sits right of its bar unless that runs off the plot.
+  const crbLabelLeft = xOf(sampleMean + crbStd) + 130 > W - 10
   const yOf = (ll: number) => 36 + (Math.max(ll, floor) / floor) * (AXIS_Y - 40)
 
   // The parabola leaves the frame below the floor: stop the stroke there
@@ -112,7 +120,7 @@ function CurvatureFigure() {
             format={(v) => `N = ${v.toFixed(0)}`}
           />
           <SliderControl
-            label="Noise level"
+            label="Noise std (per sample)"
             variable="σ"
             value={sigma}
             min={0.4}
@@ -120,7 +128,7 @@ function CurvatureFigure() {
             step={0.05}
             meaning="Weaker arguments per sample: the landscape flattens."
             onValueChange={setSigma}
-            format={(v) => v.toFixed(2)}
+            format={(v) => `σ = ${v.toFixed(2)}`}
           />
           <Button
             type="button"
@@ -147,24 +155,14 @@ function CurvatureFigure() {
           />
           <ReadoutRow
             label="Std of the 40 peaks (bottom strip)"
-            value={formatNumber(
-              Math.sqrt(
-                peaks.reduce((a, p) => {
-                  const m = peaks.reduce((x, y) => x + y, 0) / peaks.length
-                  return a + (p - m) * (p - m)
-                }, 0) / peaks.length,
-              ),
-              3,
-            )}
+            value={formatNumber(peakStd, 3)}
           />
           <ReadoutRow
             label="Score slope $-I(\theta)$"
             value={formatNumber(-information, 1)}
           />
           <ReadoutNote>
-            The measured wobble tracks the theoretical floor because this
-            estimator is efficient: its score is a straight line through the
-            peak.
+            <MathText text="The measured wobble tracks the theoretical floor because this estimator is efficient: its score factors as $I(\theta)(\bar{x} - \theta)$, with a slope $-N/\sigma^2$ that does not depend on the data." />
           </ReadoutNote>
         </>
       }
@@ -246,11 +244,16 @@ function CurvatureFigure() {
           strokeWidth={4}
         />
         <text
-          x={xOf(sampleMean + crbStd) + 5}
+          x={
+            crbLabelLeft
+              ? xOf(sampleMean - crbStd) - 5
+              : xOf(sampleMean + crbStd) + 5
+          }
           y={yOf(0) - 7}
+          textAnchor={crbLabelLeft ? 'end' : 'start'}
           className="plot-halo fill-estimate font-mono plot-text-xs"
         >
-          ±<Sym base="σ" sub="CR" />
+          ±<Sym base="σ" sub="CR" /> = {formatNumber(crbStd, 3)}
         </text>
         <circle
           cx={xOf(sampleMean)}
@@ -349,27 +352,27 @@ function CurvatureFigure() {
           ))}
         <text
           x={12}
-          y={AXIS_Y + 164}
+          y={AXIS_Y + 168}
           className="fill-muted-foreground font-mono plot-text-xs"
         >
-          peak positions over 40 re-runs
+          40 re-run peaks: std {formatNumber(peakStd, 3)}
           {peaksBeyond > 0 ? `, ${String(peaksBeyond)} beyond the axis` : ''}
         </text>
         <line
           x1={xOf(TRUTH - crbStd)}
-          y1={AXIS_Y + 176}
+          y1={AXIS_Y + 180}
           x2={xOf(TRUTH + crbStd)}
-          y2={AXIS_Y + 176}
+          y2={AXIS_Y + 180}
           className="stroke-estimate/25"
           strokeWidth={10}
         />
         <text
           x={W - 10}
-          y={AXIS_Y + 164}
+          y={AXIS_Y + 168}
           textAnchor="end"
           className="fill-estimate font-mono plot-text-xs"
         >
-          shaded: true θ ±<Sym base="σ" sub="CR" />
+          shaded: θ ±<Sym base="σ" sub="CR" /> = {formatNumber(crbStd, 3)}
         </text>
         {peaks
           .filter((p) => p >= T_MIN && p <= T_MAX)
@@ -377,7 +380,7 @@ function CurvatureFigure() {
             <circle
               key={i}
               cx={xOf(p)}
-              cy={AXIS_Y + 176}
+              cy={AXIS_Y + 180}
               r={2.4}
               className="fill-estimate"
               opacity={0.6}

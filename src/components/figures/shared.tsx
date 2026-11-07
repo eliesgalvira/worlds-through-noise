@@ -279,9 +279,9 @@ function Hatch({
         patternTransform="rotate(45)"
       >
         <line
-          x1="0"
+          x1="2.5"
           y1="0"
-          x2="0"
+          x2="2.5"
           y2="5"
           strokeWidth="2.2"
           className={className}

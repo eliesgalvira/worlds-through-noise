@@ -447,12 +447,12 @@ function WhitenMatchFigure() {
             textAnchor="middle"
             className="fill-foreground font-mono plot-text-sm"
           >
-            gap of means, <Sym base="SNR" sub="y" /> = {formatNumber(d2, 2)}
+            <Sym base="SNR" sub="y" /> = (Δm)²/σ² = {formatNumber(d2, 2)}
           </text>
         </Plot>
       </div>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        <MathText text="The shadow's separation is $(\Delta m_y)^2/\sigma_y^2$ in the picture shown. With no whitening that is $SNR_y = (\mathbf{h}^T A\mathbf{p})^2 / \mathbf{h}^T\mathbf{C}_w\mathbf{h}$. Drag on the cloud to aim $\mathbf{h}$." />
+        <MathText text="The shadow's separation is $(\Delta m_y)^2/\sigma_y^2$ in the picture shown. With no whitening that is $SNR_y = (\mathbf{h}^T A\mathbf{p})^2 / \mathbf{h}^T\mathbf{C}_w\mathbf{h}$, and after whitening it is the same $SNR_y$ for $\mathbf{h} = \mathbf{C}_w^{-t/2}\mathbf{u}$ in the original space. Drag on the cloud to aim $\mathbf{h}$." />
       </p>
     </FigureShell>
   )

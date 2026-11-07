@@ -79,6 +79,8 @@ function EnergyFigure() {
   const labelLeft = xOf(threshold) > W * 0.55
   const powerLeft =
     xOf(1 + snr) < xOf(threshold) && xOf(threshold) - xOf(1 + snr) < 70
+  // Next to the threshold the power label rises above the P_FA label.
+  const powerHigh = Math.abs(xOf(1 + snr) - xOf(threshold)) < 70
 
   return (
     <FigureShell
@@ -181,25 +183,20 @@ function EnergyFigure() {
         <Hatch id={hatchId} className="stroke-false-alarm" />
         <path d={tailOf(h0Density, threshold)} fill={`url(#${hatchId})`} />
         <path d={h0Path} fill="none" className="stroke-h0" strokeWidth={2} />
+        {threshold < X_MAX ? (
+          <text
+            x={xOf(threshold) + (labelLeft ? -6 : 6)}
+            y={H - 44}
+            textAnchor={labelLeft ? 'end' : 'start'}
+            className="plot-halo fill-false-alarm font-mono plot-text-sm"
+          >
+            <Sym base="P" sub="FA" />
+          </text>
+        ) : null}
         <text
-          x={xOf(threshold) + (labelLeft ? -6 : 6)}
-          y={H - 56}
-          textAnchor={labelLeft ? 'end' : 'start'}
-          className="plot-halo fill-detection font-mono plot-text-sm"
-        >
-          jailer <Sym base="P" sub="D" />
-        </text>
-        <text
-          x={xOf(threshold) + (labelLeft ? -6 : 6)}
-          y={H - 44}
-          textAnchor={labelLeft ? 'end' : 'start'}
-          className="plot-halo fill-false-alarm font-mono plot-text-sm"
-        >
-          <Sym base="P" sub="FA" />
-        </text>
-        <text
-          x={xOf(Math.max(dof - 2, 0.2) / dof) + 6}
+          x={xOf(Math.max(dof - 2, 0.2) / dof) - 6}
           y={yOf(h0Density(Math.max(dof - 2, 0.2) / dof)) + 14}
+          textAnchor="end"
           className="plot-halo fill-h0 font-mono plot-text-sm"
         >
           H0
@@ -255,7 +252,7 @@ function EnergyFigure() {
         />
         <text
           x={xOf(1 + snr) + (powerLeft ? -4 : 4)}
-          y={H - 50}
+          y={powerHigh ? H - 66 : H - 50}
           textAnchor={powerLeft ? 'end' : 'start'}
           className="fill-h1-ink plot-halo font-mono plot-text-sm"
         >
@@ -263,7 +260,7 @@ function EnergyFigure() {
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        <MathText text="Densities and tails are exact $\chi^2_N$ computations. Both curves share one height scale, and the axis stops at $4\sigma^2$, so a wide $\mathcal{H}_1$ curve can run past it. At $N = 2$ they are exponentials, and $P_D = P_{FA}^{\sigma_0^2/\sigma_1^2}$ exactly, with $\sigma_0^2 = \sigma_w^2$ and $\sigma_1^2 = \sigma_w^2 + P$." />
+        <MathText text="Densities and tails are exact $\chi^2_N$ computations. Both curves share one height scale, and the axis stops at $4\sigma_w^2$, so a wide $\mathcal{H}_1$ curve can run past it. At $N = 2$ they are exponentials, and $P_D = P_{FA}^{\sigma_0^2/\sigma_1^2}$ exactly, with $\sigma_0^2 = \sigma_w^2$ and $\sigma_1^2 = \sigma_w^2 + P$." />
       </p>
     </FigureShell>
   )

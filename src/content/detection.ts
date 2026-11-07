@@ -193,7 +193,7 @@ export const detectionLesson: LessonRecord = {
           latex:
             '\\frac{f(\\mathbf{x}\\mid\\mathcal{H}_1)}{f(\\mathbf{x}\\mid\\mathcal{H}_0)} \\;\\underset{\\mathcal{H}_0}{\\overset{\\mathcal{H}_1}{\\gtrless}}\\; \\frac{P_0\\,(C_{10}-C_{00})}{P_1\\,(C_{01}-C_{11})} = \\eta_{MRB}',
           caption:
-            'Minimum Bayes risk (MRB, the course’s acronym): with equal costs it reduces to MAP, and MAP with equal priors reduces to maximum likelihood.',
+            'Minimum Bayes risk (MRB, the course’s acronym, and the slides write this threshold $\\gamma_{MRB}$): with equal costs it reduces to MAP, and MAP with equal priors reduces to maximum likelihood.',
         },
         {
           sentence:

@@ -42,9 +42,9 @@ function PeriodogramFigure() {
   const fMl = frequencies[peakIndex] ?? 0
   const candidateScore = periodogramAt(signal, candidate)
 
-  const snr = (AMPLITUDE * AMPLITUDE) / 2 / (sigma * sigma)
-  // Real tone with A, f and phase unknown: Kay 1993, eq. 3.41.
-  const crbStd = Math.sqrt(12 / (4 * Math.PI * Math.PI * snr * n * (n * n - 1)))
+  const eta = (AMPLITUDE * AMPLITUDE) / (2 * sigma * sigma)
+  // Real tone, phase unknown, f away from 0 and 1/2: Kay 1993, eq. 3.41.
+  const crbStd = Math.sqrt(12 / ((2 * Math.PI) ** 2 * eta * n * (n * n - 1)))
 
   const xOf = (f: number) => 10 + (f / 0.5) * (W - 20)
   const yOf = (s: number) => H - 34 - (s / maxSpec) * (H - 60)

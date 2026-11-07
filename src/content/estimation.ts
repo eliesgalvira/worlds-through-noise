@@ -78,7 +78,7 @@ export const estimationLesson: LessonRecord = {
           latex:
             '\\mathbf{x} = \\mathbf{p}(\\theta) + \\mathbf{w}, \\quad \\mathbf{w} \\sim \\mathcal{N}(\\mathbf{0}, \\sigma^2\\mathbf{I}) \\;\\Longrightarrow\\; \\sigma^2_{CR(\\theta)} = \\frac{\\sigma^2}{\\left\\| \\partial \\mathbf{p}(\\theta) / \\partial\\theta \\right\\|^2}',
           caption:
-            'Here the mean is $\\mathbf{p}(\\theta) = \\theta\\mathbf{1}$, so $\\|\\partial\\mathbf{p}/\\partial\\theta\\|^2 = N$ and the bound is $\\sigma^2/N$. Complex noise $\\mathcal{CN}(\\mathbf{0}, \\sigma^2\\mathbf{I})$ puts a 2 in the denominator. Frequency, whose derivative grows with $n$, gets a $1/N^3$ bound, amplitude only $1/N$.',
+            'In the figure the mean is $\\mathbf{p}(\\theta) = \\theta\\mathbf{1}$, so $\\|\\partial\\mathbf{p}/\\partial\\theta\\|^2 = N$ and the bound is $\\sigma^2/N$. Complex noise $\\mathcal{CN}(\\mathbf{0}, \\sigma^2\\mathbf{I})$ puts a 2 in the denominator. Frequency, whose derivative grows with $n$, gets a $1/N^3$ bound, amplitude only $1/N$.',
         },
       ],
       prediction: {
@@ -104,7 +104,7 @@ export const estimationLesson: LessonRecord = {
       object:
         'The picture is springs. Each measurement $x_i$ is an anchor pulling the estimate toward itself with stiffness $1/\\sigma_i^2$: precise sensors are stiff springs, noisy sensors are slack ones. The estimate is where all the pulls balance. And a Gaussian prior is nothing special — it is one more spring, anchored at $\\mu_\\theta$, with stiffness $1/\\sigma_\\theta^2$.',
       action:
-        'In the figure, drag one sensor’s noise up and watch its spring slacken: the balance point slides away from it, while the combined variance $1/\\sum(1/\\sigma_i^2)$ grows, but never past what the other sensors achieve on their own. Break a sensor completely ($\\sigma_0^2 \\to \\infty$ — the defective pixel of the June 2026 final) and watch the estimate quietly ignore it: nobody had to decide to discard the data. Then switch the prior spring on, feel it pull the estimate toward $\\mu_\\theta$, and watch the data springs overwhelm it as sensors accumulate.',
+        'In the figure, drag one sensor’s noise up and watch its spring slacken: the balance point slides away from it, while the combined variance $1/\\sum(1/\\sigma_i^2)$ grows, but never past what the other sensors achieve on their own. Break a sensor completely ($\\sigma_0^2 \\to \\infty$ — the defective pixel of the June 2026 final) and watch the estimate quietly ignore it: nobody had to decide to discard the data. Then switch the prior spring on, feel it pull the estimate toward $\\mu_\\theta$, and stiffen the data springs to watch them overwhelm it.',
       payoff:
         'One picture now covers four exam staples: greenhouse-sensor fusion, the defective camera pixel, the BLUE (the best linear unbiased estimator — exactly this balance of springs, derived under a linearity constraint), and MAP shrinkage, $\\hat{\\theta}_{MAP} = \\alpha\\hat{\\theta}_{ML} + (1-\\alpha)\\mu_\\theta$. Even “the prior fades as data accumulate” stops being a slogan: $N$ data springs against one prior spring is not a fair fight.',
       equations: [
@@ -164,7 +164,7 @@ export const estimationLesson: LessonRecord = {
           latex:
             '\\sigma^2_{CR(f)} = \\frac{6}{4\\pi^2\\, \\mathrm{SNR}\\; N(N-1)(N+1)} \\;\\approx\\; \\frac{3}{2\\pi^2\\,\\mathrm{SNR}\\,N^3}, \\qquad \\mathrm{SNR} = \\frac{|A|^2}{\\sigma^2}',
           caption:
-            "This is the complex tone $A e^{j2\\pi f n}$, with $A$ complex (modulus and phase), in complex noise of power $\\sigma^2$ (slides T3, p. 97). The figure's tone is real, $A\\cos(2\\pi f n + \\phi)$ in real noise, and its bound is $12/((2\\pi)^2\\,\\eta\\,N(N^2-1))$ with $\\eta = A^2/(2\\sigma^2)$ (Kay 1993, eq. 3.41), the formula behind its CRB readout. With the complex $A$ known the bound is about 4 times lower, $3/(4\\pi^2\\,\\mathrm{SNR}\\,N(N-1)(2N-1))$. Either way the $1/N^3$ is why splitting the data into blocks is a bad idea for frequency estimation.",
+            'This is the complex tone $A e^{j2\\pi f n}$, with $A$ complex (modulus and phase), in complex noise of power $\\sigma^2$ (slides T3, p. 97). The figure’s tone is real, $A\\cos(2\\pi f n + \\phi)$ in real noise, and for $f$ away from 0 and 1/2 its bound is $12/((2\\pi)^2\\,\\eta\\,N(N^2-1))$ with $\\eta = A^2/(2\\sigma^2)$ (Kay 1993, eq. 3.41), the formula behind its CRB readout. With $A$ known, phase included, the bound is about 4 times lower, $3/(4\\pi^2\\,\\mathrm{SNR}\\,N(N-1)(2N-1))$ (slides T3, p. 58). Either way the $1/N^3$ is why splitting the data into blocks is a bad idea for frequency estimation.',
         },
       ],
       prediction: {
@@ -678,7 +678,7 @@ export const estimationLesson: LessonRecord = {
               title: 'Let the MSE go to zero',
               body: 'Efficiency gives unbiasedness plus variance equal to the bound $\\lambda/N$. The MSE is then $\\lambda/N \\to 0$ as $N \\to \\infty$.',
               latex:
-                'MSE\\{\\hat{\\lambda}_{ML}\\} = \\operatorname{var}\\{\\hat{\\lambda}_{ML}\\} = \\frac{\\lambda}{N} \\xrightarrow{N \\to \\infty} 0',
+                '\\operatorname{MSE}\\{\\hat{\\lambda}_{ML}\\} = \\operatorname{var}\\{\\hat{\\lambda}_{ML}\\} = \\frac{\\lambda}{N} \\xrightarrow{N \\to \\infty} 0',
             },
           ],
           answer: {
@@ -872,7 +872,7 @@ export const estimationLesson: LessonRecord = {
             },
             {
               title: 'Differentiate and recognize the whitened match',
-              body: 'The gradient condition gives $\\mathbf{h} \\propto \\mathbf{C}_w^{-1}\\mathbf{s}$ — the whitening-then-matching direction of D3, now discovered by an estimation argument. The constraint sets the scale.',
+              body: 'The gradient condition gives $\\mathbf{h} \\propto \\mathbf{C}_w^{-1}\\mathbf{s}$ — the whitening-then-matching direction of the Detection lesson, now discovered by an estimation argument. The constraint sets the scale.',
               latex:
                 '2\\mathbf{C}_w\\mathbf{h} - \\lambda\\mathbf{s} = \\mathbf{0} \\;\\Longrightarrow\\; \\mathbf{h}_{opt} = \\frac{\\mathbf{C}_w^{-1}\\mathbf{s}}{\\mathbf{s}^T\\mathbf{C}_w^{-1}\\mathbf{s}}, \\qquad \\hat{A}(\\mathbf{x}) = \\frac{\\mathbf{s}^T\\mathbf{C}_w^{-1}\\mathbf{x}}{\\mathbf{s}^T\\mathbf{C}_w^{-1}\\mathbf{s}}',
             },

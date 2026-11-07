@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import type { ComponentProps } from 'react'
 import { Button } from '@/components/ui/button.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
 import {
@@ -7,6 +8,7 @@ import {
   FigureShell,
   Legend,
   Plot,
+  ReadoutNote,
   ReadoutRow,
   Sym,
 } from '@/components/figures/shared.tsx'
@@ -37,6 +39,21 @@ const STRIP_HALF = 22
 const STRIP_SAMPLES = 48
 /** Row of the CRB bracket, above the peak marker. */
 const CRB_Y = 76
+
+/** Legend entries for the marks that appear with the answer. */
+const ANSWER_LEGEND: ComponentProps<typeof Legend>['items'] = [
+  {
+    label: 'peak $\\hat{f}_{ML}$',
+    swatchClass: 'fill-estimate',
+    mark: 'triangle',
+  },
+  { label: 'true tone $f_0$', swatchClass: 'stroke-truth', dash: true },
+  {
+    label: '$f_0 \\pm \\sigma_{CR}$',
+    swatchClass: 'fill-truth/15',
+    mark: 'square',
+  },
+]
 
 function PeriodogramFigure() {
   const [n, setN] = useState(48)
@@ -129,6 +146,17 @@ function PeriodogramFigure() {
             onValueChange={setCandidatePct}
             format={(v) => `f = ${((v / 100) * 0.5).toFixed(3)}`}
           />
+          <Button
+            type="button"
+            variant={answerShown ? 'secondary' : 'outline'}
+            size="sm"
+            aria-pressed={answerShown}
+            onClick={() => {
+              setAnswerShown((shown) => !shown)
+            }}
+          >
+            {answerShown ? 'Hide the answer' : 'Show the answer'}
+          </Button>
           <SliderControl
             label="Samples"
             variable="N"
@@ -160,17 +188,6 @@ function PeriodogramFigure() {
             }}
           >
             New noise
-          </Button>
-          <Button
-            type="button"
-            variant={answerShown ? 'secondary' : 'outline'}
-            size="sm"
-            aria-pressed={answerShown}
-            onClick={() => {
-              setAnswerShown((shown) => !shown)
-            }}
-          >
-            {answerShown ? 'Hide the answer' : 'Show the answer'}
           </Button>
         </>
       }
@@ -205,6 +222,11 @@ function PeriodogramFigure() {
             label="CRB std $\sigma_{CR}(\hat{f})$ (theory)"
             value={crbStd.toPrecision(2)}
           />
+          {answerShown && bandTooNarrow ? (
+            <ReadoutNote>
+              At this N the CRB band is thinner than its tick on the plot.
+            </ReadoutNote>
+          ) : null}
         </>
       }
     >
@@ -215,17 +237,7 @@ function PeriodogramFigure() {
             swatchClass: 'stroke-muted-foreground',
           },
           { label: 'your candidate', swatchClass: 'stroke-cursor' },
-          {
-            label: 'peak $\\hat{f}_{ML}$',
-            swatchClass: 'fill-estimate',
-            mark: 'triangle',
-          },
-          { label: 'true tone', swatchClass: 'stroke-truth', dash: true },
-          {
-            label: 'true tone $\\pm$ CRB std',
-            swatchClass: 'fill-truth/15',
-            mark: 'square',
-          },
+          ...(answerShown ? ANSWER_LEGEND : []),
         ]}
       />
       <Plot
@@ -305,7 +317,7 @@ function PeriodogramFigure() {
             stroke="none"
             className="font-mono plot-text-xs"
           >
-            match |X(f)|²/N
+            match |X(f)|²/N, scaled to the peak
           </text>
         </g>
         {answerShown ? (
@@ -335,15 +347,6 @@ function PeriodogramFigure() {
               <Sym base="f" sub="0" /> ±<Sym base="σ" sub="CR" /> ={' '}
               {crbStd.toPrecision(2)}
             </text>
-            {bandTooNarrow ? (
-              <text
-                x={xOf(TRUE_FREQ) + 5}
-                y={CRB_Y + 21}
-                className="fill-truth font-mono plot-text-xs"
-              >
-                band thinner than the tick
-              </text>
-            ) : null}
             <line
               x1={xOf(TRUE_FREQ)}
               y1={TOP}
@@ -408,7 +411,7 @@ function PeriodogramFigure() {
         </text>
         <text
           x={xOf(candidate) + (matchLabelLeft ? -6 : 6)}
-          y={TOP + 26}
+          y={TOP + 30}
           textAnchor={matchLabelLeft ? 'end' : 'start'}
           className="plot-halo fill-cursor font-mono plot-text-sm"
         >

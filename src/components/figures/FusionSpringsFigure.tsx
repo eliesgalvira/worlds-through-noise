@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { ComponentProps } from 'react'
 import { Button } from '@/components/ui/button.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
 import { MathText } from '@/components/MathText.tsx'
@@ -25,6 +26,15 @@ const SIGMA_MIN = 0.8
 const MAX_WEIGHT = 1 / (SIGMA_MIN * SIGMA_MIN)
 /** Height of the sensor readings above the axis. */
 const READING_Y = 40
+
+/** Legend entry for the prior anchor, shown only while the prior is on. */
+const PRIOR_LEGEND: ComponentProps<typeof Legend>['items'] = [
+  {
+    label: 'prior anchor $\\mu_\\theta$',
+    swatchClass: 'fill-prior',
+    mark: 'dot',
+  },
+]
 
 function FusionSpringsFigure() {
   const [sigmas, setSigmas] = useState<ReadonlyArray<number>>([2, 3.5, 5])
@@ -140,7 +150,7 @@ function FusionSpringsFigure() {
             mark: 'dot',
           },
           { label: 'spring', swatchClass: 'stroke-muted-foreground/60' },
-          { label: 'prior anchor', swatchClass: 'fill-prior', mark: 'dot' },
+          ...(priorOn ? PRIOR_LEGEND : []),
           {
             label: 'balance point $\\hat{\\theta}$',
             swatchClass: 'fill-estimate',

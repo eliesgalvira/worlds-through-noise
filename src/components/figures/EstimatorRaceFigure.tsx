@@ -147,7 +147,7 @@ function EstimatorRaceFigure() {
   return (
     <FigureShell
       title="Race two estimators over 500 repeated experiments"
-      instruction="Both machines estimate the same hidden mean (dashed line) from the same data. The piles are their outputs over 500 fresh experiments. The bracket above each pile marks its center and its spread $\pm\sigma_{\hat{\theta}}$: the bias $b$ is how far the center sits from the truth $\theta$. Now switch the noise from Gaussian to uniform and run again."
+      instruction="Both machines estimate the same hidden mean (dashed line) from the same data. The piles are their outputs over 500 fresh experiments. The bracket above each pile marks its center and its spread $\pm\sigma_{\hat{\theta}}$: the bias $b_{\hat{\theta}}$ is how far the center sits from the truth $\theta$. Now switch the noise from Gaussian to uniform and run again."
       controls={
         <>
           <div className="flex flex-wrap gap-2">
@@ -204,16 +204,16 @@ function EstimatorRaceFigure() {
       readout={
         <>
           <ReadoutRow
-            label="Sample mean: $b$, $\sigma_{\hat{\theta}}$ (measured)"
+            label="Sample mean: $b_{\hat{\theta}}$, $\sigma_{\hat{\theta}}$ (measured)"
             value={readout(meanStats)}
             tone="estimate"
           />
           <ReadoutRow
-            label="Midrange: $b$, $\sigma_{\hat{\theta}}$ (measured)"
+            label="Midrange: $b_{\hat{\theta}}$, $\sigma_{\hat{\theta}}$ (measured)"
             value={readout(midStats)}
           />
           <ReadoutRow
-            label="Lower MSE $= \sigma_{\hat{\theta}}^2 + b^2$"
+            label="Lower MSE $= \sigma_{\hat{\theta}}^2 + b_{\hat{\theta}}^2$"
             value={
               result === null
                 ? '—'
@@ -269,7 +269,7 @@ function EstimatorRaceFigure() {
           d={midHist
             .map(
               (count, i) =>
-                `${i === 0 ? 'M' : 'L'} ${(10 + i * slotW).toFixed(1)} ${(AXIS_Y - barH(count)).toFixed(1)} H ${(10 + (i + 1) * slotW).toFixed(1)}`,
+                `${i === 0 ? 'M' : 'L'} ${(10 + i * slotW).toFixed(1)} ${(AXIS_Y - 1.5 - barH(count)).toFixed(1)} H ${(10 + (i + 1) * slotW).toFixed(1)}`,
             )
             .join(' ')}
           fill="none"
@@ -302,11 +302,11 @@ function EstimatorRaceFigure() {
         />
         {result === null ? (
           <text
-            x={14}
+            x={xOf(TRUTH) + 10}
             y={AXIS_Y - 50}
             className="plot-halo fill-muted-foreground font-mono plot-text-sm"
           >
-            Predict, then run
+            Which pile is narrower?
           </text>
         ) : (
           bracketRows.map(({ name, stat, y, stroke, fill }) => {
@@ -314,11 +314,19 @@ function EstimatorRaceFigure() {
             const right = xOf(Math.min(stat.mean + stat.sd, X_MAX))
             const center = xOf(stat.mean)
             const label = `${name} spread ±${formatNumber(stat.sd, 3)}`
-            // Always above the bracket's left end, pulled in to fit the plot.
-            const labelX = Math.min(
-              Math.max(left, 12),
-              W - 10 - label.length * LABEL_CHAR_W,
-            )
+            // Beside the bracket on the side away from the truth line, so the
+            // line never crosses it. Above the bracket when there is no room.
+            const labelW = label.length * LABEL_CHAR_W
+            const place: { x: number; y: number; anchor: 'start' | 'end' } =
+              stat.mean >= TRUTH && right + 6 + labelW <= W - 10
+                ? { x: right + 6, y: y + 4, anchor: 'start' }
+                : stat.mean < TRUTH && left - 6 - labelW >= 10
+                  ? { x: left - 6, y: y + 4, anchor: 'end' }
+                  : {
+                      x: Math.min(Math.max(left, 12), W - 10 - labelW),
+                      y: y - 9,
+                      anchor: 'start',
+                    }
             return (
               <g key={stroke}>
                 <path
@@ -328,8 +336,9 @@ function EstimatorRaceFigure() {
                   fill="none"
                 />
                 <text
-                  x={labelX}
-                  y={y - 9}
+                  x={place.x}
+                  y={place.y}
+                  textAnchor={place.anchor}
                   className={`plot-halo font-mono plot-text-xs ${fill}`}
                 >
                   {label}

@@ -54,7 +54,7 @@ export const estimationLesson: LessonRecord = {
       object:
         'Draw the likelihood for the data you actually observed: it says how plausible each candidate value of $\\theta$ makes them. The peak of this landscape is the maximum-likelihood (ML) estimate. The sharpness near the peak is how confidently the data votes: a knife-edge peak pins $\\theta$ down, a broad hill leaves it loose. The strip under the landscape draws the slope of its logarithm, the score $\\partial \\ln f/\\partial\\theta$: zero at the peak, and steeper the sharper the peak. Fisher information is the average curvature of this landscape drawn on a log scale, and the CRB is its inverse: flat landscape, poor floor.',
       action:
-        'The figure draws $N$ samples $x_n = \\theta + w_n$ with Gaussian noise $w_n \\sim \\mathcal{N}(0, \\sigma^2)$, so $\\sigma$ is the noise standard deviation. Draw fresh samples and watch the landscape rebuild — the peak wobbles from draw to draw, and the size of the wobble matches the flatness. Raise $N$: each new sample multiplies another factor into the likelihood, the landscape sharpens, and the wobble’s variance shrinks like $1/N$ (its width like $1/\\sqrt{N}$). Raise the noise $\\sigma$ and it flattens again.',
+        'The figure draws $N$ samples $x_n = \\theta + w_n$ with Gaussian noise $w_n \\sim \\mathcal{N}(0, \\sigma^2)$, so $\\sigma$ is the noise standard deviation. Draw fresh samples and watch the landscape rebuild — the peak wobbles from draw to draw, and the size of the wobble matches the flatness. Raise $N$: each new sample multiplies another factor into the likelihood, the landscape sharpens, and the wobble’s variance shrinks like $1/N$ (its width like $1/\\sqrt{N}$). Raise the noise $\\sigma$ and it flattens again. The bar around the peak spans $\\pm\\sigma_{CR}$, the square root of the Cramér–Rao bound.',
       payoff:
         'The landscape also shows when an efficient estimator exists. The strip under it draws the score, the slope of the log-likelihood. For the Gaussian mean the score is a straight line through the peak, $\\frac{N}{\\sigma^2}(\\bar{x} - \\theta)$: it factors as $I(\\theta)\\,(g(\\mathbf{x}) - \\theta)$ with $g(\\mathbf{x}) = \\bar{x}$ free of $\\theta$, so the sample mean reaches the bound. What matters is the factorization, not the straightness: a curved score can still factor, as for the exponential mean and the Poisson rate in the workbook. When the score cannot be written that way, as for phase, frequency or power $P = A^2/2$, no unbiased estimator reaches the floor. ML still finds the peak, and presses against the floor asymptotically.',
       equations: [
@@ -106,7 +106,7 @@ export const estimationLesson: LessonRecord = {
       object:
         'Each measurement acts as a spring. $x_i$ is an anchor pulling the estimate toward itself with stiffness $1/\\sigma_i^2$: precise sensors are stiff springs, noisy sensors are slack ones. The estimate is where all the pulls balance. And a Gaussian prior is nothing special — it is one more spring, anchored at $\\mu_\\theta$, with stiffness $1/\\sigma_\\theta^2$.',
       action:
-        'In the figure, drag one sensor’s noise up and watch its spring slacken: the balance point slides away from it, while the combined variance grows, but never past what the other sensors achieve on their own. Raise $\\sigma_1$ to its maximum, a nearly broken sensor like the defective pixel of the June 2026 final (whose variance $\\sigma_0^2 \\to \\infty$), and watch what the estimate does with it. Then switch the prior spring on, feel it pull the estimate toward $\\mu_\\theta$, and stiffen the sensors (lower their $\\sigma$) to watch the data springs overpower it.',
+        'In the figure, drag one sensor’s noise up and watch its spring slacken: the balance point slides away from it, while the combined variance grows, but never past what the other sensors achieve on their own. Raise $\\sigma_1$ to its maximum, a nearly broken sensor like the defective pixel of the June 2026 final (whose variance $\\sigma_0^2 \\to \\infty$), and watch the balance point settle between the other two sensors, as if the broken one were not there. Then switch the prior spring on, feel it pull the estimate toward $\\mu_\\theta$, and stiffen the sensors (lower their $\\sigma$) to watch the data springs overpower it.',
       payoff:
         'One picture now covers four exam staples: greenhouse-sensor fusion, the defective camera pixel, the BLUE (the best linear unbiased estimator — exactly this balance of springs, derived under a linearity constraint), and MAP shrinkage, $\\hat{\\theta}_{MAP} = {\\alpha\\hat{\\theta}_{ML}} + {(1-\\alpha)\\mu_\\theta}$, where $\\alpha$ is the data springs’ share of the total stiffness. It also explains why the prior fades as data accumulate: with $N$ equal data springs against one prior spring, the prior’s share $1 - \\alpha$ shrinks as $N$ grows.',
       equations: [
@@ -129,7 +129,7 @@ export const estimationLesson: LessonRecord = {
       ],
       prediction: {
         question:
-          'Eight good pixels and one broken one. How much estimation variance does the broken pixel contribute?',
+          'Eight good pixels and one broken one. How much does keeping the broken pixel cost the fused estimate?',
         answer:
           'Almost none is lost by keeping it: its weight $1/\\sigma_0^2 \\approx 0$ makes the fusion converge to the 8-pixel average with variance $\\sigma^2/8$, where $\\sigma^2$ is the noise variance of each good pixel. Fusion degrades gracefully.',
       },
@@ -146,7 +146,7 @@ export const estimationLesson: LessonRecord = {
       title: 'ML frequency: a detector bank',
       question:
         'How does maximum likelihood find a frequency, and how precisely can it?',
-      trap: 'A tone of unknown frequency $f$, amplitude $A$ and phase is buried in noise, and you have $N$ samples $x(n)$. Which frequency is it? Maximum likelihood (ML) answers by testing every candidate frequency against the data and keeping the best match. Once the amplitude is maximized out, the best match is the $f$ that maximizes $|X(f)|^2$, with $X(f)$ the Fourier transform of the samples, and the figure runs that search.',
+      trap: 'A tone $A e^{j2\\pi f n}$ of unknown frequency $f$ and unknown complex amplitude $A$ (its size and phase) is buried in noise, and you have $N$ samples $x(n)$. Which frequency is it? Maximum likelihood (ML) answers by testing every candidate frequency against the data and keeping the best match. Once the amplitude is maximized out, the best match is the $f$ that maximizes $|X(f)|^2$, with $X(f)$ the Fourier transform of the samples, and the figure runs that search.',
       object:
         'Think of it as a bank of candidate explanations. Each candidate frequency $f$ proposes a template, the vector $\\mathbf{s}(f)$ of samples a clean tone at $f$ would produce. The data rates every candidate by how much of $\\mathbf{x}$ lies along that template: $|\\mathbf{s}(f)^H\\mathbf{x}|^2 = |X(f)|^2$, with $^H$ the conjugate transpose, a correlation computed from your samples. ML picks the candidate with the best match. This is the Fourier transform working as a detector, not as a change of representation.',
       action:
@@ -166,7 +166,7 @@ export const estimationLesson: LessonRecord = {
           latex:
             '\\sigma^2_{CR(f)} = \\frac{6}{4\\pi^2\\, \\mathrm{SNR}\\; N(N-1)(N+1)} \\;\\approx\\; \\frac{3}{2\\pi^2\\,\\mathrm{SNR}\\,N^3}, \\qquad \\mathrm{SNR} = \\frac{|A|^2}{\\sigma^2}',
           caption:
-            'This is the complex tone $A e^{j2\\pi f n}$ in complex noise of power $\\sigma^2$. It is the model the figure simulates and the bound its CRB readout uses. With $A$ known the bound is about 4 times lower, $3/(4\\pi^2\\,\\mathrm{SNR}\\,N(N-1)(2N-1))$. Either way the $1/N^3$ is why splitting the data into blocks is a bad idea for frequency estimation.',
+            'This is the complex tone $A e^{j2\\pi f n}$ in complex noise of power $\\sigma^2$. It is the model the figure simulates and the bound its CRB readout uses. With the complex amplitude $A$ known the bound is about 4 times lower, $3/(4\\pi^2\\,\\mathrm{SNR}\\,N(N-1)(2N-1))$. Either way the $1/N^3$ is why splitting the data into blocks is a bad idea for frequency estimation.',
         },
       ],
       prediction: {
@@ -368,7 +368,7 @@ export const estimationLesson: LessonRecord = {
         {
           kind: 'math',
           content:
-            'x_0 = \\theta + w_0, \\quad w_0 \\sim N(0, \\sigma_0^2) \\qquad\\quad x_i = \\theta + w_i, \\quad w_i \\sim N(0, \\sigma^2), \\;\\; {i = 1, \\dots, 8}',
+            '\\begin{aligned} x_0 &= \\theta + w_0, & w_0 &\\sim N(0, \\sigma_0^2) \\\\ x_i &= \\theta + w_i, & w_i &\\sim N(0, \\sigma^2), \\quad i = 1, \\dots, 8 \\end{aligned}',
         },
         {
           kind: 'text',
@@ -386,7 +386,7 @@ export const estimationLesson: LessonRecord = {
               title: 'Differentiate the single-sample log-likelihood',
               body: 'One Gaussian observation centered on $\\theta$. The score is linear in $(x_0 - \\theta)$.',
               latex:
-                '\\frac{\\partial \\ln L(\\theta)}{\\partial \\theta} = \\frac{1}{\\sigma_0^2}(x_0 - \\theta) \\;\\Longrightarrow\\; \\hat{\\theta}_{ML} = x_0',
+                '\\frac{\\partial \\ln f(x_0; \\theta)}{\\partial \\theta} = \\frac{1}{\\sigma_0^2}(x_0 - \\theta) \\;\\Longrightarrow\\; \\hat{\\theta}_{ML} = x_0',
             },
             {
               title: 'Read efficiency off the score factorization',
@@ -411,7 +411,7 @@ export const estimationLesson: LessonRecord = {
               title: 'Write the joint density with unequal variances',
               body: 'Independent sensors give a diagonal covariance $\\mathbf{C}_x = \\operatorname{diag}[\\sigma_0^2, \\sigma^2, \\dots, \\sigma^2]$ and mean $\\theta\\mathbf{1}$.',
               latex:
-                '\\frac{\\partial \\ln L(\\theta)}{\\partial \\theta} = \\mathbf{1}^T\\mathbf{C}_x^{-1}(\\mathbf{x} - \\mathbf{1}\\theta) = \\mathbf{1}^T\\mathbf{C}_x^{-1}\\mathbf{1}\\left(\\frac{\\mathbf{1}^T\\mathbf{C}_x^{-1}\\mathbf{x}}{\\mathbf{1}^T\\mathbf{C}_x^{-1}\\mathbf{1}} - \\theta\\right)',
+                '\\frac{\\partial \\ln f(\\mathbf{x}; \\theta)}{\\partial \\theta} = \\mathbf{1}^T\\mathbf{C}_x^{-1}(\\mathbf{x} - \\mathbf{1}\\theta) = \\mathbf{1}^T\\mathbf{C}_x^{-1}\\mathbf{1}\\left(\\frac{\\mathbf{1}^T\\mathbf{C}_x^{-1}\\mathbf{x}}{\\mathbf{1}^T\\mathbf{C}_x^{-1}\\mathbf{1}} - \\theta\\right)',
               note: 'The score factorizes, so the estimator it exposes is efficient — no need to hunt further.',
             },
             {

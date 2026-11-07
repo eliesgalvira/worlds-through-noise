@@ -153,7 +153,7 @@ function CurvatureFigure() {
             tone="estimate"
           />
           <ReadoutRow
-            label="CRB std $\sigma/\|\partial\mathbf{p}/\partial\theta\| = \sigma/\sqrt{N}$ (theory)"
+            label="CRB std $\sigma_{CR} = \sigma/\sqrt{N}$ (theory)"
             value={formatNumber(crbStd, 3)}
           />
           <ReadoutRow

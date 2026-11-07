@@ -91,7 +91,7 @@ function EstimatorRaceFigure() {
   // when its estimator does. A pile taller than the frame is clipped and
   // prints the count of its tallest bar.
   const maxCount = RUNS * 0.3
-  const barH = (count: number) => Math.min(count / maxCount, 1) * (AXIS_Y - 80)
+  const barH = (count: number) => Math.min(count / maxCount, 1) * (AXIS_Y - 104)
   const clippedPeak = (hist: ReadonlyArray<number>) => {
     const peak = Math.max(...hist)
     return peak > maxCount ? [{ count: peak, i: hist.indexOf(peak) }] : []
@@ -180,8 +180,9 @@ function EstimatorRaceFigure() {
             value={mse(meanStats) < mse(midStats) ? 'sample mean' : 'midrange'}
           />
           <ReadoutNote>
-            Both noises have variance 1. The ranking flips with the distribution
-            — “best estimator” is a property of the pair.
+            {kind === 'uniform'
+              ? 'Both noises have variance 1. The ranking flipped with the distribution: “best estimator” is a property of the pair.'
+              : 'Both noises have variance 1.'}
           </ReadoutNote>
         </>
       }
@@ -195,7 +196,7 @@ function EstimatorRaceFigure() {
           },
           {
             label: 'midrange $(\\max{+}\\min)/2$ pile (outline)',
-            swatchClass: 'stroke-foreground',
+            swatchClass: 'stroke-muted-foreground',
           },
           {
             label: 'hidden truth $\\theta$',
@@ -227,18 +228,18 @@ function EstimatorRaceFigure() {
             )
             .join(' ')}
           fill="none"
-          className="stroke-foreground"
-          strokeWidth={1.6}
+          className="stroke-muted-foreground"
+          strokeWidth={2}
         />
         {[
           { hist: meanHist, className: 'fill-estimate' },
-          { hist: midHist, className: 'fill-foreground' },
+          { hist: midHist, className: 'fill-muted-foreground' },
         ].flatMap(({ hist, className }) =>
           clippedPeak(hist).map(({ count, i }) => (
             <text
               key={`${className}${i}`}
               x={10 + (i + 1) * slotW + 3}
-              y={88}
+              y={110}
               className={`plot-halo font-mono plot-text-xs ${className}`}
             >
               {count} runs, off scale ↑
@@ -247,18 +248,20 @@ function EstimatorRaceFigure() {
         )}
         {[
           {
+            name: 'sample mean',
             stat: meanStats,
-            y: 46,
+            y: 52,
             stroke: 'stroke-estimate',
             fill: 'fill-estimate',
           },
           {
+            name: 'midrange',
             stat: midStats,
-            y: 64,
-            stroke: 'stroke-foreground',
-            fill: 'fill-foreground',
+            y: 88,
+            stroke: 'stroke-muted-foreground',
+            fill: 'fill-muted-foreground',
           },
-        ].map(({ stat, y, stroke, fill }) => {
+        ].map(({ name, stat, y, stroke, fill }) => {
           const left = xOf(Math.max(stat.mean - stat.sd, X_MIN))
           const right = xOf(Math.min(stat.mean + stat.sd, X_MAX))
           const center = xOf(stat.mean)
@@ -271,11 +274,11 @@ function EstimatorRaceFigure() {
                 fill="none"
               />
               <text
-                x={Math.min(right + 5, W - 70)}
-                y={y + 4}
+                x={12}
+                y={y - 9}
                 className={`plot-halo font-mono plot-text-xs ${fill}`}
               >
-                ±σ = {formatNumber(stat.sd, 3)}
+                {name}: center and ±σ = {formatNumber(stat.sd, 3)}
               </text>
             </g>
           )

@@ -5,23 +5,23 @@ export const estimationLesson: LessonRecord = {
   ordinal: '03',
   title: 'Estimation',
   thesis:
-    'An estimator is a machine you must judge by its cloud of outputs, never by one lucky number — and the Cramér-Rao bound is the physics of how tight that cloud can ever be.',
+    'An estimator is a machine you must judge by its cloud of outputs, never by one lucky number — and the Cramér-Rao bound says how tight that cloud can ever be.',
   intro: [
-    'Tema 3 has one skeleton: model the data $f(\\mathbf{x}; \\theta)$, ask how much the data even knows about $\\theta$ (the Cramér–Rao bound, CRB), try to build the estimator that extracts all of it (an efficient or maximum-likelihood, ML, estimator), and, when prior knowledge exists, add it as one more measurement.',
+    'Topic 3 has one skeleton: model the data $f(\\mathbf{x}; \\theta)$, ask how much the data even knows about $\\theta$ (the Cramér–Rao bound, CRB), try to build the estimator that extracts all of it (an efficient or maximum-likelihood, ML, estimator), and, when prior knowledge exists, add it as one more measurement.',
     'Exams walk this skeleton in order — “find the pdf, find the CRB, does the efficient estimator exist, find the ML, is it consistent” — so this lesson does too, with the objects made visible at each step.',
   ],
   modules: [
     {
       id: 'E1',
-      title: 'Bias, variance, MSE: judge the machine',
+      title: 'Bias, variance, mean squared error',
       question: 'What do bias, variance and MSE actually describe?',
       trap: 'An estimator is a formula $\\hat{\\theta}(\\mathbf{x})$ that turns observed data $\\mathbf{x}$ into a guess for an unknown parameter $\\theta$ — and its output looks like an answer. It is not. It is one draw from a random variable, because the data it ate were random, and a single lucky draw can make a terrible estimator look brilliant. Bias and variance stay abstract penalties until you see the cloud of outputs they actually measure.',
       object:
         'So judge machines, not numbers. Take two competing estimators of the same hidden mean: the sample mean, and the “midrange,” $(\\max + \\min)/2$, which averages only the largest and smallest observations. Feed both the same experiment hundreds of times. Each machine piles up a histogram of its outputs. Bias is where a pile is centered relative to the truth. Variance is the pile’s width. The mean squared error (MSE) charges for both at once.',
       action:
-        'Press run in the figure and watch the piles grow under Gaussian noise: the sample mean wins and the midrange is a wide mess. Then switch the noise to uniform and run again. The ranking flips — the midrange pile becomes eerily narrow. Nothing about the two formulas changed. Only the data model $f(\\mathbf{x}; \\theta)$, the density that describes how the data are generated, did.',
+        'Press run in the figure and watch the piles grow under Gaussian noise. Which pile is narrower? Then predict what happens when the noise turns uniform with the same variance, switch it and run again. The two formulas never change. Only the data model $f(\\mathbf{x}; \\theta)$, the density that describes how the data are generated, does.',
       payoff:
-        'That flip is the lesson of the whole tema: “best estimator” is not a property of a formula, it is a property of the formula–distribution pair. It explains why the theory insists on writing down $f(\\mathbf{x}; \\theta)$ before doing anything else, and why a word like “efficient” is always relative to a model. Consistency also becomes something you can watch: raise $N$ and a good pile tightens onto the truth.',
+        'That flip is the lesson of the whole topic: “best estimator” is not a property of a formula, it is a property of the formula–distribution pair. It explains why the theory insists on writing down $f(\\mathbf{x}; \\theta)$ before doing anything else, and why a word like “efficient” is always relative to a model. Consistency also becomes something you can watch: raise $N$ and a good pile tightens onto the truth.',
       equations: [
         {
           sentence:
@@ -52,11 +52,11 @@ export const estimationLesson: LessonRecord = {
         'What limits every unbiased estimator, and when does the perfect one exist?',
       trap: 'Every estimate built from noisy data wobbles from one experiment to the next. The Cramér–Rao bound (CRB) is a floor on that wobble: no unbiased estimator can have a variance below it. Its formula, an expectation of a squared derivative of a logarithm, then inverted, is hard to picture. So is the test for an efficient estimator, one whose variance actually touches the floor. Both are read off one curve.',
       object:
-        'That curve is the likelihood, drawn as a function of $\\theta$. For the data you actually observed, plot how plausible each candidate value of $\\theta$ makes them — the likelihood $f(\\mathbf{x}; \\theta)$ as a function of $\\theta$. The peak of this landscape is the maximum-likelihood (ML) estimate. The sharpness near the peak is how confidently the data votes: a knife-edge peak pins $\\theta$ down, a broad hill leaves it loose. Fisher information is the average curvature of this landscape drawn on a log scale, $-E\\{\\partial^2 \\ln f/\\partial\\theta^2\\}$, and the CRB is its inverse: flat landscape, poor floor.',
+        'That curve is the likelihood $f(\\mathbf{x}; \\theta)$, drawn as a function of $\\theta$ for the data you actually observed: how plausible each candidate value of $\\theta$ makes them. The peak of this landscape is the maximum-likelihood (ML) estimate. The sharpness near the peak is how confidently the data votes: a knife-edge peak pins $\\theta$ down, a broad hill leaves it loose. Fisher information is the average curvature of this landscape drawn on a log scale, and the CRB is its inverse: flat landscape, poor floor.',
       action:
-        'In the figure, draw fresh samples and watch the landscape rebuild — the peak wobbles from draw to draw, and the size of the wobble matches the flatness. Raise $N$: each new sample multiplies another factor into the likelihood, the landscape sharpens, and the wobble’s variance shrinks like $1/N$ (its width like $1/\\sqrt{N}$). Raise the noise $\\sigma$ and it flattens again. You are watching the bound $\\sigma^2_{CR}(\\theta) = \\sigma^2/N$ operate live, not as a formula.',
+        'In the figure, draw fresh samples and watch the landscape rebuild — the peak wobbles from draw to draw, and the size of the wobble matches the flatness. Raise $N$: each new sample multiplies another factor into the likelihood, the landscape sharpens, and the wobble’s variance shrinks like $1/N$ (its width like $1/\\sqrt{N}$). Raise the noise $\\sigma$ and it flattens again. You are watching the Cramér–Rao bound operate live.',
       payoff:
-        'With the landscape in mind, the existence condition stops being mystical. For the Gaussian-mean problem the score, the slope of the log-likelihood, is $\\frac{N}{\\sigma^2}(\\bar{x} - \\theta)$ — a straight line through the peak whose slope never depends on the data. When the score factors like that, as $I(\\theta)\\,(\\hat{\\theta}(\\mathbf{x}) - \\theta)$ with $I(\\theta)$ the Fisher information, the peak position $\\bar{x}$ carries all the information, and the estimator that reads it achieves the bound. When the score bends — as it does for phase, frequency, or power $P = A^2/2$ — no unbiased estimator reaches the floor. ML still finds the peak, and presses against the floor asymptotically.',
+        'The landscape also shows when an efficient estimator exists. The strip under it draws the score, the slope of the log-likelihood. For the Gaussian mean the score is a straight line through the peak whose slope never depends on the data. When the score has that rigid shape, the peak position $\\bar{x}$ carries all the information, and the estimator that reads it achieves the bound. When the score bends — as it does for phase, frequency, or power $P = A^2/2$ — no unbiased estimator reaches the floor. ML still finds the peak, and presses against the floor asymptotically.',
       equations: [
         {
           sentence:
@@ -97,16 +97,16 @@ export const estimationLesson: LessonRecord = {
     },
     {
       id: 'E3',
-      title: 'Fusion and MAP: precision votes',
+      title: 'Weighted fusion and the prior',
       question:
         'How should unequal-quality measurements be combined — and what is a prior, really?',
       trap: 'Three sensors of unequal quality measure the same humidity $\\theta$, each with independent Gaussian noise of its own standard deviation $\\sigma_i$. Averaging them equally wastes the good ones. Separately, old knowledge may say $\\theta$ is usually near $\\mu_\\theta$, with spread $\\sigma_\\theta$. Students memorize the best fusion of the sensors and the MAP estimate (maximum a posteriori: the most probable value once data and prior are combined) as two different results. Both are one weighted average.',
       object:
         'The picture is springs. Each measurement $x_i$ is an anchor pulling the estimate toward itself with stiffness $1/\\sigma_i^2$: precise sensors are stiff springs, noisy sensors are slack ones. The estimate is where all the pulls balance. And a Gaussian prior is nothing special — it is one more spring, anchored at $\\mu_\\theta$, with stiffness $1/\\sigma_\\theta^2$.',
       action:
-        'In the figure, drag one sensor’s noise up and watch its spring slacken: the balance point slides away from it, while the combined variance $1/\\sum(1/\\sigma_i^2)$ grows, but never past what the other sensors achieve on their own. Break a sensor completely (its variance $\\sigma_0^2 \\to \\infty$, the defective pixel of the June 2026 final) and watch the estimate quietly ignore it: nobody had to decide to discard the data. Then switch the prior spring on, feel it pull the estimate toward $\\mu_\\theta$, and watch the data springs overwhelm it as sensors accumulate.',
+        'In the figure, drag one sensor’s noise up and watch its spring slacken: the balance point slides away from it, while the combined variance $1/\\sum(1/\\sigma_i^2)$ grows, but never past what the other sensors achieve on their own. Raise $\\sigma_1$ to its maximum, a nearly broken sensor like the defective pixel of the June 2026 final (whose variance $\\sigma_0^2 \\to \\infty$), and watch the estimate quietly ignore it: nobody had to decide to discard the data. Then switch the prior spring on, feel it pull the estimate toward $\\mu_\\theta$, and stiffen the sensors (lower their $\\sigma$) to watch the data springs overpower it.',
       payoff:
-        'One picture now covers four exam staples: greenhouse-sensor fusion, the defective camera pixel, the BLUE (the best linear unbiased estimator — exactly this balance of springs, derived under a linearity constraint), and MAP shrinkage, $\\hat{\\theta}_{MAP} = \\alpha\\hat{\\theta}_{ML} + (1-\\alpha)\\mu_\\theta$, where $\\alpha$ is the data springs’ share of the total stiffness. Even “the prior fades as data accumulate” stops being a slogan: $N$ data springs against one prior spring is not a fair fight.',
+        'One picture now covers four exam staples: greenhouse-sensor fusion, the defective camera pixel, the BLUE (the best linear unbiased estimator — exactly this balance of springs, derived under a linearity constraint), and MAP shrinkage, $\\hat{\\theta}_{MAP} = \\alpha\\hat{\\theta}_{ML} + (1-\\alpha)\\mu_\\theta$, where $\\alpha$ is the data springs’ share of the total stiffness. It also explains why the prior fades as data accumulate: with $N$ equal data springs against one prior spring, the prior’s share $1 - \\alpha$ shrinks as $N$ grows.',
       equations: [
         {
           sentence:
@@ -144,9 +144,9 @@ export const estimationLesson: LessonRecord = {
       title: 'ML frequency: a detector bank',
       question:
         'What does maximum likelihood do when no efficient estimator exists — and what does it cost to transform parameters?',
-      trap: 'A tone of unknown frequency $f$, amplitude $A$ and phase is buried in noise, and you have $N$ samples $x(n)$. Which frequency is it? The maximum-likelihood (ML) answer is a recipe: take the Fourier transform $X(f)$ of the samples, square its magnitude (the periodogram) and pick the peak. A second rule comes with it: ML is invariant, so squaring the amplitude estimate gives the ML estimate of the power $P = A^2/2$. Both get memorized without a reason, until an exam asks why that power estimate is biased.',
+      trap: 'A tone of unknown frequency $f$, amplitude $A$ and phase is buried in noise, and you have $N$ samples $x(n)$. Which frequency is it? Maximum likelihood (ML) answers by testing every candidate frequency against the data and keeping the best match. The figure runs that search, and the search turns out to be a Fourier transform.',
       object:
-        'Think of it instead as a bank of candidate explanations. Each candidate frequency $f$ proposes a template, the vector $\\mathbf{s}(f)$ of samples a clean tone at $f$ would produce. The data scores every candidate by how much of $\\mathbf{x}$ lies along that template — $|\\mathbf{s}(f)^H\\mathbf{x}|^2$, a genuine correlation computed against your actual samples. ML picks the candidate with the top score. This is the Fourier transform working as a detector, not as a change of representation.',
+        'Think of it as a bank of candidate explanations. Each candidate frequency $f$ proposes a template, the vector $\\mathbf{s}(f)$ of samples a clean tone at $f$ would produce. The data scores every candidate by how much of $\\mathbf{x}$ lies along that template — $|\\mathbf{s}(f)^H\\mathbf{x}|^2$, a genuine correlation computed against your actual samples. ML picks the candidate with the top score. This is the Fourier transform working as a detector, not as a change of representation.',
       action:
         'In the figure, slide the candidate $f$ across the band and watch the dot on the curve, whose height is the score: the landscape $|X(f)|^2$ rises to a peak at the hidden tone. Add noise and watch spurious ripples start to compete. Then raise $N$ and watch the main peak narrow. Frequency’s CRB shrinks like $1/N^3$, not $1/N$, because a longer record makes the template far more sensitive to small frequency errors.',
       payoff:
@@ -164,14 +164,14 @@ export const estimationLesson: LessonRecord = {
           latex:
             '\\sigma^2_{CR(f)} = \\frac{6}{4\\pi^2\\, \\mathrm{SNR}\\; N(N-1)(N+1)} \\;\\approx\\; \\frac{3}{2\\pi^2\\,\\mathrm{SNR}\\,N^3}, \\qquad \\mathrm{SNR} = \\frac{|A|^2}{\\sigma^2}',
           caption:
-            "This is the complex tone $A e^{j2\\pi f n}$ in complex noise of power $\\sigma^2$. The figure's tone is real, $A\\cos(2\\pi f n + \\phi)$ in real noise, and its bound is $12/((2\\pi)^2\\,\\eta\\,N(N^2-1))$ with $\\eta = A^2/(2\\sigma^2)$ (Kay 1993, eq. 3.41), the formula behind its CRB readout. With $A$ known the bound is about 4 times lower, $3/(4\\pi^2\\,\\mathrm{SNR}\\,N(N-1)(2N-1))$. Either way the $1/N^3$ is why splitting the data into blocks is a bad idea for frequency estimation.",
+            'This is the complex tone $A e^{j2\\pi f n}$ in complex noise of power $\\sigma^2$. It is the model the figure simulates and the bound its CRB readout uses. With $A$ known the bound is about 4 times lower, $3/(4\\pi^2\\,\\mathrm{SNR}\\,N(N-1)(2N-1))$. Either way the $1/N^3$ is why splitting the data into blocks is a bad idea for frequency estimation.',
         },
       ],
       prediction: {
         question:
-          'You double $N$. Roughly how much narrower does the periodogram peak’s wobble get?',
+          'You double $N$. By how much does the CRB standard deviation of $\\hat{f}$ shrink?',
         answer:
-          'Standard deviation shrinks by about $\\sqrt{8} \\approx 2.8$ — the $1/N^3$ law — versus only $\\sqrt{2}$ for an amplitude estimate.',
+          'By about $\\sqrt{8} \\approx 2.8$, the $1/N^3$ law, against only $\\sqrt{2}$ for an amplitude estimate. Check it in the figure: move $N$ from 48 to 96 and the CRB readout drops by that factor.',
       },
       transfer:
         'Slides exercise: two ML frequency estimates from half-blocks, averaged, versus one full-block estimate. Show the variance ratio $\\approx 4$ and explain it with the $N^3$ law rather than algebra.',
@@ -507,7 +507,7 @@ export const estimationLesson: LessonRecord = {
       id: 'wp-exponential',
       source: 'Midterm, Oct 30 2025, Ex. 2 (40 %)',
       title: 'Hospital arrivals: buy accuracy with bias',
-      why: 'The cleanest recent example of the E1 lesson that unbiased is not sacred: after finding the efficient estimator, the exam asks you to deliberately shrink it — and the MSE goes down.',
+      why: 'The cleanest recent example of the E1 lesson that unbiased is not sacred: after finding the efficient estimator, the exam asks whether deliberately shrinking it can lower the MSE.',
       statement: [
         {
           kind: 'text',
@@ -617,7 +617,7 @@ export const estimationLesson: LessonRecord = {
       id: 'wp-poisson',
       source: 'Final, January 7 2026, Ex. 1 (40 %)',
       title: 'Poisson accidents: ML, a transformed cost, and a prior',
-      why: 'One problem covering the three ways an exam can dress up estimation: straight ML with efficiency and consistency, estimating a nonlinear transformation $c(\\lambda) = \\lambda^2 + \\lambda$ of the parameter, and a MAP estimator whose prior fades exactly as data accumulate.',
+      why: 'One problem covering the three ways an exam can dress up estimation: straight ML with efficiency and consistency, estimating a nonlinear transformation $c(\\lambda) = \\lambda^2 + \\lambda$ of the parameter, and a MAP estimator with a prior on the parameter.',
       statement: [
         {
           kind: 'text',
@@ -806,7 +806,7 @@ export const estimationLesson: LessonRecord = {
       id: 'wp-radar-blue',
       source: 'Midterm, April 7 2025, Ex. 2',
       title: 'Radar amplitude in colored noise: design the estimator yourself',
-      why: 'The estimation twin of the Detection page’s whitening move: you build the best linear unbiased estimator with a Lagrange multiplier and the direction $\\mathbf{C}_w^{-1}\\mathbf{s}$ appears again. The closing subtlety is exam gold — the design of parts (b)–(c) is the best LINEAR estimator always, but efficient only because the noise turned out Gaussian.',
+      why: 'The estimation twin of the Detection page’s whitening move: you build the best linear unbiased estimator with a Lagrange multiplier. The closing parts ask when that linear design is also efficient.',
       statement: [
         {
           kind: 'text',
@@ -940,7 +940,7 @@ export const estimationLesson: LessonRecord = {
       id: 'wp-cable',
       source: 'Midterm, April 13 2026, Ex. 2 (5 points)',
       title: 'Two wires, one value: the ML estimator that cancels interference',
-      why: 'A structured covariance you must assemble yourself — $\\sigma_w^2\\mathbf{q}\\mathbf{q}^T + \\sigma_v^2\\mathbf{I}$ — and an ML estimator that the algebra turns into a differential combiner: the common interference cancels exactly, whatever its power. This is why twisted-pair signaling works, derived rather than asserted.',
+      why: 'A structured covariance you must assemble yourself — $\\sigma_w^2\\mathbf{q}\\mathbf{q}^T + \\sigma_v^2\\mathbf{I}$ — and an ML estimator to derive from it, then test against the interference power.',
       statement: [
         {
           kind: 'text',

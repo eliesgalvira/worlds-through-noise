@@ -15,7 +15,9 @@ import { linspace } from '@/domain/math/distributions.ts'
 import { gaussianVector, makeRng } from '@/domain/math/kernel.ts'
 
 const TRUTH = 1
-const W = 470
+const W = 560
+/** Left margin for the vertical-axis numbers, clear of the curve. */
+const LEFT = 40
 const H = 400
 /** Bottom of the curve area, where the θ axis runs. */
 const AXIS_Y = 214
@@ -56,13 +58,10 @@ function CurvatureFigure() {
   const scoreTo = Math.min(sampleMean + scoreReach, T_MAX)
   const scoreY = (theta: number) =>
     SCORE_Y - ((information * (sampleMean - theta)) / SCORE_MAX) * 22
-  // Labels near the top go on opposite sides: the truth label away from the
-  // peak, the CRB label away from the truth.
+  // The truth label and the CRB label each sit on the side away from the
+  // other mark, so neither crosses the other's line.
   const peakRight = sampleMean >= TRUTH
-  const outside = {
-    left: sample.filter((x) => x < T_MIN).length,
-    right: sample.filter((x) => x > T_MAX).length,
-  }
+  const beyondAxis = sample.filter((x) => x < T_MIN || x > T_MAX).length
 
   // Wobble strip: peak positions over 40 independent hypothetical samples.
   const peaks = useMemo(() => {
@@ -76,7 +75,7 @@ function CurvatureFigure() {
   }, [n, sigma, seed])
 
   const xOf = (theta: number) =>
-    10 + ((theta - T_MIN) / (T_MAX - T_MIN)) * (W - 20)
+    LEFT + ((theta - T_MIN) / (T_MAX - T_MIN)) * (W - LEFT - 10)
   const yOf = (ll: number) => 30 + (Math.max(ll, floor) / floor) * (AXIS_Y - 34)
 
   // The parabola leaves the frame below the floor: stop the stroke there
@@ -146,7 +145,7 @@ function CurvatureFigure() {
             value={formatNumber(crbStd, 3)}
           />
           <ReadoutRow
-            label="Std of the 40 peaks below"
+            label="Std of the 40 peak positions (blue dots)"
             value={formatNumber(
               Math.sqrt(
                 peaks.reduce((a, p) => {
@@ -209,9 +208,9 @@ function CurvatureFigure() {
         />
         <text
           x={xOf(TRUTH) + (peakRight ? -4 : 4)}
-          y={20}
+          y={AXIS_Y - 6}
           textAnchor={peakRight ? 'end' : 'start'}
-          className="fill-truth font-mono plot-text-xs"
+          className="plot-halo fill-truth font-mono plot-text-xs"
         >
           θ = {TRUTH}
         </text>
@@ -265,7 +264,7 @@ function CurvatureFigure() {
           strokeWidth={1.5}
         />
         <line
-          x1={10}
+          x1={LEFT}
           y1={AXIS_Y}
           x2={W - 10}
           y2={AXIS_Y}
@@ -295,7 +294,7 @@ function CurvatureFigure() {
           score ∂ln f/∂θ, zero at the peak
         </text>
         <line
-          x1={10}
+          x1={LEFT}
           y1={SCORE_Y}
           x2={W - 10}
           y2={SCORE_Y}
@@ -317,11 +316,20 @@ function CurvatureFigure() {
           className="fill-estimate"
         />
         <text
+          x={W - 10}
+          y={SCORE_Y - 26}
+          textAnchor="end"
+          className="fill-muted-foreground font-mono plot-text-xs"
+        >
+          slope −I(θ) = {formatNumber(-information, 1)}
+        </text>
+        <text
           x={12}
           y={AXIS_Y + 128}
           className="fill-muted-foreground font-mono plot-text-xs"
         >
           samples
+          {beyondAxis > 0 ? `, ${String(beyondAxis)} beyond the axis` : ''}
         </text>
         {sample
           .filter((x) => x >= T_MIN && x <= T_MAX)
@@ -336,25 +344,6 @@ function CurvatureFigure() {
               opacity={0.7}
             />
           ))}
-        {outside.left > 0 ? (
-          <text
-            x={12}
-            y={AXIS_Y + 146}
-            className="fill-muted-foreground font-mono plot-text-xs"
-          >
-            ◂ {outside.left}
-          </text>
-        ) : null}
-        {outside.right > 0 ? (
-          <text
-            x={W - 12}
-            y={AXIS_Y + 146}
-            textAnchor="end"
-            className="fill-muted-foreground font-mono plot-text-xs"
-          >
-            {outside.right} ▸
-          </text>
-        ) : null}
         <text
           x={12}
           y={AXIS_Y + 164}

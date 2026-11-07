@@ -11,7 +11,11 @@ import {
 } from '@/components/figures/shared.tsx'
 import { formatNumber, niceTicks } from '@/components/figures/figure-utils.ts'
 import { linspace } from '@/domain/math/distributions.ts'
-import { makeRng, periodogramAt, toneInNoise } from '@/domain/math/kernel.ts'
+import {
+  complexPeriodogramAt,
+  complexToneInNoise,
+  makeRng,
+} from '@/domain/math/kernel.ts'
 
 const TRUE_FREQ = 0.21
 const AMPLITUDE = 1
@@ -33,12 +37,12 @@ function PeriodogramFigure() {
 
   const signal = useMemo(() => {
     const rng = makeRng(seed)
-    return toneInNoise(rng, n, AMPLITUDE, TRUE_FREQ, sigma, 1.1)
+    return complexToneInNoise(rng, n, AMPLITUDE, TRUE_FREQ, sigma, 1.1)
   }, [n, sigma, seed])
 
   const frequencies = useMemo(() => linspace(0.005, 0.495, 220), [])
   const spectrum = useMemo(
-    () => frequencies.map((f) => periodogramAt(signal, f)),
+    () => frequencies.map((f) => complexPeriodogramAt(signal, f)),
     [signal, frequencies],
   )
   const maxSpec = Math.max(...spectrum, 1e-9)
@@ -47,15 +51,17 @@ function PeriodogramFigure() {
     0,
   )
   const fMl = frequencies[peakIndex] ?? 0
-  const candidateScore = periodogramAt(signal, candidate)
+  const candidateScore = complexPeriodogramAt(signal, candidate)
 
-  const snr = (AMPLITUDE * AMPLITUDE) / 2 / (sigma * sigma)
-  // Real tone with A, f and phase unknown: Kay 1993, eq. 3.41.
-  const crbStd = Math.sqrt(12 / (4 * Math.PI * Math.PI * snr * n * (n * n - 1)))
+  // Complex tone with A and phase unknown: the bound of the slides (T3, p. 97).
+  const snr = (AMPLITUDE * AMPLITUDE) / (sigma * sigma)
+  const crbStd = Math.sqrt(6 / (4 * Math.PI * Math.PI * snr * n * (n * n - 1)))
 
   const xOf = (f: number) => LEFT + (f / 0.5) * (RIGHT - LEFT)
   const yOf = (s: number) => AXIS_Y - (s / maxSpec) * (AXIS_Y - TOP)
   // Zero sits on the frequency axis, which already labels it.
+  // At least 3 units wide, so the band stays visible at large N.
+  const bandW = Math.max(xOf(TRUE_FREQ + crbStd) - xOf(TRUE_FREQ - crbStd), 3)
   const scoreTicks = niceTicks(maxSpec, 5).filter((tick) => tick > 0)
 
   return (
@@ -126,11 +132,11 @@ function PeriodogramFigure() {
             value={formatNumber(TRUE_FREQ, 3)}
           />
           <ReadoutRow
-            label="Tone $A = 1$: SNR $\eta = A^2/(2\sigma^2)$"
+            label="SNR $|A|^2/\sigma^2$ with $A = 1$"
             value={formatNumber(snr, 2)}
           />
           <ReadoutRow
-            label="CRB std of $\hat{f}$ (theory, $\propto N^{-3/2}$)"
+            label="CRB std of $\hat{f}$ (theory)"
             value={formatNumber(crbStd, 5)}
           />
         </>
@@ -212,12 +218,9 @@ function PeriodogramFigure() {
           </text>
         </g>
         <rect
-          x={xOf(Math.max(TRUE_FREQ - crbStd, 0))}
+          x={xOf(TRUE_FREQ) - bandW / 2}
           y={TOP}
-          width={Math.max(
-            xOf(TRUE_FREQ + crbStd) - xOf(TRUE_FREQ - crbStd),
-            1.4,
-          )}
+          width={bandW}
           height={AXIS_Y - TOP}
           className="fill-truth/15"
         />
@@ -269,6 +272,14 @@ function PeriodogramFigure() {
           className="fill-cursor stroke-card"
           strokeWidth={1.5}
         />
+        <text
+          x={xOf(candidate) + (candidate > 0.4 ? -9 : 9)}
+          y={yOf(candidateScore) - 6}
+          textAnchor={candidate > 0.4 ? 'end' : 'start'}
+          className="plot-halo fill-cursor font-mono plot-text-sm"
+        >
+          {formatNumber(candidateScore, 2)}
+        </text>
         <text
           x={(LEFT + RIGHT) / 2}
           y={H - 6}

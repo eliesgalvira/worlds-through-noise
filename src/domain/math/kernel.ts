@@ -68,6 +68,50 @@ export function toneInNoise(
   return out
 }
 
+export type ComplexSignal = {
+  readonly re: ReadonlyArray<number>
+  readonly im: ReadonlyArray<number>
+}
+
+/**
+ * x(n) = A e^{j(2π f n + φ)} + w(n), with w circular complex Gaussian of
+ * power σ² (σ²/2 in each part): the frequency model of the course slides.
+ */
+export function complexToneInNoise(
+  rng: () => number,
+  count: number,
+  amplitude: number,
+  frequency: number,
+  sigma: number,
+  phase: number,
+): ComplexSignal {
+  const re: Array<number> = []
+  const im: Array<number> = []
+  const partSigma = sigma / Math.SQRT2
+  for (let n = 0; n < count; n += 1) {
+    const angle = 2 * Math.PI * frequency * n + phase
+    re.push(amplitude * Math.cos(angle) + partSigma * gaussian(rng))
+    im.push(amplitude * Math.sin(angle) + partSigma * gaussian(rng))
+  }
+  return { re, im }
+}
+
+/** Periodogram |Σ x(n) e^{-j2πfn}|²/N of a complex signal at frequency f. */
+export function complexPeriodogramAt(x: ComplexSignal, f: number): number {
+  let re = 0
+  let im = 0
+  for (let n = 0; n < x.re.length; n += 1) {
+    const c = Math.cos(2 * Math.PI * f * n)
+    const s = Math.sin(2 * Math.PI * f * n)
+    const xr = x.re[n] ?? 0
+    const xi = x.im[n] ?? 0
+    // (xr + j xi)(c − j s)
+    re += xr * c + xi * s
+    im += xi * c - xr * s
+  }
+  return (re * re + im * im) / x.re.length
+}
+
 /** Biased sample autocorrelation r̂(m) = (1/N) Σ x(n+m)x(n) for m = 0..maxLag. */
 export function sampleAutocorrelation(
   x: ReadonlyArray<number>,

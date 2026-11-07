@@ -8,7 +8,7 @@ export const processesLesson: LessonRecord = {
     'A random signal is not a wiggly line. It is a machine that deals wiggly lines, and everything in this course is a question about the machine.',
   intro: [
     'Every later topic — detection, estimation, Wiener filtering, LMS — manipulates the same three objects: the ensemble behind one trace, the autocorrelation $r_x(m)$, and the correlation matrix $\\mathbf{R}_x$. This lesson makes those three objects physical before anyone asks you to compute with them.',
-    'If you can slice an ensemble, slide a copy of a signal past itself, and walk on a power terrain, Tema 1 stops being definitions and becomes furniture.',
+    'If you can slice an ensemble, slide a copy of a signal past itself, and walk on a power terrain, Topic 1 stops being definitions and becomes furniture.',
   ],
   modules: [
     {
@@ -37,7 +37,7 @@ export const processesLesson: LessonRecord = {
           latex:
             'm_X(n) = m_X, \\qquad r_X(n+m,\\,n) = E\\{x(n+m)\\,x^*(n)\\} = r_X(m)',
           caption:
-            'The course says “PAE” for these processes. Everything from Tema 4 onward assumes them.',
+            'The course says “PAE” for these processes. Everything from Topic 4 onward assumes them.',
         },
         {
           sentence:
@@ -57,7 +57,7 @@ export const processesLesson: LessonRecord = {
       transfer:
         'Record a hundred speakers saying the same word. Fixing the speaker gives one waveform — a realization. Fixing sample $n_0 = 500$ (mid-vowel) and drawing speakers at random gives the scalar random variable $x(n_0, S)$. Speech is processed in short frames: say precisely which assumption fails on whole sentences and is rescued frame by frame.',
       examRefs: [
-        'Tema 1 slides: /f/→/u/ phoneme transition as a non-stationary power profile',
+        'Topic 1 slides: /f/→/u/ phoneme transition as a non-stationary power profile',
       ],
     },
     {
@@ -95,7 +95,7 @@ export const processesLesson: LessonRecord = {
       transfer:
         'A prediction filter can only exploit memory. Read from an autocorrelation plot how many lags of memory are available, and say what happens to predictability when $r_x(m) = P_x\\,\\delta(m)$.',
       examRefs: [
-        'Tema 1 collection: $r_x$ of tone, white noise, and tone+noise (the $\\mathbf{R}_x = |A|^2\\mathbf{s}\\mathbf{s}^H + \\sigma^2\\mathbf{I}$ workhorse)',
+        'Topic 1 collection: $r_x$ of tone, white noise, and tone+noise (the $\\mathbf{R}_x = |A|^2\\mathbf{s}\\mathbf{s}^H + \\sigma^2\\mathbf{I}$ workhorse)',
       ],
     },
     {
@@ -109,7 +109,7 @@ export const processesLesson: LessonRecord = {
       action:
         'Walk it in the figure. Drag $\\mathbf{h}$ across the plane and read the honestly computed power. Then tick the constraint box to stay on the unit circle $\\|\\mathbf{h}\\| = 1$ and go around it: the power rises and falls, and its maximum sits exactly where the circle crosses the long axis of the ellipses. Notice what you just did: you solved the constrained optimization “maximize $\\mathbf{h}^H\\mathbf{R}_x\\mathbf{h}$ subject to $\\|\\mathbf{h}\\| = 1$” with your hands. The answer is the principal eigenvector, and the height there is the largest eigenvalue, $\\lambda_{\\max}$.',
       payoff:
-        'Once you have found the loudest direction by walking, the exam classic — design the filter that maximizes SNR for a tone in white noise — stops being a Lagrange-multiplier ritual. A tone $A e^{j\\phi} e^{j2\\pi f_0 n}$ with random phase $\\phi$, whose $Q$ phase-free samples $e^{j2\\pi f_0 n}$ form the vector $\\mathbf{s}$, plus white noise of power $\\sigma^2$, gives $\\mathbf{R}_x = |A|^2\\mathbf{s}\\mathbf{s}^H + \\sigma^2\\mathbf{I}$: a cigar-shaped terrain whose long axis IS $\\mathbf{s}$. So the best unit-norm filter is $\\mathbf{s}/\\sqrt{Q}$, the tone’s own shape, and every other eigen-direction sits at the flat noise floor $\\sigma^2$. Keep this terrain: it returns as the error bowl of Tema 4 and the convergence landscape of Tema 5.',
+        'Once you have found the loudest direction by walking, the exam classic — design the filter that maximizes SNR for a tone in white noise — stops being a Lagrange-multiplier ritual. A tone $A e^{j\\phi} e^{j2\\pi f_0 n}$ with random phase $\\phi$, whose $Q$ phase-free samples $e^{j2\\pi f_0 n}$ form the vector $\\mathbf{s}$, plus white noise of power $\\sigma^2$, gives $\\mathbf{R}_x = |A|^2\\mathbf{s}\\mathbf{s}^H + \\sigma^2\\mathbf{I}$: a cigar-shaped terrain whose long axis IS $\\mathbf{s}$. So the best unit-norm filter is $\\mathbf{s}/\\sqrt{Q}$, the tone’s own shape, and every other eigen-direction sits at the flat noise floor $\\sigma^2$. Keep this terrain: it returns as the error bowl of Topic 4 and the convergence landscape of Topic 5.',
       equations: [
         {
           sentence:
@@ -133,19 +133,19 @@ export const processesLesson: LessonRecord = {
           'A perfectly round bowl: circles instead of ellipses. Every unit filter gives the same power $\\sigma^2$ — there is no preferred direction to exploit.',
       },
       transfer:
-        'Pulse design (Tema 2, radar): to maximize detection SNR in colored noise, the pulse must be the eigenvector of $\\mathbf{C}_w$ with the smallest eigenvalue. Restate that as a fact about walking this terrain for $\\mathbf{C}_w$ instead of $\\mathbf{R}_x$.',
+        'Pulse design (Topic 2, radar): to maximize detection SNR in colored noise, the pulse must be the eigenvector of $\\mathbf{C}_w$ with the smallest eigenvalue. Restate that as a fact about walking this terrain for $\\mathbf{C}_w$ instead of $\\mathbf{R}_x$.',
       examRefs: [
         'Midterm Oct 2025, Ex. 1: codeword design in colored noise via eigen-directions',
-        'Tema 1 ejercicio final: max-SNR FIR filter for a noisy tone',
+        'Topic 1 final exercise: max-SNR FIR filter for a noisy tone',
       ],
     },
   ],
   workedProblems: [
     {
       id: 'wp-sinusoid-predictor',
-      source: 'Exercise collection, Temas 4 and 5 (Feb 2026), Ex. 4.8',
+      source: 'Exercise collection, Topics 4 and 5 (Feb 2026), Ex. 4.8',
       title: 'A sinusoid that predicts itself',
-      why: 'Tema 1 never gets its own exam problem — its moves open the others. This exercise runs both P1 and P2: an ensemble average over the random phase gives the exact $r_x(m)$, then a single recorded realization has to reproduce it by time averages, and you watch the biased estimator fall short.',
+      why: 'Topic 1 never gets its own exam problem — its moves open the others. This exercise runs both P1 and P2: an ensemble average over the random phase gives the exact $r_x(m)$, then a single recorded realization has to reproduce it by time averages, and you watch the biased estimator fall short.',
       statement: [
         {
           kind: 'text',
@@ -270,7 +270,7 @@ export const processesLesson: LessonRecord = {
     },
     {
       id: 'wp-tone-noise',
-      source: 'Exercise collection, Temas 4 and 5 (Feb 2026), Ex. 4.9',
+      source: 'Exercise collection, Topics 4 and 5 (Feb 2026), Ex. 4.9',
       title: 'Tone in noise: the workhorse autocorrelation',
       why: 'This is the $r_x(m) = P\\cos(\\omega_1 m) + \\sigma_w^2\\,\\delta(m)$ object that P2 builds and P3 walks on. Part (d) is the eigenvalue fact the Oct 2025 exam (Detection workbook, last part) pays real points for.',
       statement: [

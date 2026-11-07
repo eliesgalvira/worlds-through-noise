@@ -59,30 +59,32 @@ function FusionSpringsFigure() {
       instruction="Three sensors read the same hidden humidity with different noise. Each pulls the estimate toward its reading with stiffness $1/\sigma^2$. Slacken a sensor and watch the balance slide away from it — then switch on the prior: one more spring, anchored at old knowledge."
       controls={
         <>
-          <Button
-            type="button"
-            variant={priorOn ? 'default' : 'outline'}
-            size="sm"
-            aria-pressed={priorOn}
-            onClick={() => {
-              setPriorOn((on) => !on)
-            }}
-          >
-            {priorOn ? 'Remove the prior spring' : 'Add the prior spring'}
-          </Button>
-          {priorOn ? (
-            <SliderControl
-              label="Prior spread (std of the prior)"
-              variable="σθ"
-              value={priorSigma}
-              min={1}
-              max={15}
-              step={0.5}
-              meaning="Small $\sigma_\theta$: a stubborn prior."
-              onValueChange={setPriorSigma}
-              format={(v) => v.toFixed(1)}
-            />
-          ) : null}
+          <div className="flex flex-col gap-4">
+            <Button
+              type="button"
+              variant={priorOn ? 'default' : 'outline'}
+              size="sm"
+              aria-pressed={priorOn}
+              onClick={() => {
+                setPriorOn((on) => !on)
+              }}
+            >
+              {priorOn ? 'Remove the prior spring' : 'Add the prior spring'}
+            </Button>
+            {priorOn ? (
+              <SliderControl
+                label="Prior spread (std of the prior)"
+                variable="σθ"
+                value={priorSigma}
+                min={1}
+                max={15}
+                step={0.5}
+                meaning="Small $\sigma_\theta$: a stubborn prior."
+                onValueChange={setPriorSigma}
+                format={(v) => v.toFixed(1)}
+              />
+            ) : null}
+          </div>
           {SENSOR_READINGS.map((reading, index) => (
             <SliderControl
               key={reading}
@@ -179,8 +181,16 @@ function FusionSpringsFigure() {
             </text>
           </g>
         ))}
+        <text
+          x={W - 10}
+          y={H - 28}
+          textAnchor="end"
+          className="fill-muted-foreground font-mono plot-text-xs"
+        >
+          humidity θ
+        </text>
         {SENSOR_READINGS.map((reading, index) => {
-          const y = 34 + index * 26
+          const y = 40
           return (
             <g key={reading}>
               <line
@@ -200,11 +210,12 @@ function FusionSpringsFigure() {
                 strokeWidth={1.5}
               />
               <text
-                x={xOf(reading) + 9}
-                y={y + 4}
+                x={xOf(reading)}
+                y={y - 10}
+                textAnchor="middle"
                 className="fill-muted-foreground font-mono plot-text-sm"
               >
-                <Sym base="x" sub={String(index + 1)} /> = {reading}
+                <Sym base="x" sub={String(index + 1)} />={reading}
               </text>
             </g>
           )
@@ -250,7 +261,7 @@ function FusionSpringsFigure() {
             />
             <text
               x={xOf(dataOnly)}
-              y={H - 72}
+              y={H - 96}
               textAnchor="middle"
               className="plot-halo fill-estimate font-mono plot-text-xs"
             >

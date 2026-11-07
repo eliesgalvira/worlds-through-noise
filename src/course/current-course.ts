@@ -48,12 +48,12 @@ export const currentCourse: CourseRecord = {
   ],
   labels: {
     allLessons: 'All lessons',
-    unit: 'Tema',
-    lessonIndexTitle: 'Five temas',
+    unit: 'Topic',
+    lessonIndexTitle: 'Five topics',
     assessmentEyebrow: 'Exam workbook',
     assessmentTitle: 'Real problems, worked one move at a time',
     assessmentDescription:
-      'These are real recent exam and collection problems, chosen because each one runs the moves this tema just taught. Read the statement, solve on paper, and only then walk the solution — each step is revealed one honest move at a time, so you can stop the moment you see where it goes.',
+      'These are real recent exam and collection problems, chosen because each one runs the moves this topic just taught. Read the statement, solve on paper, and only then walk the solution — each step is revealed one at a time, so you can stop the moment you see where it goes.',
     backToIndex: 'Back to the index',
     nextPrefix: 'Next:',
   },
@@ -86,7 +86,7 @@ export const currentCourse: CourseRecord = {
       },
       {
         lead: 'Close with the exam workbook.',
-        body: 'Each tema ends with real recent exam problems. Solve on paper first; the solution then unfolds one move at a time, so you can stop revealing the moment you see the way.',
+        body: 'Each topic ends with real recent exam problems. Solve on paper first; the solution then unfolds one move at a time, so you can stop revealing the moment you see the way.',
       },
     ],
   },

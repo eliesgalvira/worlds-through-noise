@@ -198,7 +198,7 @@ function ErrorBowlFigure() {
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
         Turn the input correlation up and watch the bowl stretch: this exact
-        stretching is what will slow LMS down in Tema 5.
+        stretching is what will slow LMS down in Topic 5.
       </p>
     </FigureShell>
   )

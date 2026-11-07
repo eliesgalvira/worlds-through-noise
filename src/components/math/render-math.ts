@@ -20,6 +20,18 @@ export function renderDisplayMath(latex: string): string {
   })
 }
 
+/**
+ * A display equation laid out as display-size inline math, so the browser
+ * can break it after a relation or operator, or between the formulas a
+ * \\qquad separates, when it is too wide for its box.
+ */
+export function renderWrappedMath(latex: string): string {
+  return katex.renderToString(
+    `\\displaystyle ${latex.replaceAll('\\qquad', '\\quad\\allowbreak')}`,
+    { displayMode: false, throwOnError: false, strict: 'ignore' },
+  )
+}
+
 export function parseInlineMath(
   text: string,
 ): ReadonlyArray<InlineMathSegment> {

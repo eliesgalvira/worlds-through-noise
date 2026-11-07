@@ -55,7 +55,7 @@ function PowerTerrainFigure() {
   return (
     <FigureShell
       title="Walk the power terrain $P_y = \mathbf{h}^H\mathbf{R}_x\mathbf{h}$"
-      instruction="Every point of the plane is a 2-tap filter; the ellipses are iso-power curves of the honestly computed quadratic form. Drag $\mathbf{h}$ around the unit circle and hunt for the loudest direction — then check where the eigenvector arrows point."
+      instruction="Every point of the plane is a 2-tap filter, and the ellipses are iso-power curves of the honestly computed quadratic form. Drag $\mathbf{h}$ around the unit circle and hunt for the loudest direction, then check where the green eigenvector lines point."
       controls={
         <>
           <SliderControl
@@ -65,7 +65,7 @@ function PowerTerrainFigure() {
             min={0}
             max={2.5}
             step={0.05}
-            meaning="Stretches the terrain along the tone's steering direction."
+            meaning="Makes the terrain steeper, mostly along $\mathbf{u}_{\max}$."
             onValueChange={setAmplitude}
             format={(v) => v.toFixed(2)}
           />
@@ -105,7 +105,7 @@ function PowerTerrainFigure() {
             tone="good"
           />
           <ReadoutRow
-            label="$\lambda_{\min}$ (noise-only floor)"
+            label="$\lambda_{\min}$ (quietest direction)"
             value={formatNumber(eig.lambda2, 3)}
           />
           <ReadoutRow

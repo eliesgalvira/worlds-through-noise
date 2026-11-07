@@ -68,7 +68,7 @@ export const processesLesson: LessonRecord = {
       object:
         'Picture the signal and a transparent copy of it on a slider. Slide the copy $m$ samples to the side, lay it over the original, multiply the samples that overlap, and average the products. That average is one number, and it is the autocorrelation at lag $m$. It comes out large when the signal still resembles itself after the shift, and near zero when the shift has destroyed all resemblance. In one word: $r_x(m)$ measures memory.',
       action:
-        'The figure below performs exactly this multiplication and averaging on a real generated signal. Drag the lag $m$ and watch the overlap product collapse into one number, $\\hat{r}_x(m)$, which is stamped onto the growing autocorrelation plot underneath. Then try all three signals and watch memory die at three different speeds: for white noise all resemblance is gone at the first shift. For filtered noise it fades over a few lags. For the tone in noise it never dies — it oscillates forever.',
+        'The figure below performs exactly this multiplication and averaging on a real generated signal. Drag the lag $m$, with the slider or on the lower-left plot, and watch the amber copy slide. The average of the overlap products is one number, $\\hat{r}_x(m)$, the highlighted stem among the lags plotted underneath. Then try all three signals and watch memory die at three different speeds: for white noise all resemblance is gone at the first shift. For filtered noise it fades over a few lags. For the tone in noise it never dies: it oscillates forever.',
       payoff:
         'After a few drags, the properties you were asked to memorize become things you have seen. $r_x(0)$ is the power, because at zero shift a signal overlaps itself perfectly. No lag can beat $r_x(0)$, because nothing overlaps better than no shift. And the power spectral density is the same information asked in the language of frequency: a wide, slowly-fading $r_x$ means a narrow spectrum, a spiky $r_x$ means a flat one. The Fourier pair is a change of language, not new content.',
       equations: [
@@ -83,7 +83,7 @@ export const processesLesson: LessonRecord = {
             'Filtering a stationary process reshapes its spectrum with the filter magnitude as a mask.',
           latex: 'S_Y(f) = |H(f)|^2\\, S_X(f), \\qquad m_y = m_x H(0)',
           caption:
-            'The output stays stationary. Only the sand under the curve is redistributed.',
+            'The output stays stationary. Each frequency’s power is multiplied by $|H(f)|^2$, so the total power can change too.',
         },
       ],
       prediction: {
@@ -95,7 +95,7 @@ export const processesLesson: LessonRecord = {
       transfer:
         'A prediction filter can only exploit memory. Read from an autocorrelation plot how many lags of memory are available, and say what happens to predictability when $r_x(m) = P_x\\,\\delta(m)$.',
       examRefs: [
-        'Tema 1 collection: $r_x$ of tone, white noise, and tone+noise (the $\\mathbf{R}_x = |A|^2\\mathbf{s}\\mathbf{s}^H + \\sigma^2\\mathbf{I}$ workhorse)',
+        'Tema 1 slides, p. 63, Examples 1–3: correlation of white noise, a tone, and tone + noise (the $\\mathbf{R}_x = |A|^2\\mathbf{s}\\mathbf{s}^H + \\sigma^2\\mathbf{I}$ workhorse)',
       ],
     },
     {
@@ -107,9 +107,9 @@ export const processesLesson: LessonRecord = {
       object:
         'Here is the right one: a landscape. Take a filter with two taps, $\\mathbf{h} = [h_0, h_1]^T$, feed it the process, and measure the output power. The result, $P_y = \\mathbf{h}^H\\mathbf{R}_x\\mathbf{h}$, assigns a height to every point of the $(h_0, h_1)$ plane. The curves of equal power are ellipses. The eigenvectors of $\\mathbf{R}_x$ are the axes of those ellipses, and each eigenvalue is how steeply the power grows along its axis. $\\mathbf{R}_x$ is not a table — it is this terrain, and every design problem in the course is a walk on it.',
       action:
-        'Walk it in the figure. Drag $\\mathbf{h}$ across the plane and read the honestly computed power. Then tick the constraint box to stay on the unit circle $\\|\\mathbf{h}\\| = 1$ and go around it: the power rises and falls, and its maximum sits exactly where the circle crosses the long axis of the ellipses. Notice what you just did: you solved the constrained optimization “maximize $\\mathbf{h}^H\\mathbf{R}_x\\mathbf{h}$ subject to $\\|\\mathbf{h}\\| = 1$” with your hands. The answer is the principal eigenvector, and the height there is the largest eigenvalue, $\\lambda_{\\max}$.',
+        'Walk it in the figure. Untick the constraint box, drag $\\mathbf{h}$ across the plane and read the honestly computed power. Then tick the box again to stay on the unit circle $\\|\\mathbf{h}\\| = 1$ and go around it: the power rises and falls, and its maximum sits exactly where the circle crosses $\\mathbf{u}_{\\max}$, the direction in which the ellipses are narrowest because the power climbs fastest there. Notice what you just did: you solved the constrained optimization “maximize $\\mathbf{h}^H\\mathbf{R}_x\\mathbf{h}$ subject to $\\|\\mathbf{h}\\| = 1$” with your hands. The answer is the principal eigenvector, and the height there is the largest eigenvalue, $\\lambda_{\\max}$.',
       payoff:
-        'Once you have found the loudest direction by walking, the exam classic — design the filter that maximizes SNR for a tone in white noise — stops being a Lagrange-multiplier ritual. A tone $A e^{j\\phi} e^{j2\\pi f_0 n}$ with random phase $\\phi$, whose $Q$ phase-free samples $e^{j2\\pi f_0 n}$ form the vector $\\mathbf{s}$, plus white noise of power $\\sigma^2$, gives $\\mathbf{R}_x = |A|^2\\mathbf{s}\\mathbf{s}^H + \\sigma^2\\mathbf{I}$: a cigar-shaped terrain whose long axis IS $\\mathbf{s}$. So the best unit-norm filter is $\\mathbf{s}/\\sqrt{Q}$, the tone’s own shape, and every other eigen-direction sits at the flat noise floor $\\sigma^2$. Keep this terrain: it returns as the error bowl of Tema 4 and the convergence landscape of Tema 5.',
+        'Once you have found the loudest direction by walking, the exam classic — design the filter that maximizes SNR for a tone in white noise — stops being a Lagrange-multiplier ritual. A tone $A e^{j\\phi} e^{j2\\pi f_0 n}$ with random phase $\\phi$, whose $Q$ phase-free samples $e^{j2\\pi f_0 n}$ form the vector $\\mathbf{s}$, plus white noise of power $\\sigma^2$, gives $\\mathbf{R}_x = |A|^2\\mathbf{s}\\mathbf{s}^H + \\sigma^2\\mathbf{I}$: a terrain whose steepest direction IS $\\mathbf{s}$. So the best unit-norm filter is $\\mathbf{s}/\\sqrt{Q}$, the tone’s own shape, and every other eigen-direction sits at the flat noise floor $\\sigma^2$. Keep this terrain: it returns as the error bowl of Tema 4 and the convergence landscape of Tema 5.',
       equations: [
         {
           sentence:
@@ -154,7 +154,7 @@ export const processesLesson: LessonRecord = {
         {
           kind: 'math',
           content:
-            'x(n) = 2\\cos\\!\\left(\\tfrac{\\pi}{2}n + \\varphi\\right)',
+            'x(n) = \\sqrt{2}\\cos\\!\\left(\\tfrac{\\pi}{2}n + \\varphi\\right)',
         },
         {
           kind: 'text',
@@ -172,7 +172,7 @@ export const processesLesson: LessonRecord = {
               title: 'Average over the phase, not over time',
               body: 'The only random thing here is $\\varphi$, so the expectation is an average over the phase deck. Expand the product of cosines. The term carrying $2\\varphi$ averages to zero over a full uniform circle.',
               latex:
-                '\\begin{aligned} r_x(m) &= E\\{x(n+m)\\,x(n)\\} = 2\\cos\\!\\left(\\tfrac{\\pi}{2}m\\right) + 2\\,\\underbrace{E\\left\\{\\cos\\!\\left(\\tfrac{\\pi}{2}(2n+m) + 2\\varphi\\right)\\right\\}}_{=\\,0} \\\\[2pt] &= 2\\cos\\!\\left(\\tfrac{\\pi}{2}m\\right) \\end{aligned}',
+                '\\begin{aligned} r_x(m) &= E\\{x(n+m)\\,x(n)\\} = \\cos\\!\\left(\\tfrac{\\pi}{2}m\\right) + \\underbrace{E\\left\\{\\cos\\!\\left(\\tfrac{\\pi}{2}(2n+m) + 2\\varphi\\right)\\right\\}}_{=\\,0} \\\\[2pt] &= \\cos\\!\\left(\\tfrac{\\pi}{2}m\\right) \\end{aligned}',
               note: 'No $n$ survives — the phase average makes the process stationary, exactly the P1 move.',
             },
             {
@@ -183,9 +183,9 @@ export const processesLesson: LessonRecord = {
             },
             {
               title: 'Insert the three lags and solve',
-              body: 'From step 1: $r_x(0) = 2$, $r_x(1) = 2\\cos(\\pi/2) = 0$, $r_x(2) = 2\\cos(\\pi) = -2$. The matrix is diagonal, so the system falls apart into two scalar equations.',
+              body: 'From step 1: $r_x(0) = 1$, $r_x(1) = \\cos(\\pi/2) = 0$, $r_x(2) = \\cos(\\pi) = -1$. The matrix is diagonal, so the system falls apart into two scalar equations.',
               latex:
-                '\\begin{bmatrix} 2 & 0 \\\\ 0 & 2 \\end{bmatrix} \\begin{bmatrix} a_1 \\\\ a_2 \\end{bmatrix} = \\begin{bmatrix} 0 \\\\ -2 \\end{bmatrix} \\;\\Longrightarrow\\; a_1 = 0,\\quad a_2 = -1',
+                '\\begin{bmatrix} 1 & 0 \\\\ 0 & 1 \\end{bmatrix} \\begin{bmatrix} a_1 \\\\ a_2 \\end{bmatrix} = \\begin{bmatrix} 0 \\\\ -1 \\end{bmatrix} \\;\\Longrightarrow\\; a_1 = 0,\\quad a_2 = -1',
             },
           ],
           answer: {
@@ -201,9 +201,9 @@ export const processesLesson: LessonRecord = {
           steps: [
             {
               title: 'List the eight samples',
-              body: 'With $\\varphi = 0$, $x(n) = 2\\cos(\\pi n / 2)$ cycles with period 4.',
+              body: 'With $\\varphi = 0$, $x(n) = \\sqrt{2}\\cos(\\pi n / 2)$ cycles with period 4.',
               latex:
-                'x(n) = 2,\\; 0,\\; -2,\\; 0,\\; 2,\\; 0,\\; -2,\\; 0 \\qquad (n = 0,\\dots,7)',
+                'x(n) = \\sqrt{2},\\; 0,\\; -\\sqrt{2},\\; 0,\\; \\sqrt{2},\\; 0,\\; -\\sqrt{2},\\; 0 \\qquad (n = 0,\\dots,7)',
             },
             {
               title: 'Read the predictor off the picture',
@@ -222,13 +222,13 @@ export const processesLesson: LessonRecord = {
           steps: [
             {
               title: 'Estimate the lags with the biased formula',
-              body: 'The biased estimator always divides by $N$, even though only $N - m$ products exist at lag $m$. On the record $2, 0, -2, 0, \\dots$ the lag-1 products are all zero, and each nonzero lag-2 product equals $-4$.',
+              body: 'The biased estimator always divides by $N$, even though only $N - m$ products exist at lag $m$. On the record $\\sqrt{2}, 0, -\\sqrt{2}, 0, \\dots$ the lag-1 products are all zero, and each nonzero lag-2 product equals $-2$.',
               latex:
-                '\\hat{r}_x(m) = \\frac{1}{N} \\sum_{n=0}^{N-1-m} x(n)\\,x(n+m): \\qquad \\hat{r}_x(0) = 2, \\quad \\hat{r}_x(1) = 0, \\quad \\hat{r}_x(2) = \\begin{cases} -\\tfrac{12}{8} = -\\tfrac{3}{2} & N = 8 \\\\[2pt] -\\tfrac{4}{4} = -1 & N = 4 \\end{cases}',
+                '\\hat{r}_x(m) = \\frac{1}{N} \\sum_{n=0}^{N-1-m} x(n)\\,x(n+m): \\qquad \\hat{r}_x(0) = 1, \\quad \\hat{r}_x(1) = 0, \\quad \\hat{r}_x(2) = \\begin{cases} -\\tfrac{6}{8} = -\\tfrac{3}{4} & N = 8 \\\\[2pt] -\\tfrac{2}{4} = -\\tfrac{1}{2} & N = 4 \\end{cases}',
             },
             {
               title: 'Solve the same normal equations with the estimates',
-              body: 'The estimated matrix is still diagonal with $\\hat{r}_x(0) = 2$, so $a_2 = \\hat{r}_x(2) / 2$.',
+              body: 'The estimated matrix is still diagonal with $\\hat{r}_x(0) = 1$, so $a_2 = \\hat{r}_x(2)$.',
               latex:
                 'N = 8: \\; a_1 = 0,\\; a_2 = -\\tfrac{3}{4} \\qquad\\quad N = 4: \\; a_1 = 0,\\; a_2 = -\\tfrac{1}{2}',
             },
@@ -239,7 +239,7 @@ export const processesLesson: LessonRecord = {
           ],
           answer: {
             sentence:
-              'The biased estimate shrinks the lag-2 correlation by the factor $(N-2)/N$ — a half at $N=4$, a quarter at $N=8$ — and the predictor inherits the shrinkage. Only as $N \\to \\infty$ does $a_2$ reach $-1$.',
+              'The biased estimate multiplies the lag-2 correlation by $(N-2)/N$, which is $1/2$ at $N=4$ and $3/4$ at $N=8$, and the predictor inherits the shrinkage. Only as $N \\to \\infty$ does $a_2$ reach $-1$.',
             latex:
               'a_2 = -\\tfrac{1}{2} \\;(N{=}4), \\qquad a_2 = -\\tfrac{3}{4} \\;(N{=}8), \\qquad a_2 \\to -1 \\;(N \\to \\infty)',
           },
@@ -253,11 +253,11 @@ export const processesLesson: LessonRecord = {
               title: 'Divide by the number of products actually summed',
               body: 'The unbiased estimator divides each lag by $N - m$ instead of $N$, removing the triangular taper.',
               latex:
-                '\\hat{r}_x^{u}(m) = \\frac{1}{N-m} \\sum_{n=0}^{N-1-m} x(n)\\,x(n+m): \\qquad \\hat{r}_x^{u}(0) = 2, \\quad \\hat{r}_x^{u}(1) = 0, \\quad \\hat{r}_x^{u}(2) = -\\tfrac{12}{6} = -2',
+                '\\hat{r}_x^{u}(m) = \\frac{1}{N-m} \\sum_{n=0}^{N-1-m} x(n)\\,x(n+m): \\qquad \\hat{r}_x^{u}(0) = 1, \\quad \\hat{r}_x^{u}(1) = 0, \\quad \\hat{r}_x^{u}(2) = -\\tfrac{6}{6} = -1',
             },
             {
               title: 'Solve and compare',
-              body: 'The normal equations now reproduce the exact lags of part (a), so the coefficients come out exact: $a_1 = 0$, $a_2 = -1$. The biased estimator does worse on this signal because its taper $(N-m)/N$ systematically underestimates long-lag memory, pulling the predictor toward doing nothing — even though on noisy data the same taper is what keeps estimated correlation matrices well behaved.',
+              body: 'The normal equations now reproduce the exact lags of part (a), so the coefficients come out exact: $a_1 = 0$, $a_2 = -1$. The biased estimator does worse on this signal because its taper $(N-m)/N$ systematically underestimates long-lag memory, pulling the predictor toward doing nothing.',
             },
           ],
           answer: {
@@ -272,12 +272,12 @@ export const processesLesson: LessonRecord = {
       id: 'wp-tone-noise',
       source: 'Exercise collection, Temas 4 and 5 (Feb 2026), Ex. 4.9',
       title: 'Tone in noise: the workhorse autocorrelation',
-      why: 'This is the $r_x(m) = P\\cos(\\omega_1 m) + \\sigma_w^2\\,\\delta(m)$ object that P2 builds and P3 walks on. Part (d) is the eigenvalue fact the Oct 2025 exam (Detection workbook, last part) pays real points for.',
+      why: 'This is the $r_x(m) = P\\cos(\\omega_1 m) + \\sigma_w^2\\,\\delta(m)$ object that P2 builds and P3 walks on. Part (d) uses the same eigen-argument as the Oct 2025 midterm (Detection workbook, part h), where the best codeword difference is the eigenvector of the noise covariance with the smallest eigenvalue.',
       statement: [
         {
           kind: 'text',
           content:
-            'A signal $x(n)$ consists of a sinusoid of power $P$, frequency $\\omega_1$ and phase uniformly distributed in $[0, 2\\pi)$, immersed in white noise of power $\\sigma_w^2$, independent of the sinusoid.',
+            'A signal $x(n)$ consists of a sinusoid of power $P$, frequency $\\omega_1$ and phase uniformly distributed in $[0, 2\\pi)$, immersed in white noise of power $\\sigma_w^2$.',
         },
       ],
       parts: [
@@ -293,7 +293,7 @@ export const processesLesson: LessonRecord = {
             },
             {
               title: 'Independent parts add their autocorrelations',
-              body: 'Tone and noise are independent and zero-mean, so cross terms vanish and the white noise contributes only at zero lag.',
+              body: 'The statement leaves it implicit, but the solution needs tone and noise independent and zero-mean, so cross terms vanish and the white noise contributes only at zero lag.',
               latex:
                 'r_x(m) = r_s(m) + r_w(m) = P\\cos(\\omega_1 m) + \\sigma_w^2\\,\\delta(m)',
               note: 'Memorize the shape: an everlasting cosine floor plus a spike of noise power at $m = 0$.',
@@ -321,7 +321,7 @@ export const processesLesson: LessonRecord = {
               body: 'Divide each determinant by $\\Delta = (P+\\sigma_w^2)^2 - (P\\cos\\omega_1)^2$.',
               latex:
                 'h_0 = \\frac{P\\cos\\omega_1\\left[(P + \\sigma_w^2) - P\\cos 2\\omega_1\\right]}{(P+\\sigma_w^2)^2 - (P\\cos\\omega_1)^2}, \\qquad h_1 = \\frac{(P + \\sigma_w^2)P\\cos 2\\omega_1 - (P\\cos\\omega_1)^2}{(P+\\sigma_w^2)^2 - (P\\cos\\omega_1)^2}',
-              note: 'Sanity check the knobs: as $\\sigma_w^2$ grows, both coefficients shrink — the noisier the data, the less the predictor dares to move.',
+              note: 'Sanity check the knobs: as $\\sigma_w^2 \\to \\infty$ both coefficients go to zero, so the predictor stops trusting the data. On the way $h_1$ can change sign, so the shrinking is not monotone.',
             },
           ],
           answer: {
@@ -359,7 +359,7 @@ export const processesLesson: LessonRecord = {
           steps: [
             {
               title: 'Split the matrix into tone plus noise floor',
-              body: 'A real sinusoid is two complex exponentials, so its correlation matrix $\\mathbf{R}_s$ has rank 2 whatever the size $M$: only two directions in signal space are ever occupied by the tone.',
+              body: 'A real sinusoid is two complex exponentials, so for $0 < \\omega_1 < \\pi$ its correlation matrix $\\mathbf{R}_s$ has rank 2 for any size $M \\geq 2$: only two directions in signal space are ever occupied by the tone.',
               latex:
                 '\\mathbf{R}_x = \\mathbf{R}_s + \\sigma_w^2 \\mathbf{I}, \\qquad \\operatorname{rank}(\\mathbf{R}_s) = 2',
             },

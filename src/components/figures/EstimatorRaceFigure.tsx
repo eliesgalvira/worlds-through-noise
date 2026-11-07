@@ -19,7 +19,7 @@ const H = 280
 /** The estimate axis; piles grow up from it. */
 const AXIS_Y = H - 40
 /** Generous width of one monospace label character, in viewBox units. */
-const LABEL_CHAR_W = 8.5
+const LABEL_CHAR_W = 9
 const X_MIN = -0.3
 const X_MAX = 1.3
 
@@ -109,8 +109,8 @@ function EstimatorRaceFigure() {
 
   // The two brackets sit in two rows just above the taller pile.
   const pilesTop = AXIS_Y - barH(Math.max(...meanHist, ...midHist))
-  const midY = Math.max(pilesTop - 14, 66)
-  const meanY = midY - 22
+  const midY = Math.max(pilesTop - 14, 76)
+  const meanY = midY - 32
   const bracketRows = [
     {
       name: 'sample mean',

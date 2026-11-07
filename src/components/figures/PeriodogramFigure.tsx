@@ -244,8 +244,9 @@ function PeriodogramFigure() {
           className="fill-truth/15"
         />
         <text
-          x={xOf(TRUE_FREQ) + bandW / 2 + 4}
-          y={AXIS_Y - 8}
+          x={xOf(TRUE_FREQ) - bandW / 2 - 4}
+          y={TOP + 22}
+          textAnchor="end"
           className="plot-halo fill-truth font-mono plot-text-xs"
         >
           ±<Sym base="σ" sub="CR" /> {formatNumber(crbStd, 4)}

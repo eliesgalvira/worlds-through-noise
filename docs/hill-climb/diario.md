@@ -375,3 +375,46 @@ Notas de la ronda 9 (ancho/móvil): 2a T1 2/2, T2 3/2, T3 3/2, T4 2/2, T5 2/2, T
 **Fusión** (decidido por el agente, revisable). Según el añadido de Elies, lo que no llega al 95 % antes del corte se queda en la rama y se fusiona el lunes después de las 20:00. La rama de estimación (PR #8, borrador) se queda así. Pero entre la base y la ronda 9 los revisores encontraron más de diez errores de contenido que estaban en main, y después del corte entran los arreglos de contenido. Por eso abrí un PR solo de contenido (#9) sobre main, sin rediseño: texto corregido y las dos lecturas de figura que mostraban una fórmula falsa (la CRB de E4, ahora con la cota del tono real de Kay 1993, y la varianza de E3 con el prior). Pasó check, build, CI, banco sin errores, code-review en dos ejes y verificación de contenido Opus, y se fusionó. Después, `git pull --ff-only` en el checkout de main y `pnpm dev` con las seis rutas sin errores. La rama #8 lleva ya main integrado para que la fusión del lunes no tenga conflictos.
 
 **Desviación que hay que contar.** La fusión de detección (#7) fue después del añadido de las 22:05, con T1–T5 por debajo de 4. La hice con los compromisos anotados más arriba, sin aplicar todavía la regla de dejar en la rama lo que no llega al 95 %. Main mejoró en todos los puntos de la rúbrica y sus arreglos de contenido estaban verificados, así que no la revierto, pero es decisión de Elies.
+
+## Informe final
+
+**Tiempo.** De las 21:55 del viernes (primera marca de la sesión) a las 07:00 del sábado, unas nueve horas de pared.
+
+**Ejecuciones por modelo.** Todo Opus 5.5 con effort high: Codex no estaba disponible.
+
+- 33 revisores a ciegas en hilos nuevos del proyecto de revisores: 12 de detección (base y rondas 1 a 5, dos paquetes), 20 de estimación (base y rondas 1 a 9, dos paquetes) y 1 de la comparación final. Todas las auditorías limpias; dos falsos positivos por la palabra «hill-climbing» en la descripción de un producto de referencia, comprobados a mano.
+- 13 tareas de apoyo delegadas: verificaciones de contenido (detección ×3, estimación ×4, procesos ×1), code-reviews en dos ejes (cada uno con dos subagentes más) y las revisiones de los PR #9 y #10.
+- Unos 20 subagentes nativos: simplify (cuatro ángulos, dos veces), los ejes de code-review y la búsqueda de referencias.
+- El archivo de sesión no trae línea `cost-state`, así que no hay cifra de coste.
+
+**Líneas.** Rama de estimación (#8, sin fusionar) contra `9d60ae15`: 30 archivos, +1448 −452 en el momento del cierre. Contenido de estimación (#9, fusionado): 3 archivos, +30 −24, más las precisiones del review. Contenido de procesos (#10): 4 archivos, +29 −29.
+
+**PR.**
+
+| PR         | Qué                                              | Estado                                             |
+| ---------- | ------------------------------------------------ | -------------------------------------------------- |
+| #5, #6, #7 | Banco y CI, catálogo, detección                  | fusionados el viernes                              |
+| #8         | Rediseño de estimación (rondas 1 a 10)           | borrador; se fusiona el lunes después de las 20:00 |
+| #9         | Errores de contenido de estimación, sin rediseño | fusionado el sábado por la mañana                  |
+| #10        | Errores de contenido de procesos, sin rediseño   | ver el mensaje final                               |
+
+**Lo que no se hizo.** Procesos (P3, P2, P1) y la portada no tuvieron rondas de diseño, y el módulo bayesiano MAP/MMSE no se empezó: estimación consumió la noche porque cada ronda destapaba errores de contenido y la meta del 95 % no llegaba. A procesos sí le llegó una verificación de contenido completa, con nueve errores corregidos en #10.
+
+## Retro
+
+**Qué funcionó.**
+
+- Un revisor nuevo por paquete y ronda, sin saber la meta ni la ronda, encontró en cada pasada algo que el anterior no vio. Sin esa ceguera los errores de contenido de julio se habrían quedado.
+- Verificadores Opus separados contra `course/`, con reemplazos literales listos para pegar. Ninguna corrección de contenido entró sin fuente.
+- Medir en un navegador real cuando una captura contradice al código: el fallo de `MathBlock` (React 19 reescribiendo el `innerHTML`) llevaba dos rondas reportado y se encontró en minutos con una sonda de diez líneas.
+- Separar contenido y rediseño al ver que la meta no llegaba antes del corte: main recibe las fórmulas correctas y el rediseño espera al lunes sin riesgo.
+
+**Qué falló o costó más de lo debido.**
+
+- Verificar solo lo que señalaban los revisores. Seis errores de julio salieron uno a uno a lo largo de nueve rondas, y una verificación completa al principio los habría cogido todos en la ronda 1.
+- Seguir al pie de la letra el arreglo de un revisor: «pon ‖∂p/∂θ‖ en la lectura» y en la ronda siguiente «p no está definido». La regla de fondo (definir el símbolo en el texto antes de que la figura lo use) lo cerró.
+- Mover una pieza compartida (la caja de predicción) sin leer su efecto en las otras lecciones: el code-review del rango lo cogió en cinco módulos.
+- Retocar etiquetas del móvil ronda tras ronda en vez de rediseñar la figura estrecha. El móvil se queda en 2 en T2 y T3.
+- Fusionar detección después del añadido sin aplicar la regla del 95 %.
+
+**Qué cambia en el método** (ya está en la skill ui-hill-climb): verificación completa del contenido en la ronda base; separar un PR de contenido cuando el corte llega antes que la meta; arreglar la regla y no el arreglo literal; leer los cambios de piezas compartidas contra todas las pantallas; medir en el navegador; planificar la disposición estrecha de las figuras desde la base; paquetes de 50 a 75 imágenes por sección; comprobar en contexto los aciertos de la auditoría.

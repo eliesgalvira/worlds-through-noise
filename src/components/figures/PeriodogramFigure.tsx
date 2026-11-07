@@ -317,7 +317,7 @@ function PeriodogramFigure() {
             stroke="none"
             className="font-mono plot-text-xs"
           >
-            match |X(f)|²/N, scaled to the peak
+            match |X(f)|²/N
           </text>
         </g>
         {answerShown ? (

@@ -38,7 +38,7 @@ const KIND_MEANING: Record<SignalKind, string> = {
     'Every sample is an independent fresh draw: shift the copy by any amount and the resemblance is gone.',
   colored:
     'White noise filtered so each sample keeps 88% of the previous one (autoregressive). The memory fades over a few lags.',
-  tone: 'A sinusoid buried in white noise. The noise forgets instantly; the tone never forgets — its resemblance oscillates forever.',
+  tone: 'A sinusoid buried in white noise. The noise forgets instantly. The tone never forgets, and its resemblance oscillates forever.',
 }
 
 function makeSignal(kind: SignalKind, seed: number): Array<number> {
@@ -78,7 +78,7 @@ function AutocorrelationFigure() {
   return (
     <FigureShell
       title="Slide a copy of the signal past itself"
-      instruction="The faint trace is the signal; the amber trace is the same signal shifted by the lag $m$. The overlap product, averaged, is one point of the autocorrelation — already plotted below for every lag. Try all three signals and watch memory die fast, slowly, or never."
+      instruction="The blue trace is the signal and the amber trace is the same signal shifted by the lag $m$. The overlap product, averaged, is one point of the autocorrelation, already plotted below for every lag. Try all three signals and watch memory die fast, slowly, or never."
       controls={
         <>
           <div className="space-y-2">
@@ -264,7 +264,7 @@ function AutocorrelationFigure() {
               textAnchor="middle"
               className="fill-muted-foreground font-mono plot-text-xs"
             >
-              Ŝ(f) — same information, by frequency
+              Ŝ(f) — the lags shown, by frequency
             </text>
           </Plot>
         </div>

@@ -418,3 +418,7 @@ Notas de la ronda 9 (ancho/móvil): 2a T1 2/2, T2 3/2, T3 3/2, T4 2/2, T5 2/2, T
 - Fusionar detección después del añadido sin aplicar la regla del 95 %.
 
 **Qué cambia en el método** (ya está en la skill ui-hill-climb): verificación completa del contenido en la ronda base; separar un PR de contenido cuando el corte llega antes que la meta; arreglar la regla y no el arreglo literal; leer los cambios de piezas compartidas contra todas las pantallas; medir en el navegador; planificar la disposición estrecha de las figuras desde la base; paquetes de 50 a 75 imágenes por sección; comprobar en contexto los aciertos de la auditoría.
+
+## Cambio de plan: #8 se fusiona el sábado
+
+Sábado 7/11, 10:00: el coordinador, de parte de Elies, pide fusionar #8 hoy antes del corte de las 12:00. La regla de dejar en la rama lo que no llega al 95 % era demasiado estricta, y la comparación a ciegas prefiere la versión nueva en las 12 casillas de tareas. Puertas del tramo final (`14319504..`): code-review en dos ejes (`code-review-est-3`), con un único bloqueante (el umbral de fórmulas irrompibles había bajado a 36 y dejaba partir unas 75 fórmulas de 37 a 48 caracteres; vuelve a 48 y la fórmula larga del predictor de Wiener se reescribe, comprobado a 360 px sin desbordes en ninguna lección), y verificación de contenido de todo lo que cambia respecto a main (`verificacion-pr8`): ningún error, tres dudas de redacción aplicadas.

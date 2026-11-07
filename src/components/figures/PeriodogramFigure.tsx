@@ -131,7 +131,7 @@ function PeriodogramFigure() {
   return (
     <FigureShell
       title="Sweep a detector bank across the band"
-      instruction="Each candidate frequency proposes a template. The strip on top lays that template over your first samples. The dot's height is their match $|X(f)|^2/N$, with $X(f) = \sum x(n)e^{-j2\pi f n}$. Slide the candidate to find the hidden tone, then show the answer and raise $N$ to watch the peak narrow."
+      instruction="Each candidate frequency proposes a template. The strip on top lays the real part of that template over your first samples. At the tone they share a rhythm, though shifted, because the match ignores phase. The dot's height is their match $|X(f)|^2/N$, with $X(f) = \sum x(n)e^{-j2\pi f n}$. Slide the candidate to find the hidden tone, then show the answer and raise $N$ to watch the peak narrow."
       controls={
         <>
           <SliderControl

@@ -268,7 +268,7 @@ export const wienerLesson: LessonRecord = {
           steps: [
             {
               title: 'Chain the two blocks',
-              body: 'The predictor reads the vector of the $Q$ past samples $\\mathbf{x}(n-1) = [x(n-1), \\dots, x(n-Q)]^T$ and outputs $\\hat{x}(n) = \\mathbf{h}^H\\mathbf{x}(n-1)$, its guess of the tone at time $n$. That prediction — not the raw sample — feeds the Neyman–Pearson detector of part (b), which compares its statistic against the threshold to decide tone present / tone lost.',
+              body: 'The predictor reads the vector $\\mathbf{x}(n-1)$ of the $Q$ past samples, $x(n-1)$ to $x(n-Q)$, and outputs $\\hat{x}(n) = \\mathbf{h}^H\\mathbf{x}(n-1)$, its guess of the tone at time $n$. That prediction — not the raw sample — feeds the Neyman–Pearson detector of part (b), which compares its statistic against the threshold to decide tone present / tone lost.',
             },
           ],
           answer: {

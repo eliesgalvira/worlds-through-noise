@@ -8,7 +8,7 @@ export const estimationLesson: LessonRecord = {
     'An estimator is a machine you must judge by its cloud of outputs, never by one lucky number — and the Cramér-Rao bound says how tight that cloud can be for any unbiased estimator.',
   intro: [
     'Topic 3 walks one path, one module per step. E1 judges an estimator by its cloud of outputs. E2 finds the floor no unbiased estimator can beat. E3 fuses unequal measurements and adds prior knowledge. E4 finds a frequency by maximum likelihood.',
-    'Exams walk this skeleton in order — “find the pdf, find the CRB, does the efficient estimator exist, find the ML, is it consistent” — so this lesson does too, with the objects made visible at each step.',
+    'Exams walk a fixed skeleton — “find the pdf, find the CRB, does the efficient estimator exist, find the ML, is it consistent” — and each module gives one of those steps an object you can see.',
   ],
   modules: [
     {
@@ -106,7 +106,7 @@ export const estimationLesson: LessonRecord = {
       object:
         'Each measurement acts as a spring. $x_i$ is an anchor pulling the estimate toward itself with stiffness $1/\\sigma_i^2$: precise sensors are stiff springs, noisy sensors are slack ones. The estimate is where all the pulls balance. And a Gaussian prior is nothing special — it is one more spring, anchored at $\\mu_\\theta$, with stiffness $1/\\sigma_\\theta^2$.',
       action:
-        'In the figure, drag one sensor’s noise up and watch its spring slacken: the balance point slides away from it, while the combined variance grows, but never past what the other sensors achieve on their own. Raise $\\sigma_1$ to its maximum: sensor 1 then plays the defective pixel of the June 2026 final, whose variance the exam calls $\\sigma_0^2 \\to \\infty$, and watch the balance point settle between the other two sensors, as if the broken one were not there. Then switch the prior spring on, feel it pull the estimate toward $\\mu_\\theta$, and stiffen the sensors (lower their $\\sigma$) to watch the data springs overpower it.',
+        'In the figure, drag one sensor’s noise up and watch its spring slacken: the balance point slides away from it, while the combined variance grows, but never past what the other sensors achieve on their own. Raise $\\sigma_1$ to its maximum: sensor 1 then plays the defective pixel of the June 2026 final, whose variance the exam calls $\\sigma_0^2 \\to \\infty$, and watch the balance point settle between the other two sensors, almost as if the broken one were not there. Then switch the prior spring on, feel it pull the estimate toward $\\mu_\\theta$, and stiffen the sensors (lower their $\\sigma$) to watch the data springs overpower it.',
       payoff:
         'One picture covers greenhouse-sensor fusion, the defective camera pixel, the best linear unbiased estimator (BLUE) and MAP shrinkage. The data springs’ share of the total stiffness is the readout $\\alpha$, and it explains why the prior fades as data accumulate: with $N$ equal data springs against one prior spring, the prior’s share $1 - \\alpha$ shrinks as $N$ grows.',
       equations: [

@@ -194,7 +194,7 @@ function EnergyFigure() {
           </text>
         ) : null}
         <text
-          x={xOf(Math.max(dof - 2, 0.2) / dof) - 6}
+          x={Math.max(xOf(Math.max(dof - 2, 0.2) / dof) - 6, 26)}
           y={yOf(h0Density(Math.max(dof - 2, 0.2) / dof)) + 14}
           textAnchor="end"
           className="plot-halo fill-h0 font-mono plot-text-sm"
@@ -210,15 +210,17 @@ function EnergyFigure() {
         </text>
 
         <path d={h1Path} fill="none" className="stroke-h1" strokeWidth={2} />
-        <line
-          x1={xOf(threshold)}
-          y1={14}
-          x2={xOf(threshold)}
-          y2={H - 36}
-          className="stroke-threshold"
-          strokeWidth={2}
-          strokeDasharray="5 3"
-        />
+        {threshold < X_MAX ? (
+          <line
+            x1={xOf(threshold)}
+            y1={14}
+            x2={xOf(threshold)}
+            y2={H - 36}
+            className="stroke-threshold"
+            strokeWidth={2}
+            strokeDasharray="5 3"
+          />
+        ) : null}
         <AxisTicks
           y={H - 40}
           ticks={[0, 1, 2, 3, 4].map((v) => ({ x: xOf(v), label: String(v) }))}
@@ -230,6 +232,7 @@ function EnergyFigure() {
           className="fill-threshold plot-halo font-mono plot-text-sm"
         >
           <tspan className="font-serif italic">γ</tspan>
+          {threshold < X_MAX ? null : ' beyond the axis'}
           <tspan className="fill-detection">
             , jailer <Sym base="P" sub="D" /> {formatPercentValue(pdJailer)}
           </tspan>

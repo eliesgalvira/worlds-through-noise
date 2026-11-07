@@ -156,7 +156,7 @@ export const detectionLesson: LessonRecord = {
         },
         {
           sentence:
-            'For large $N$ the test statistic is approximately Gaussian, and the separation is $\\sqrt{N/2}\\,P/\\sigma_w^2$ for real samples ($\\sqrt{N}\\,P/\\sigma_w^2$ for complex ones).',
+            'For large $N$ the test statistic is approximately Gaussian. With low SNR ($P \\ll \\sigma_w^2$) both hypotheses have about the same spread, and the separation is $\\sqrt{N/2}\\,P/\\sigma_w^2$ for real samples ($\\sqrt{N}\\,P/\\sigma_w^2$ for complex ones).',
           latex:
             'P_D \\approx Q\\!\\left(Q^{-1}(P_{FA}) - \\sqrt{\\tfrac{N}{2}}\\,\\frac{P}{\\sigma_w^2}\\right)',
         },

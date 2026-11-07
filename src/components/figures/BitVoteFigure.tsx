@@ -71,7 +71,7 @@ function BitVoteFigure() {
   return (
     <FigureShell
       title="MAP and minimum-risk decisions on a repeated bit"
-      instruction="A bit is stored five times and each copy flips with probability $\varepsilon$. The bars are the exact distribution of the number of ones $k$ under each stored bit, and the shaded region is where the rule decides bit = 1. Change the prior of a one or the cost of missing it and watch the boundary move."
+      instruction="A bit is stored five times and each copy flips with probability $\varepsilon$. Each bar is the exact probability of reading $k$ ones under a stored bit, weighted by that bit’s prior (and by the cost of missing a 1), so the rule decides bit = 1 in the shaded region, where the amber bar is taller. Change the prior of a one or the cost of missing it and watch the boundary move."
       controls={
         <>
           <SliderControl

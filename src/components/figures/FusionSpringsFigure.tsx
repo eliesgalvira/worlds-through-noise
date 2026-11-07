@@ -261,7 +261,7 @@ function FusionSpringsFigure() {
             />
             <text
               x={xOf(dataOnly)}
-              y={H - 96}
+              y={H - 22}
               textAnchor="middle"
               className="plot-halo fill-estimate font-mono plot-text-xs"
             >

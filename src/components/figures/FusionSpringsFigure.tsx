@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Button } from '@/components/ui/button.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
 import { MathText } from '@/components/MathText.tsx'
 import {
@@ -7,6 +8,7 @@ import {
   Plot,
   ReadoutRow,
   ReadoutNote,
+  Sym,
 } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
 
@@ -17,6 +19,8 @@ const X_MAX = 70
 
 const SENSOR_READINGS = [44, 53, 58]
 const PRIOR_MEAN = 38
+/** Stiffest spring the controls allow: σ = 0.8 gives 1/σ² ≈ 1.56. */
+const MAX_WEIGHT = 1 / (0.8 * 0.8)
 
 function FusionSpringsFigure() {
   const [sigmas, setSigmas] = useState<ReadonlyArray<number>>([2, 3.5, 5])
@@ -41,8 +45,8 @@ function FusionSpringsFigure() {
     (weights.reduce((a, b) => a + b, 0) + priorWeight)
 
   const xOf = (v: number) => 10 + ((v - X_MIN) / (X_MAX - X_MIN)) * (W - 20)
-  const maxWeight = Math.max(...weights, priorWeight, 1e-9)
-  const springWidth = (w: number) => 1 + (w / maxWeight) * 7
+  // Fixed scale, so a spring only changes when its own σ changes.
+  const springWidth = (w: number) => 0.75 + (w / MAX_WEIGHT) * 9
 
   return (
     <FigureShell
@@ -68,20 +72,23 @@ function FusionSpringsFigure() {
               format={(v) => v.toFixed(1)}
             />
           ))}
-          <label className="flex items-center gap-2 text-sm text-muted-foreground">
-            <input
-              type="checkbox"
-              checked={priorOn}
-              onChange={(event) => {
-                setPriorOn(event.target.checked)
-              }}
+          <Button
+            type="button"
+            variant={priorOn ? 'default' : 'outline'}
+            size="sm"
+            aria-pressed={priorOn}
+            onClick={() => {
+              setPriorOn((on) => !on)
+            }}
+          >
+            <MathText
+              text={`${priorOn ? 'Remove' : 'Add'} the prior spring at $\\mu_\\theta = ${PRIOR_MEAN}$`}
             />
-            Add the prior spring (μ_θ = {PRIOR_MEAN})
-          </label>
+          </Button>
           {priorOn ? (
             <SliderControl
-              label="Prior confidence"
-              variable="σ_θ"
+              label="Prior spread (std of the prior)"
+              variable="σθ"
               value={priorSigma}
               min={1}
               max={15}
@@ -98,12 +105,15 @@ function FusionSpringsFigure() {
           <ReadoutRow
             label={priorOn ? 'MAP estimate' : 'Fused ML estimate'}
             value={formatNumber(estimate, 2)}
-            tone="h1"
+            tone="estimate"
           />
           <ReadoutRow
-            label="Estimator variance $1/\sum(1/\sigma_i^2)$"
+            label={
+              priorOn
+                ? 'Posterior variance $1/(\\sum 1/\\sigma_i^2 + 1/\\sigma_\\theta^2)$'
+                : 'Estimator variance $1/\\sum 1/\\sigma_i^2$'
+            }
             value={formatNumber(variance, 3)}
-            tone="good"
           />
           {priorOn ? (
             <ReadoutRow
@@ -119,11 +129,14 @@ function FusionSpringsFigure() {
     >
       <Legend
         items={[
-          { label: 'sensor readings (springs)', swatchClass: 'stroke-h0' },
+          {
+            label: 'sensor readings (springs)',
+            swatchClass: 'stroke-foreground',
+          },
           { label: 'prior anchor', swatchClass: 'stroke-prior' },
           {
             label: 'balance point $\\hat{\\theta}$',
-            swatchClass: 'stroke-cursor',
+            swatchClass: 'stroke-estimate',
           },
         ]}
       />
@@ -169,23 +182,23 @@ function FusionSpringsFigure() {
                 y1={y}
                 x2={xOf(estimate)}
                 y2={H - 62}
-                className="stroke-h0"
+                className="stroke-foreground"
                 strokeWidth={springWidth(weights[index] ?? 0)}
-                opacity={0.55}
+                opacity={0.45}
               />
               <circle
                 cx={xOf(reading)}
                 cy={y}
                 r={5}
-                className="fill-h0 stroke-card"
+                className="fill-foreground stroke-card"
                 strokeWidth={1.5}
               />
               <text
                 x={xOf(reading) + 9}
                 y={y + 4}
-                className="fill-h0 font-mono plot-text-sm"
+                className="fill-foreground font-mono plot-text-sm"
               >
-                x{index + 1}={reading}
+                <Sym base="x" sub={String(index + 1)} /> = {reading}
               </text>
             </g>
           )
@@ -213,7 +226,7 @@ function FusionSpringsFigure() {
               y={H - 20}
               className="fill-prior font-mono plot-text-sm"
             >
-              μ_θ={PRIOR_MEAN}
+              <Sym base="μ" sub="θ" /> = {PRIOR_MEAN}
             </text>
           </g>
         ) : null}
@@ -223,7 +236,7 @@ function FusionSpringsFigure() {
             cy={H - 60}
             r={4}
             fill="none"
-            className="stroke-h0"
+            className="stroke-estimate"
             strokeWidth={1.4}
             strokeDasharray="2 2"
           />
@@ -232,20 +245,26 @@ function FusionSpringsFigure() {
           cx={xOf(estimate)}
           cy={H - 60}
           r={7}
-          className="fill-cursor stroke-card"
+          className="fill-estimate stroke-card"
           strokeWidth={2}
         />
         <text
           x={xOf(estimate)}
           y={H - 72}
           textAnchor="middle"
-          className="fill-foreground font-mono plot-text"
+          className="plot-halo fill-estimate font-mono plot-text"
         >
           θ̂ = {formatNumber(estimate, 1)}
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        <MathText text="Spring thickness is the honest weight $1/\sigma_i^2$. With the prior on, the dashed ring marks where the data alone would balance." />
+        <MathText
+          text={
+            priorOn
+              ? 'Thicker spring, larger weight $1/\\sigma^2$, on a fixed scale. The dashed ring is where the data alone balance.'
+              : 'Thicker spring, larger weight $1/\\sigma_i^2$, on a fixed scale.'
+          }
+        />
       </p>
     </FigureShell>
   )

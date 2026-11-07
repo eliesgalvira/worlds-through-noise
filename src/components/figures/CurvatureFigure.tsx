@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
 import {
+  AxisTicks,
   FigureShell,
   Legend,
   Plot,
@@ -14,7 +15,9 @@ import { gaussianVector, makeRng } from '@/domain/math/kernel.ts'
 
 const TRUTH = 1
 const W = 470
-const H = 290
+const H = 320
+/** Bottom of the curve area, where the θ axis runs. */
+const AXIS_Y = 214
 const T_MIN = -1.5
 const T_MAX = 3.5
 
@@ -55,7 +58,22 @@ function CurvatureFigure() {
 
   const xOf = (theta: number) =>
     10 + ((theta - T_MIN) / (T_MAX - T_MIN)) * (W - 20)
-  const yOf = (ll: number) => 14 + (Math.max(ll, floor) / floor) * (H - 76)
+  const yOf = (ll: number) => 30 + (Math.max(ll, floor) / floor) * (AXIS_Y - 34)
+
+  // The parabola leaves the frame below the floor: stop the stroke there
+  // instead of drawing a flat line along the bottom edge.
+  const curvePath = grid
+    .flatMap((theta, i) => {
+      const value = values[i] ?? floor
+      if (value < floor) {
+        return []
+      }
+      const inside = (values[i - 1] ?? floor - 1) >= floor
+      return [
+        `${inside ? 'L' : 'M'} ${xOf(theta).toFixed(1)} ${yOf(value).toFixed(1)}`,
+      ]
+    })
+    .join(' ')
 
   return (
     <FigureShell
@@ -102,12 +120,11 @@ function CurvatureFigure() {
           <ReadoutRow
             label="Peak $\hat{\theta}_{ML}$ (sample mean)"
             value={formatNumber(sampleMean, 3)}
-            tone="h1"
+            tone="estimate"
           />
           <ReadoutRow
             label="CRB std $\sigma/\sqrt{N}$"
             value={formatNumber(crbStd, 3)}
-            tone="good"
           />
           <ReadoutRow
             label="Std of the 40 peaks below"
@@ -133,9 +150,12 @@ function CurvatureFigure() {
         items={[
           {
             label: 'log-likelihood of $\\theta$ (this sample)',
-            swatchClass: 'stroke-h0',
+            swatchClass: 'stroke-foreground',
           },
-          { label: 'CRB width at the peak', swatchClass: 'stroke-detection' },
+          {
+            label: 'peak $\\hat{\\theta}_{ML}$ and its CRB width',
+            swatchClass: 'stroke-estimate',
+          },
           { label: 'true $\\theta$', swatchClass: 'stroke-truth', dash: true },
         ]}
       />
@@ -146,23 +166,32 @@ function CurvatureFigure() {
       >
         <line
           x1={xOf(TRUTH)}
-          y1={10}
+          y1={24}
           x2={xOf(TRUTH)}
-          y2={H - 42}
+          y2={AXIS_Y}
           className="stroke-truth"
           strokeWidth={1.4}
           strokeDasharray="4 4"
           opacity={0.7}
         />
+        <text
+          x={xOf(TRUTH) + 4}
+          y={20}
+          className="fill-truth font-mono plot-text-xs"
+        >
+          true θ = {TRUTH}
+        </text>
+        <text
+          x={12}
+          y={20}
+          className="fill-muted-foreground font-mono plot-text-xs"
+        >
+          ln f(x;θ), peak at 0
+        </text>
         <path
-          d={grid
-            .map(
-              (theta, i) =>
-                `${i === 0 ? 'M' : 'L'} ${xOf(theta).toFixed(1)} ${yOf(values[i] ?? floor).toFixed(1)}`,
-            )
-            .join(' ')}
+          d={curvePath}
           fill="none"
-          className="stroke-h0"
+          className="stroke-foreground"
           strokeWidth={2}
         />
         <line
@@ -170,21 +199,22 @@ function CurvatureFigure() {
           y1={yOf(-0.5)}
           x2={xOf(sampleMean + crbStd)}
           y2={yOf(-0.5)}
-          className="stroke-detection"
-          strokeWidth={3}
+          className="stroke-estimate"
+          strokeWidth={4}
+          opacity={0.55}
         />
         <circle
           cx={xOf(sampleMean)}
           cy={yOf(0)}
           r={4}
-          className="fill-h1 stroke-card"
+          className="fill-estimate stroke-card"
           strokeWidth={1.5}
         />
         {sample.slice(0, 60).map((x, i) => (
           <circle
             key={i}
             cx={xOf(Math.min(Math.max(x, T_MIN), T_MAX))}
-            cy={H - 52}
+            cy={AXIS_Y + 52}
             r={2.4}
             className="fill-truth"
             opacity={0.55}
@@ -192,32 +222,47 @@ function CurvatureFigure() {
         ))}
         <line
           x1={10}
-          y1={H - 42}
+          y1={AXIS_Y}
           x2={W - 10}
-          y2={H - 42}
-          className="stroke-border"
+          y2={AXIS_Y}
+          className="stroke-muted-foreground"
           strokeWidth={1}
         />
+        <AxisTicks
+          y={AXIS_Y}
+          ticks={[-1, 0, 1, 2, 3].map((t) => ({
+            x: xOf(t),
+            label: t.toString(),
+          }))}
+        />
+        <text
+          x={W - 10}
+          y={AXIS_Y + 28}
+          textAnchor="end"
+          className="fill-muted-foreground font-mono plot-text-xs"
+        >
+          candidate θ
+        </text>
         {peaks.map((p, i) => (
           <circle
             key={i}
             cx={xOf(Math.min(Math.max(p, T_MIN), T_MAX))}
-            cy={H - 26}
+            cy={AXIS_Y + 94}
             r={2.4}
-            className="fill-h1"
+            className="fill-estimate"
             opacity={0.6}
           />
         ))}
         <text
           x={12}
-          y={H - 48}
+          y={AXIS_Y + 42}
           className="fill-muted-foreground font-mono plot-text-xs"
         >
           samples
         </text>
         <text
           x={12}
-          y={H - 16}
+          y={AXIS_Y + 84}
           className="fill-muted-foreground font-mono plot-text-xs"
         >
           peak positions over 40 re-runs

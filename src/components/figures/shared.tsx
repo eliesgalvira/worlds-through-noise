@@ -135,7 +135,7 @@ function Plot({
   )
 }
 
-type Tone = 'default' | 'h0' | 'h1' | 'good' | 'bad'
+type Tone = 'default' | 'h0' | 'h1' | 'good' | 'bad' | 'estimate' | 'cursor'
 
 const TONE_CLASS: Readonly<Record<Tone, string>> = {
   default: 'text-foreground',
@@ -143,6 +143,8 @@ const TONE_CLASS: Readonly<Record<Tone, string>> = {
   h1: 'text-h1-ink',
   good: 'text-detection',
   bad: 'text-false-alarm',
+  estimate: 'text-estimate',
+  cursor: 'text-cursor',
 }
 
 type ReadoutRowProps = {

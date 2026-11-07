@@ -7,6 +7,7 @@ import {
   Plot,
   ReadoutRow,
   ReadoutNote,
+  AxisTicks,
 } from '@/components/figures/shared.tsx'
 import { formatNumber } from '@/components/figures/figure-utils.ts'
 import { gaussian, makeRng } from '@/domain/math/kernel.ts'
@@ -80,7 +81,10 @@ function EstimatorRaceFigure() {
   const bins = 46
   const meanHist = histogramOf(result.means, bins)
   const midHist = histogramOf(result.midranges, bins)
-  const maxCount = Math.max(...meanHist, ...midHist, 1)
+  // One fixed count scale for every N and noise, so a pile only changes
+  // when its estimator does; the tallest bars are clipped at the top.
+  const maxCount = RUNS * 0.3
+  const barH = (count: number) => Math.min(count / maxCount, 1) * (H - 60)
   const meanStats = stats(result.means)
   const midStats = stats(result.midranges)
 
@@ -152,19 +156,18 @@ function EstimatorRaceFigure() {
       readout={
         <>
           <ReadoutRow
-            label="Sample mean: std of pile"
+            label="Sample mean: $\sigma$ of its pile"
             value={formatNumber(meanStats.sd, 3)}
             tone="h0"
           />
           <ReadoutRow
-            label="Midrange: std of pile"
+            label="Midrange: $\sigma$ of its pile"
             value={formatNumber(midStats.sd, 3)}
             tone="h1"
           />
           <ReadoutRow
             label="Winner (this model)"
             value={meanStats.sd < midStats.sd ? 'sample mean' : 'midrange'}
-            tone="good"
           />
           <ReadoutNote>
             Both noises have variance 1. The ranking flips with the distribution
@@ -175,9 +178,9 @@ function EstimatorRaceFigure() {
     >
       <Legend
         items={[
-          { label: 'sample mean pile', swatchClass: 'stroke-h0' },
+          { label: 'sample mean pile', swatchClass: 'fill-h0', square: true },
           {
-            label: 'midrange $(\\max{+}\\min)/2$ pile',
+            label: 'midrange $(\\max{+}\\min)/2$ pile (outline)',
             swatchClass: 'stroke-h1',
           },
           { label: 'hidden truth $\\theta$', swatchClass: 'stroke-truth' },
@@ -192,24 +195,24 @@ function EstimatorRaceFigure() {
           <rect
             key={`m${i}`}
             x={10 + i * slotW}
-            y={H - 30 - (count / maxCount) * (H - 60)}
+            y={H - 30 - barH(count)}
             width={slotW * 0.9}
-            height={(count / maxCount) * (H - 60)}
+            height={barH(count)}
             className="fill-h0"
-            opacity={0.55}
+            opacity={0.6}
           />
         ))}
-        {midHist.map((count, i) => (
-          <rect
-            key={`r${i}`}
-            x={10 + i * slotW}
-            y={H - 30 - (count / maxCount) * (H - 60)}
-            width={slotW * 0.9}
-            height={(count / maxCount) * (H - 60)}
-            className="fill-h1"
-            opacity={0.45}
-          />
-        ))}
+        <path
+          d={midHist
+            .map(
+              (count, i) =>
+                `${i === 0 ? 'M' : 'L'} ${(10 + i * slotW).toFixed(1)} ${(H - 30 - barH(count)).toFixed(1)} H ${(10 + (i + 1) * slotW).toFixed(1)}`,
+            )
+            .join(' ')}
+          fill="none"
+          className="stroke-h1"
+          strokeWidth={2}
+        />
         <line
           x1={xOf(TRUTH)}
           y1={12}
@@ -232,6 +235,21 @@ function EstimatorRaceFigure() {
           className="fill-truth font-mono plot-text-sm"
         >
           θ = 0.5
+        </text>
+        <AxisTicks
+          y={H - 30}
+          ticks={[-0.25, 0, 0.25, 0.5, 0.75, 1, 1.25].map((v) => ({
+            x: xOf(v),
+            label: String(v),
+          }))}
+        />
+        <text
+          x={W - 12}
+          y={H - 4}
+          textAnchor="end"
+          className="fill-muted-foreground font-mono plot-text-sm"
+        >
+          estimate θ̂ (experiments per bin ↑)
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">

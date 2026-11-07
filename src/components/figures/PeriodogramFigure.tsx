@@ -2,19 +2,26 @@ import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button.tsx'
 import { SliderControl } from '@/components/SliderControl.tsx'
 import {
+  AxisTicks,
   FigureShell,
   Legend,
   Plot,
   ReadoutRow,
+  Sym,
 } from '@/components/figures/shared.tsx'
-import { formatNumber } from '@/components/figures/figure-utils.ts'
+import { formatNumber, niceTicks } from '@/components/figures/figure-utils.ts'
 import { linspace } from '@/domain/math/distributions.ts'
 import { makeRng, periodogramAt, toneInNoise } from '@/domain/math/kernel.ts'
 
 const TRUE_FREQ = 0.21
 const AMPLITUDE = 1
 const W = 470
-const H = 290
+const H = 300
+/** Left edge of the plot, leaving room for the score ticks. */
+const LEFT = 40
+const RIGHT = W - 10
+const AXIS_Y = H - 46
+const TOP = 16
 
 function PeriodogramFigure() {
   const [n, setN] = useState(48)
@@ -43,15 +50,17 @@ function PeriodogramFigure() {
   const candidateScore = periodogramAt(signal, candidate)
 
   const snr = (AMPLITUDE * AMPLITUDE) / 2 / (sigma * sigma)
-  const crbStd = Math.sqrt(3 / (8 * Math.PI * Math.PI * snr * n ** 3))
+  // Real tone with A, f and phase unknown: Kay 1993, eq. 3.41.
+  const crbStd = Math.sqrt(12 / (4 * Math.PI * Math.PI * snr * n * (n * n - 1)))
 
-  const xOf = (f: number) => 10 + (f / 0.5) * (W - 20)
-  const yOf = (s: number) => H - 34 - (s / maxSpec) * (H - 60)
+  const xOf = (f: number) => LEFT + (f / 0.5) * (RIGHT - LEFT)
+  const yOf = (s: number) => AXIS_Y - (s / maxSpec) * (AXIS_Y - TOP)
+  const scoreTicks = niceTicks(maxSpec, 4)
 
   return (
     <FigureShell
       title="Sweep a detector bank across the band"
-      instruction="Each candidate frequency proposes a template; the meter is the honest correlation $|\sum x(n)e^{-j2\pi f n}|^2/N$ between your actual noisy samples and that template. Slide the candidate and hunt the hidden tone — then raise $N$ and watch the peak sharpen like $N^3$."
+      instruction="Each candidate frequency proposes a template. The dot's height is the score $|\sum x(n)e^{-j2\pi f n}|^2/N$ of your noisy samples against that template. Slide the candidate to find the hidden tone, then raise $N$ and watch the peak narrow."
       controls={
         <>
           <SliderControl
@@ -104,19 +113,19 @@ function PeriodogramFigure() {
           <ReadoutRow
             label="Score at your candidate"
             value={formatNumber(candidateScore, 2)}
-            tone="h1"
+            tone="cursor"
           />
           <ReadoutRow
             label="Peak of the bank: $\hat{f}_{ML}$"
             value={formatNumber(fMl, 3)}
-            tone="good"
+            tone="estimate"
           />
           <ReadoutRow
             label="True frequency"
             value={formatNumber(TRUE_FREQ, 3)}
           />
           <ReadoutRow
-            label="CRB std of $\hat{f}$ ($\approx 1/N^{1.5}$)"
+            label="CRB std of $\hat{f}$ (theory, $\propto N^{-3/2}$)"
             value={formatNumber(crbStd, 5)}
           />
         </>
@@ -124,12 +133,21 @@ function PeriodogramFigure() {
     >
       <Legend
         items={[
-          { label: 'periodogram $|X(f)|^2/N$', swatchClass: 'stroke-h0' },
+          {
+            label: 'periodogram $|X(f)|^2/N$',
+            swatchClass: 'stroke-foreground',
+          },
           { label: 'your candidate', swatchClass: 'stroke-cursor' },
           {
-            label: 'true tone $\\pm$ CRB',
-            swatchClass: 'stroke-truth',
-            dash: true,
+            label: 'peak $\\hat{f}_{ML}$',
+            swatchClass: 'fill-estimate',
+            square: true,
+          },
+          { label: 'true tone', swatchClass: 'stroke-truth', dash: true },
+          {
+            label: 'true tone $\\pm$ CRB std',
+            swatchClass: 'fill-truth/15',
+            square: true,
           },
         ]}
       />
@@ -138,34 +156,71 @@ function PeriodogramFigure() {
         viewH={H}
         ariaLabel="Periodogram of the noisy tone with candidate frequency marker"
         onDragPoint={(x) => {
-          const f = ((x - 10) / (W - 20)) * 0.5
+          const f = ((x - LEFT) / (RIGHT - LEFT)) * 0.5
           setCandidatePct(Math.min(99, Math.max(1, (f / 0.5) * 100)))
         }}
       >
         <line
-          x1={10}
-          y1={H - 34}
-          x2={W - 10}
-          y2={H - 34}
+          x1={LEFT}
+          y1={AXIS_Y}
+          x2={RIGHT}
+          y2={AXIS_Y}
           className="stroke-muted-foreground"
           strokeWidth={1}
         />
+        <AxisTicks
+          y={AXIS_Y}
+          ticks={[0, 0.1, 0.2, 0.3, 0.4, 0.5].map((f) => ({
+            x: xOf(f),
+            label: f.toFixed(1),
+          }))}
+        />
+        <g className="fill-muted-foreground stroke-muted-foreground">
+          <line x1={LEFT} y1={TOP} x2={LEFT} y2={AXIS_Y} strokeWidth={1} />
+          {scoreTicks.map((tick) => (
+            <g key={tick}>
+              <line
+                x1={LEFT - 4}
+                y1={yOf(tick)}
+                x2={LEFT}
+                y2={yOf(tick)}
+                strokeWidth={1}
+              />
+              <text
+                x={LEFT - 6}
+                y={yOf(tick) + 3}
+                textAnchor="end"
+                stroke="none"
+                className="font-mono plot-text-xs"
+              >
+                {formatNumber(tick, tick < 1 ? 1 : 0)}
+              </text>
+            </g>
+          ))}
+          <text
+            x={LEFT + 4}
+            y={TOP - 4}
+            stroke="none"
+            className="font-mono plot-text-xs"
+          >
+            score
+          </text>
+        </g>
         <rect
           x={xOf(Math.max(TRUE_FREQ - crbStd, 0))}
-          y={12}
+          y={TOP}
           width={Math.max(
             xOf(TRUE_FREQ + crbStd) - xOf(TRUE_FREQ - crbStd),
             1.4,
           )}
-          height={H - 46}
-          className="fill-truth"
-          opacity={0.12}
+          height={AXIS_Y - TOP}
+          className="fill-truth/15"
         />
         <line
           x1={xOf(TRUE_FREQ)}
-          y1={12}
+          y1={TOP}
           x2={xOf(TRUE_FREQ)}
-          y2={H - 34}
+          y2={AXIS_Y}
           className="stroke-truth"
           strokeWidth={1.2}
           strokeDasharray="4 4"
@@ -179,14 +234,26 @@ function PeriodogramFigure() {
             )
             .join(' ')}
           fill="none"
-          className="stroke-h0"
+          className="stroke-foreground"
           strokeWidth={1.6}
         />
+        <path
+          d={`M ${xOf(fMl)} ${yOf(maxSpec) - 3} l -5 -8 h 10 z`}
+          className="fill-estimate"
+        />
+        <text
+          x={xOf(fMl) + (fMl > 0.4 ? -8 : 8)}
+          y={yOf(maxSpec) + 4}
+          textAnchor={fMl > 0.4 ? 'end' : 'start'}
+          className="plot-halo fill-estimate font-mono plot-text-sm"
+        >
+          <Sym base="f̂" sub="ML" />
+        </text>
         <line
           x1={xOf(candidate)}
-          y1={16}
+          y1={TOP}
           x2={xOf(candidate)}
-          y2={H - 30}
+          y2={AXIS_Y}
           className="stroke-cursor"
           strokeWidth={2}
         />
@@ -198,19 +265,14 @@ function PeriodogramFigure() {
           strokeWidth={1.5}
         />
         <text
-          x={W / 2}
-          y={H - 12}
+          x={(LEFT + RIGHT) / 2}
+          y={H - 6}
           textAnchor="middle"
           className="fill-muted-foreground font-mono plot-text-sm"
         >
           candidate frequency f (drag anywhere)
         </text>
       </Plot>
-      <p className="mt-2 text-center text-xs text-muted-foreground">
-        This is the Fourier transform working as a detector: compressed
-        likelihood turned the joint (A, f) search into one sweep plus one
-        read-off.
-      </p>
     </FigureShell>
   )
 }

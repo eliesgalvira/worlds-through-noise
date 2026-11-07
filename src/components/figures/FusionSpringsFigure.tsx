@@ -101,7 +101,11 @@ function FusionSpringsFigure() {
             tone="h1"
           />
           <ReadoutRow
-            label="Estimator variance $1/\sum(1/\sigma_i^2)$"
+            label={
+              priorOn
+                ? 'Posterior variance $1/(\\sum 1/\\sigma_i^2 + 1/\\sigma_\\theta^2)$'
+                : 'Estimator variance $1/\\sum 1/\\sigma_i^2$'
+            }
             value={formatNumber(variance, 3)}
             tone="good"
           />
@@ -245,7 +249,7 @@ function FusionSpringsFigure() {
         </text>
       </Plot>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        <MathText text="Spring thickness is the honest weight $1/\sigma_i^2$. With the prior on, the dashed ring marks where the data alone would balance." />
+        <MathText text="Thicker spring, larger weight $1/\sigma_i^2$. With the prior on, the dashed ring marks where the data alone would balance." />
       </p>
     </FigureShell>
   )

@@ -43,7 +43,8 @@ function PeriodogramFigure() {
   const candidateScore = periodogramAt(signal, candidate)
 
   const snr = (AMPLITUDE * AMPLITUDE) / 2 / (sigma * sigma)
-  const crbStd = Math.sqrt(3 / (8 * Math.PI * Math.PI * snr * n ** 3))
+  // Real tone with A, f and phase unknown: Kay 1993, eq. 3.41.
+  const crbStd = Math.sqrt(12 / (4 * Math.PI * Math.PI * snr * n * (n * n - 1)))
 
   const xOf = (f: number) => 10 + (f / 0.5) * (W - 20)
   const yOf = (s: number) => H - 34 - (s / maxSpec) * (H - 60)
@@ -51,7 +52,7 @@ function PeriodogramFigure() {
   return (
     <FigureShell
       title="Sweep a detector bank across the band"
-      instruction="Each candidate frequency proposes a template; the meter is the honest correlation $|\sum x(n)e^{-j2\pi f n}|^2/N$ between your actual noisy samples and that template. Slide the candidate and hunt the hidden tone — then raise $N$ and watch the peak sharpen like $N^3$."
+      instruction="Each candidate frequency proposes a template. The dot's height is the correlation $|\sum x(n)e^{-j2\pi f n}|^2/N$ between your noisy samples and that template. Slide the candidate to find the hidden tone, then raise $N$ and watch the peak narrow."
       controls={
         <>
           <SliderControl
@@ -116,7 +117,7 @@ function PeriodogramFigure() {
             value={formatNumber(TRUE_FREQ, 3)}
           />
           <ReadoutRow
-            label="CRB std of $\hat{f}$ ($\approx 1/N^{1.5}$)"
+            label="CRB std of $\hat{f}$ (theory, $\propto N^{-3/2}$)"
             value={formatNumber(crbStd, 5)}
           />
         </>

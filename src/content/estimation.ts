@@ -5,9 +5,9 @@ export const estimationLesson: LessonRecord = {
   ordinal: '03',
   title: 'Estimation',
   thesis:
-    'An estimator is a machine you must judge by its cloud of outputs, never by one lucky number — and the Cramér-Rao bound is the physics of how tight that cloud can ever be.',
+    'An estimator is a machine you must judge by its cloud of outputs, never by one lucky number — and the Cramér-Rao bound says how tight that cloud can be for any unbiased estimator.',
   intro: [
-    'Tema 3 has one skeleton: model the data $f(\\mathbf{x}; \\theta)$, ask how much the data even knows about $\\theta$ (CRB), try to build the estimator that extracts all of it (efficient / ML), and, when prior knowledge exists, add it as one more measurement (MAP, MMSE).',
+    'Tema 3 has one skeleton: model the data $f(\\mathbf{x}; \\theta)$, ask how much the data even knows about $\\theta$ (CRB), look for the estimator that extracts all of it (the efficient estimator when it exists, otherwise the maximum-likelihood, ML, estimator, which reaches the bound as $N$ grows), and, when prior knowledge exists, add it through a prior density (a Gaussian prior acts as one more measurement: MAP, MMSE).',
     'Exams walk this skeleton in order — “find the pdf, find the CRB, does the efficient estimator exist, find the ML, is it consistent” — so this lesson does too, with the objects made visible at each step.',
   ],
   modules: [
@@ -39,7 +39,7 @@ export const estimationLesson: LessonRecord = {
           'Almost nothing. Bias is the center of the pile over many runs. One draw cannot reveal it.',
       },
       transfer:
-        'Classic collection exercise: for $\\hat{m}_2 = \\frac{1}{N+1}\\sum x_i$, find bias and variance and check consistency. Picture the pile: slightly off-center, slightly narrower — then confirm with algebra.',
+        'Slides example (T3 p. 15): for $\\hat{m}_2 = \\frac{1}{N+1}\\sum x_i$, find bias and variance and check consistency. Picture the pile: slightly off-center, slightly narrower — then confirm with algebra.',
       examRefs: [
         'Slides T3 §2: sample mean vs midrange under uniform and Gaussian noise',
         'Midterm Apr 2026, Ex. 1(b–c): unbiasedness conditions for proposed estimators',
@@ -56,7 +56,7 @@ export const estimationLesson: LessonRecord = {
       action:
         'In the figure, draw fresh samples and watch the landscape rebuild — the peak wobbles from draw to draw, and the size of the wobble matches the flatness. Raise $N$: each new sample multiplies another factor into the likelihood, the landscape sharpens, and the wobble’s variance shrinks like $1/N$ (its width like $1/\\sqrt{N}$). Raise the noise $\\sigma$ and it flattens again. You are watching the bound $\\sigma^2_{CR}(\\theta) = \\sigma^2/N$ operate live, not as a formula.',
       payoff:
-        'With the landscape in mind, the existence condition stops being mystical. For the Gaussian-mean problem the score is $\\frac{N}{\\sigma^2}(\\bar{x} - \\theta)$ — a straight line through the peak whose slope never depends on the data. When the score has that rigid straight shape, the peak position $\\bar{x}$ carries all the information, and the estimator that reads it achieves the bound. When the score bends — as it does for phase, frequency, or power $P = A^2/2$ — no unbiased estimator reaches the floor. ML still finds the peak, and presses against the floor asymptotically.',
+        'With the landscape in mind, the existence condition stops being mystical. For the Gaussian-mean problem the score is $\\frac{N}{\\sigma^2}(\\bar{x} - \\theta)$ — a straight line through the peak whose slope never depends on the data. It factors as $I(\\theta)\\,(g(\\mathbf{x}) - \\theta)$ with $g(\\mathbf{x}) = \\bar{x}$ free of $\\theta$, so the sample mean reaches the bound. What matters is the factorization, not the straightness: a curved score can still factor, as for the exponential mean and the Poisson rate in the workbook. When the score cannot be written that way, as for phase, frequency or power $P = A^2/2$, no unbiased estimator reaches the floor. ML still finds the peak, and presses against the floor asymptotically.',
       equations: [
         {
           sentence:
@@ -74,11 +74,11 @@ export const estimationLesson: LessonRecord = {
         },
         {
           sentence:
-            'For a deterministic signal in white noise the bound rewards signals that change fast with the parameter.',
+            'For a known signal shape $\\mathbf{p}(\\theta)$ in real white Gaussian noise, the bound rewards signals that change fast with the parameter.',
           latex:
-            '\\sigma^2_{CR(\\theta)} = \\frac{\\sigma^2}{2\\,\\left\\| \\partial \\mathbf{p}(\\theta) / \\partial\\theta \\right\\|^2}',
+            '\\mathbf{x} = \\mathbf{p}(\\theta) + \\mathbf{w}, \\quad \\mathbf{w} \\sim \\mathcal{N}(\\mathbf{0}, \\sigma^2\\mathbf{I}) \\;\\Longrightarrow\\; \\sigma^2_{CR(\\theta)} = \\frac{\\sigma^2}{\\left\\| \\partial \\mathbf{p}(\\theta) / \\partial\\theta \\right\\|^2}',
           caption:
-            'This is why frequency (whose derivative grows with $n$) enjoys a $1/N^3$ bound while amplitude gets $1/N$.',
+            'In the figure the mean is $\\mathbf{p}(\\theta) = \\theta\\mathbf{1}$, so $\\|\\partial\\mathbf{p}/\\partial\\theta\\|^2 = N$ and the bound is $\\sigma^2/N$. Complex noise $\\mathcal{CN}(\\mathbf{0}, \\sigma^2\\mathbf{I})$ puts a 2 in the denominator. Frequency, whose derivative grows with $n$, gets a $1/N^3$ bound, amplitude only $1/N$.',
         },
       ],
       prediction: {
@@ -104,7 +104,7 @@ export const estimationLesson: LessonRecord = {
       object:
         'The picture is springs. Each measurement $x_i$ is an anchor pulling the estimate toward itself with stiffness $1/\\sigma_i^2$: precise sensors are stiff springs, noisy sensors are slack ones. The estimate is where all the pulls balance. And a Gaussian prior is nothing special — it is one more spring, anchored at $\\mu_\\theta$, with stiffness $1/\\sigma_\\theta^2$.',
       action:
-        'In the figure, drag one sensor’s noise up and watch its spring slacken: the balance point slides away from it, while the combined variance $1/\\sum(1/\\sigma_i^2)$ grows, but never past what the other sensors achieve on their own. Break a sensor completely ($\\sigma_0^2 \\to \\infty$ — the defective pixel of the June 2026 final) and watch the estimate quietly ignore it: nobody had to decide to discard the data. Then switch the prior spring on, feel it pull the estimate toward $\\mu_\\theta$, and watch the data springs overwhelm it as sensors accumulate.',
+        'In the figure, drag one sensor’s noise up and watch its spring slacken: the balance point slides away from it, while the combined variance $1/\\sum(1/\\sigma_i^2)$ grows, but never past what the other sensors achieve on their own. Break a sensor completely ($\\sigma_0^2 \\to \\infty$ — the defective pixel of the June 2026 final) and watch the estimate quietly ignore it: nobody had to decide to discard the data. Then switch the prior spring on, feel it pull the estimate toward $\\mu_\\theta$, and stiffen the data springs to watch them overwhelm it.',
       payoff:
         'One picture now covers four exam staples: greenhouse-sensor fusion, the defective camera pixel, the BLUE (the best linear unbiased estimator — exactly this balance of springs, derived under a linearity constraint), and MAP shrinkage, $\\hat{\\theta}_{MAP} = \\alpha\\hat{\\theta}_{ML} + (1-\\alpha)\\mu_\\theta$. Even “the prior fades as data accumulate” stops being a slogan: $N$ data springs against one prior spring is not a fair fight.',
       equations: [
@@ -129,10 +129,10 @@ export const estimationLesson: LessonRecord = {
         question:
           'Eight good pixels and one broken one. How much estimation variance does the broken pixel contribute?',
         answer:
-          'Almost none is lost by keeping it: its weight $1/\\sigma_0^2 \\approx 0$ makes the fusion converge to the 8-pixel average with variance $\\sigma^2/8$. Fusion degrades gracefully.',
+          'None: keeping it can only help. Its weight $1/\\sigma_0^2 \\approx 0$ makes the fusion converge to the 8-pixel average, with variance just under $\\sigma^2/8$, where $\\sigma^2$ is the noise variance of each good pixel. Fusion degrades gracefully.',
       },
       transfer:
-        'Final Jun 2026, Ex. 1: defective pixel — do (a) single pixel, (b) 9-pixel fusion, (c) the two limits $\\sigma_0^2 = \\sigma^2$ and $\\sigma_0^2 \\gg \\sigma^2$, (d–e) MAP with a $N(\\mu_\\theta, \\sigma_\\theta^2)$ prior. All five parts are spring diagrams.',
+        'Final Jun 2026, Ex. 1: defective pixel, with $\\sigma^2$ the noise variance of each good pixel and $\\sigma_0^2$ that of the broken one. Do (a) single pixel, (b) 9-pixel fusion, (c) the two limits $\\sigma_0^2 = \\sigma^2$ and $\\sigma_0^2 \\gg \\sigma^2$, (d–e) MAP with a $N(\\mu_\\theta, \\sigma_\\theta^2)$ prior. All five parts are spring diagrams.',
       examRefs: [
         'Final Jun 2026, Ex. 1: defective pixel fusion + MAP',
         'Final Jun 2025, Ex. 2: greenhouse sensors of unequal quality',
@@ -148,7 +148,7 @@ export const estimationLesson: LessonRecord = {
       object:
         'Think of it instead as a bank of candidate explanations. Each candidate frequency $f$ proposes a template, the vector $\\mathbf{s}(f)$ of samples a clean tone at $f$ would produce. The data scores every candidate by how much of $\\mathbf{x}$ lies along that template — $|\\mathbf{s}(f)^H\\mathbf{x}|^2$, a genuine correlation computed against your actual samples. ML picks the candidate with the top score. This is the Fourier transform working as a detector, not as a change of representation.',
       action:
-        'In the figure, slide the candidate $f$ across the band and watch the score meter: the landscape $|X(f)|^2$ rises to a peak at the hidden tone. Add noise and watch spurious ripples start to compete. Then raise $N$ and watch the main peak narrow dramatically — frequency’s CRB shrinks like $1/N^3$, not $1/N$, because a longer record makes the template far more sensitive to small frequency errors. Try the two-block strategy (average two half-length estimates) and see it lose by a factor of about 4: halving $N$ is quadratically expensive here.',
+        'In the figure, slide the candidate $f$ across the band and watch the dot on the curve, whose height is the score: the landscape $|X(f)|^2$ rises to a peak at the hidden tone. Add noise and watch spurious ripples start to compete. Then raise $N$ and watch the main peak narrow dramatically — frequency’s CRB shrinks like $1/N^3$, not $1/N$, because a longer record makes the template far more sensitive to small frequency errors.',
       payoff:
         'Two abstract tools become concrete. Compressed likelihood: maximize over the easy parameter first ($\\hat{A}_{ML} = \\mathbf{s}(f)^H\\mathbf{x}/N$ for each candidate $f$), substitute it back, and the leftover function of $f$ alone is exactly the periodogram — the recipe was a derivation all along. And invariance is a gift with a price tag: $g(\\hat{\\theta}_{ML})$ is the ML estimate of $g(\\theta)$, but when $g$ bends — squaring an amplitude to get a power — the transformed estimator picks up a bias of order $1/N$: asymptotically forgiven, never free.',
       equations: [
@@ -160,11 +160,11 @@ export const estimationLesson: LessonRecord = {
         },
         {
           sentence:
-            'Frequency information grows with the cube of the observation length.',
+            'With amplitude and phase unknown, frequency information still grows with the cube of the observation length.',
           latex:
-            '\\sigma^2_{CR(f)} = \\frac{3}{4\\pi^2\\, \\mathrm{SNR}\\; N(N-1)(2N-1)} \\;\\approx\\; \\frac{3}{8\\pi^2\\,\\mathrm{SNR}\\,N^3}',
+            '\\sigma^2_{CR(f)} = \\frac{6}{4\\pi^2\\, \\mathrm{SNR}\\; N(N-1)(N+1)} \\;\\approx\\; \\frac{3}{2\\pi^2\\,\\mathrm{SNR}\\,N^3}, \\qquad \\mathrm{SNR} = \\frac{|A|^2}{\\sigma^2}',
           caption:
-            'The $1/N^3$ is why splitting the data into blocks is a bad idea for frequency estimation.',
+            'This is the complex tone $A e^{j2\\pi f n}$, with $A$ complex (modulus and phase), in complex noise of power $\\sigma^2$ (slides T3, p. 97). The figure’s tone is real, $A\\cos(2\\pi f n + \\phi)$ in real noise, and for $f$ away from 0 and 1/2 its bound is $12/((2\\pi)^2\\,\\eta\\,N(N^2-1))$ with $\\eta = A^2/(2\\sigma^2)$ (Kay 1993, eq. 3.41), the formula behind its CRB readout. With $A$ known, phase included, the bound is about 4 times lower, $3/(4\\pi^2\\,\\mathrm{SNR}\\,N(N-1)(2N-1))$ (slides T3, p. 58). Either way the $1/N^3$ is why splitting the data into blocks is a bad idea for frequency estimation.',
         },
       ],
       prediction: {
@@ -178,7 +178,7 @@ export const estimationLesson: LessonRecord = {
       examRefs: [
         'Slides T3 ML2/ML3: frequency estimation, known and unknown amplitude',
         'Slides T3: block-splitting frequency estimation exercise (variance ratio 4)',
-        'Final Jan 2025: joint amplitude/frequency estimation with compressed likelihood',
+        'Final Jan 2023, Ex. 3: ML frequency of a complex exponential from its phases, and its CRB',
       ],
     },
   ],
@@ -236,7 +236,7 @@ export const estimationLesson: LessonRecord = {
           steps: [
             {
               title: 'Force the mean to hit A',
-              body: 'This estimator only reads the sample mean, whose expectation is $\\beta \\alpha N A$.',
+              body: 'This estimator is a scaled sum, $\\beta\\mathbf{1}^T\\mathbf{x} = \\beta N\\bar{x}$, so its expectation is $\\beta \\alpha N A$.',
               latex:
                 'E\\{\\hat{A}\\} = \\beta\\,\\alpha N A = A \\;\\Longrightarrow\\; \\beta = \\frac{1}{N\\alpha}',
             },
@@ -678,7 +678,7 @@ export const estimationLesson: LessonRecord = {
               title: 'Let the MSE go to zero',
               body: 'Efficiency gives unbiasedness plus variance equal to the bound $\\lambda/N$. The MSE is then $\\lambda/N \\to 0$ as $N \\to \\infty$.',
               latex:
-                'ECM\\{\\hat{\\lambda}_{ML}\\} = \\operatorname{var}\\{\\hat{\\lambda}_{ML}\\} = \\frac{\\lambda}{N} \\xrightarrow{N \\to \\infty} 0',
+                '\\operatorname{MSE}\\{\\hat{\\lambda}_{ML}\\} = \\operatorname{var}\\{\\hat{\\lambda}_{ML}\\} = \\frac{\\lambda}{N} \\xrightarrow{N \\to \\infty} 0',
             },
           ],
           answer: {
@@ -834,7 +834,7 @@ export const estimationLesson: LessonRecord = {
               body: 'The vectors stack the $N$ samples of each signal. Stationary colored noise makes $\\mathbf{C}_w$ Toeplitz: entry $(i, j)$ is the autocorrelation at lag $i - j$.',
               latex:
                 '\\mathbf{C}_w = \\begin{bmatrix} c_w(0) & c_w(-1) & \\cdots & c_w(-N{+}1) \\\\ c_w(1) & c_w(0) & & \\vdots \\\\ \\vdots & & \\ddots & \\\\ c_w(N{-}1) & \\cdots & & c_w(0) \\end{bmatrix}',
-              note: 'This is the P2 object $r_w(m)$ arranged into the P3 terrain — the same matrix the whole course keeps walking on.',
+              note: 'With zero-mean noise $c_w(m)$ is the autocorrelation $r_w(m)$ of the Processes lesson, arranged into its correlation-matrix terrain — the same matrix the whole course keeps walking on.',
             },
           ],
           answer: {
@@ -856,7 +856,7 @@ export const estimationLesson: LessonRecord = {
           ],
           answer: {
             sentence:
-              'Bias is controlled by $\\mathbf{h}^T\\mathbf{s}$, price by $\\mathbf{h}^T\\mathbf{C}_w\\mathbf{h}$ — a constrained walk on the P3 terrain is coming.',
+              'Bias is controlled by $\\mathbf{h}^T\\mathbf{s}$, price by $\\mathbf{h}^T\\mathbf{C}_w\\mathbf{h}$ — a constrained walk on the noise covariance terrain is coming.',
           },
         },
         {
@@ -872,7 +872,7 @@ export const estimationLesson: LessonRecord = {
             },
             {
               title: 'Differentiate and recognize the whitened match',
-              body: 'The gradient condition gives $\\mathbf{h} \\propto \\mathbf{C}_w^{-1}\\mathbf{s}$ — the whitening-then-matching direction of D3, now discovered by an estimation argument. The constraint sets the scale.',
+              body: 'The gradient condition gives $\\mathbf{h} \\propto \\mathbf{C}_w^{-1}\\mathbf{s}$ — the whitening-then-matching direction of the Detection lesson, now discovered by an estimation argument. The constraint sets the scale.',
               latex:
                 '2\\mathbf{C}_w\\mathbf{h} - \\lambda\\mathbf{s} = \\mathbf{0} \\;\\Longrightarrow\\; \\mathbf{h}_{opt} = \\frac{\\mathbf{C}_w^{-1}\\mathbf{s}}{\\mathbf{s}^T\\mathbf{C}_w^{-1}\\mathbf{s}}, \\qquad \\hat{A}(\\mathbf{x}) = \\frac{\\mathbf{s}^T\\mathbf{C}_w^{-1}\\mathbf{x}}{\\mathbf{s}^T\\mathbf{C}_w^{-1}\\mathbf{s}}',
             },
@@ -1076,7 +1076,8 @@ export const estimationLesson: LessonRecord = {
               title: 'Re-run the simplification with p = [1, 1]ᵀ',
               body: 'The general expressions hold, but now $\\mathbf{p}$ is parallel to $\\mathbf{q}$ instead of orthogonal: $\\mathbf{p}^T\\mathbf{C}_x^{-1} = \\frac{1}{\\sigma_v^2 + 2\\sigma_w^2}[1, 1]$, and the estimator becomes the average of the wire sum.',
               latex:
-                '\\hat{A}_{ML} = \\frac{1}{N}\\sum_{n}\\frac{x_1(n) + x_2(n)}{2}, \\qquad \\frac{x_1 + x_2}{2} = A + w(n) + \\frac{v_1 - v_2}{2}',
+                '\\hat{A}_{ML} = \\frac{1}{N}\\sum_{n}\\frac{x_1(n) + x_2(n)}{2}, \\qquad \\frac{x_1 + x_2}{2} = A + w(n) + \\frac{v_1 + v_2}{2}',
+              note: 'The printed solution writes $(v_1 - v_2)/2$, a slip carried over from part (c). With $x_2 = A + w + v_2$ the half-sum has $+$. The variance is the same either way.',
             },
             {
               title: 'Price the lost orthogonality',

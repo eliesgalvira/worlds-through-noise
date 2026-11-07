@@ -123,8 +123,8 @@ function CurvatureFigure() {
           />
           <ReadoutNote>
             The measured wobble tracks the theoretical floor because this
-            estimator is efficient: its score is a straight line through the
-            peak.
+            estimator is efficient: its score factors as information times
+            error.
           </ReadoutNote>
         </>
       }

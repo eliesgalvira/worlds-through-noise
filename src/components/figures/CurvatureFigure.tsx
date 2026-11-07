@@ -206,7 +206,7 @@ function CurvatureFigure() {
         />
         <text
           x={xOf(TRUTH) + 4}
-          y={20}
+          y={AXIS_Y - 6}
           className="fill-truth font-mono plot-text-xs"
         >
           true θ = {TRUTH}

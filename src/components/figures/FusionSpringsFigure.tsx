@@ -45,6 +45,11 @@ function FusionSpringsFigure() {
     (weights.reduce((a, b) => a + b, 0) + priorWeight)
 
   const xOf = (v: number) => 10 + ((v - X_MIN) / (X_MAX - X_MIN)) * (W - 20)
+  // The θ̂ label goes on the side with fewer springs, and left of the
+  // data-only ring when the prior is on.
+  const readingsMean =
+    SENSOR_READINGS.reduce((a, b) => a + b, 0) / SENSOR_READINGS.length
+  const labelLeft = priorOn || estimate < readingsMean
   // Fixed scale, so a spring only changes when its own σ changes.
   const springWidth = (w: number) => 0.75 + Math.sqrt(w / MAX_WEIGHT) * 9
 
@@ -261,9 +266,9 @@ function FusionSpringsFigure() {
           strokeWidth={2}
         />
         <text
-          x={xOf(estimate)}
-          y={H - 28}
-          textAnchor="middle"
+          x={xOf(estimate) + (labelLeft ? -10 : 10)}
+          y={H - 74}
+          textAnchor={labelLeft ? 'end' : 'start'}
           className="plot-halo fill-estimate font-mono plot-text"
         >
           θ̂ = {formatNumber(estimate, 1)}
